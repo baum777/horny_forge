@@ -1,16 +1,17 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Upload, User, LogOut } from 'lucide-react';
+import { Menu, X, Upload, User, LogOut, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { ArchivesLoginModal } from './ArchivesLoginModal';
 import { UploadArtifactModal } from './UploadArtifactModal';
 
+const X_COMMUNITY_URL = import.meta.env.VITE_X_COMMUNITY_URL || 'https://twitter.com/i/communities/horny';
+
 const navLinks = [
-  { href: '/', label: 'Home' },
-  { href: '/archives', label: 'Archives' },
-  { href: '/interact', label: 'Interact' },
+  { href: '/archives', label: 'Archives', external: false },
+  { href: X_COMMUNITY_URL, label: 'Community', external: true },
 ];
 
 export function ArchivesNavbar() {
@@ -24,11 +25,12 @@ export function ArchivesNavbar() {
   const [scrolled, setScrolled] = useState(false);
 
   // Track scroll for styling
-  useState(() => {
+  useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener('scroll', handleScroll);
+    handleScroll();
     return () => window.removeEventListener('scroll', handleScroll);
-  });
+  }, []);
 
   const handleInfuseClick = () => {
     if (isAuthenticated) {
@@ -36,6 +38,7 @@ export function ArchivesNavbar() {
     } else {
       setShowLogin(true);
     }
+    setIsOpen(false);
   };
 
   const handleLogout = async () => {
@@ -43,36 +46,72 @@ export function ArchivesNavbar() {
     navigate('/archives');
   };
 
+  const handleLoginSuccess = () => {
+    setShowLogin(false);
+    navigate('/archives');
+  };
+
   return (
     <>
       <motion.nav
-        className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
-          scrolled ? 'bg-background/90 backdrop-blur-lg border-b border-border' : ''
+        initial={{ y: -100 }}
+        animate={{ y: 0 }}
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+          scrolled ? 'bg-background/95 backdrop-blur-lg border-b border-border shadow-lg' : 'bg-transparent'
         }`}
       >
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
-            <Link to="/archives" className="flex items-center gap-2">
+            <Link to="/archives" className="flex items-center gap-2 group">
               <span className="text-xl font-bold text-gradient">$HORNY</span>
-              <span className="text-xs text-muted-foreground hidden sm:inline">ARCHIVES</span>
+              <span className="text-xs text-muted-foreground group-hover:text-foreground transition-colors hidden sm:inline">
+                ARCHIVES
+              </span>
             </Link>
 
             {/* Desktop Nav */}
             <div className="hidden md:flex items-center gap-6">
               {navLinks.map((link) => (
+                link.external ? (
+                  <a
+                    key={link.href}
+                    href={link.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {link.label}
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                ) : (
+                  <Link
+                    key={link.href}
+                    to={link.href}
+                    className={`text-sm font-medium transition-colors ${
+                      location.pathname === link.href || location.pathname.startsWith(link.href + '/')
+                        ? 'text-primary'
+                        : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    {link.label}
+                  </Link>
+                )
+              ))}
+
+              {/* Profile Link - only when logged in */}
+              {isAuthenticated && (
                 <Link
-                  key={link.href}
-                  to={link.href}
+                  to="/profile"
                   className={`text-sm font-medium transition-colors ${
-                    location.pathname === link.href
+                    location.pathname === '/profile'
                       ? 'text-primary'
                       : 'text-muted-foreground hover:text-foreground'
                   }`}
                 >
-                  {link.label}
+                  Profile
                 </Link>
-              ))}
+              )}
             </div>
 
             {/* Actions */}
@@ -101,7 +140,7 @@ export function ArchivesNavbar() {
                       <img
                         src={archivesUser.avatar}
                         alt={archivesUser.handle}
-                        className="w-6 h-6 rounded-full object-cover"
+                        className="w-6 h-6 rounded-full object-cover ring-2 ring-primary/20"
                       />
                     ) : (
                       <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary to-destructive" />
@@ -123,7 +162,11 @@ export function ArchivesNavbar() {
                   onClick={() => setShowLogin(true)}
                   variant="outline"
                   size="sm"
+                  className="gap-2"
                 >
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                  </svg>
                   Login with X
                 </Button>
               )}
@@ -150,18 +193,32 @@ export function ArchivesNavbar() {
             >
               <div className="container mx-auto px-4 py-4 space-y-4">
                 {navLinks.map((link) => (
-                  <Link
-                    key={link.href}
-                    to={link.href}
-                    onClick={() => setIsOpen(false)}
-                    className={`block py-2 font-medium ${
-                      location.pathname === link.href
-                        ? 'text-primary'
-                        : 'text-muted-foreground'
-                    }`}
-                  >
-                    {link.label}
-                  </Link>
+                  link.external ? (
+                    <a
+                      key={link.href}
+                      href={link.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => setIsOpen(false)}
+                      className="flex items-center gap-2 py-2 text-muted-foreground"
+                    >
+                      {link.label}
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                  ) : (
+                    <Link
+                      key={link.href}
+                      to={link.href}
+                      onClick={() => setIsOpen(false)}
+                      className={`block py-2 font-medium ${
+                        location.pathname === link.href
+                          ? 'text-primary'
+                          : 'text-muted-foreground'
+                      }`}
+                    >
+                      {link.label}
+                    </Link>
+                  )
                 ))}
                 
                 {isAuthenticated && (
@@ -176,10 +233,7 @@ export function ArchivesNavbar() {
                 )}
 
                 <Button
-                  onClick={() => {
-                    setIsOpen(false);
-                    handleInfuseClick();
-                  }}
+                  onClick={handleInfuseClick}
                   variant="gradient"
                   className="w-full gap-2"
                 >
@@ -193,7 +247,11 @@ export function ArchivesNavbar() {
       </motion.nav>
 
       {/* Modals */}
-      <ArchivesLoginModal isOpen={showLogin} onClose={() => setShowLogin(false)} />
+      <ArchivesLoginModal 
+        isOpen={showLogin} 
+        onClose={() => setShowLogin(false)} 
+        onSuccess={handleLoginSuccess}
+      />
       <UploadArtifactModal isOpen={showUpload} onClose={() => setShowUpload(false)} />
     </>
   );
