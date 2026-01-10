@@ -117,16 +117,18 @@ export const ForgePreview: React.FC<ForgePreviewProps> = ({
                         </div>
                     </div>
 
-                    <details className="cursor-pointer group">
-                        <summary className="text-[10px] text-muted-foreground hover:text-foreground transition-colors list-none">
-                            + Show Prompt Details
-                        </summary>
-                        <div className="mt-2 p-2 bg-black/40 rounded border border-white/5">
-                            <p className="text-[10px] font-mono leading-relaxed text-muted-foreground">
-                                {metadata.final_prompt}
-                            </p>
-                        </div>
-                    </details>
+                    {metadata.debug?.final_prompt && (
+                        <details className="cursor-pointer group">
+                            <summary className="text-[10px] text-muted-foreground hover:text-foreground transition-colors list-none">
+                                + Show Prompt Details
+                            </summary>
+                            <div className="mt-2 p-2 bg-black/40 rounded border border-white/5">
+                                <p className="text-[10px] font-mono leading-relaxed text-muted-foreground">
+                                    {metadata.debug.final_prompt}
+                                </p>
+                            </div>
+                        </details>
+                    )}
                 </motion.div>
             )}
 

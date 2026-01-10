@@ -7,17 +7,26 @@ export interface ForgeRequest {
 }
 
 export interface ForgeResponse {
-  image_url: string;
-  final_prompt: string;
-  preset: string;
-  base_id: string;
   generation_id: string;
+  base_id: string;
+  preset: string;
+  sanitized_input: string;
+  image_url: string;
   created_at: string;
+  meta: {
+    expires_in_seconds: number;
+    model: string;
+    size: string;
+  };
+  debug?: {
+    final_prompt: string;
+  };
 }
 
 export interface ForgeError {
   error: string;
-  code: 'INVALID_INPUT' | 'RATE_LIMIT' | 'GEN_FAIL';
+  code: 'INVALID_INPUT' | 'UNAUTHORIZED' | 'RATE_LIMIT' | 'PROMPT_REJECTED' | 'GEN_FAIL' | 'STORAGE_FAIL' | 'DB_FAIL' | 'NOT_FOUND';
+  generation_id?: string;
 }
 
 export async function forgeArtifact(data: ForgeRequest): Promise<ForgeResponse> {
