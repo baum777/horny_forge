@@ -6,14 +6,14 @@ import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import HornyMeter from '@/components/features/HornyMeter';
 import Quiz from '@/components/features/Quiz';
-import MemeForge from '@/components/features/MemeForge';
+import MetaForge from '@/components/MetaForge/MetaForge';
 import Badges from '@/components/features/Badges';
 import FOMOTracker from '@/components/features/FOMOTracker';
 import { addSectionVisited, unlockBadge, getVisitData } from '@/lib/storage';
 
 const sections = [
   { id: 'quiz', title: 'Horny Level Quiz', icon: Brain, description: 'Discover your true crypto desire class' },
-  { id: 'meme-forge', title: 'Meme Forge', icon: Palette, description: 'Create legendary memes with sacred templates' },
+  { id: 'meta-forge', title: 'Meta Forge', icon: Palette, description: 'Create legendary memes with sacred bases — AI-infused.' },
   { id: 'badges', title: 'Badge Collection', icon: Trophy, description: 'Earn and showcase your achievements' },
   { id: 'fomo', title: 'FOMO Tracker', icon: TrendingUp, description: 'Monitor horny velocity in real-time' },
 ];
@@ -41,8 +41,7 @@ export default function Interact() {
             addSectionVisited(entry.target.id);
             
             // Check if all sections visited
-            const visitData = getVisitData();
-            const allSections = ['quiz', 'meme-forge', 'badges', 'fomo', 'hero', 'lore', 'interact-preview'];
+            const allSections = ['quiz', 'meta-forge', 'badges', 'fomo', 'hero', 'lore', 'interact-preview'];
             const visitedAll = allSections.every(s => visitData.sectionsVisited.includes(s));
             if (visitedAll) {
               unlockBadge('all-sections');
@@ -123,8 +122,8 @@ export default function Interact() {
             </motion.div>
           </section>
 
-          {/* Meme Forge */}
-          <section id="meme-forge" className="max-w-6xl mx-auto px-4">
+          {/* Meta Forge */}
+          <section id="meta-forge" className="max-w-6xl mx-auto px-4">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -135,11 +134,11 @@ export default function Interact() {
                   <Palette className="w-6 h-6 text-yellow-500" />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold">Meme Forge</h2>
-                  <p className="text-muted-foreground">Create legendary memes with sacred templates</p>
+                  <h2 className="text-2xl font-bold">Meta Forge</h2>
+                  <p className="text-muted-foreground">Create legendary memes with sacred bases — AI-infused.</p>
                 </div>
               </div>
-              <MemeForge />
+              <MetaForge />
             </motion.div>
           </section>
 
