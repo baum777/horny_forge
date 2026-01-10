@@ -8,7 +8,6 @@ import { VoteButton } from '@/components/archives/VoteButton';
 import { SharePanel } from '@/components/archives/SharePanel';
 import { ArtifactCard } from '@/components/archives/ArtifactCard';
 import { ArchivesLoginModal } from '@/components/archives/ArchivesLoginModal';
-import { TokenPulsePanel } from '@/components/archives/TokenPulsePanel';
 import { useArtifact, useArtifacts } from '@/hooks/useArtifacts';
 import Footer from '@/components/layout/Footer';
 
@@ -147,9 +146,6 @@ export default function ArtifactDetail() {
               artifactId={artifact.id}
               caption={artifact.caption}
             />
-
-            {/* Token Pulse Panel */}
-            <TokenPulsePanel />
           </motion.div>
         </div>
 

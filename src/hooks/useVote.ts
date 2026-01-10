@@ -8,12 +8,6 @@ interface UseVoteOptions {
   initialVotesCount: number;
 }
 
-interface RpcResult {
-  success: boolean;
-  error?: string;
-  votes_count?: number;
-}
-
 export function useVote({ artifactId, initialVotesCount }: UseVoteOptions) {
   const { user, isAuthenticated } = useAuth();
   const [hasVoted, setHasVoted] = useState(false);
@@ -69,26 +63,25 @@ export function useVote({ artifactId, initialVotesCount }: UseVoteOptions) {
     setVotesCount(prev => wasVoted ? prev - 1 : prev + 1);
 
     try {
-      // Use RPC functions for atomic vote operations
-      const rpcName = wasVoted ? 'rpc_unvote' : 'rpc_vote';
-      const { data, error } = await supabase.rpc(rpcName, {
-        p_artifact_id: artifactId,
-      });
+      if (wasVoted) {
+        // Remove vote
+        const { error } = await supabase
+          .from('votes')
+          .delete()
+          .eq('artifact_id', artifactId)
+          .eq('user_id', user.id);
 
-      if (error) throw error;
+        if (error) throw error;
+      } else {
+        // Add vote
+        const { error } = await supabase
+          .from('votes')
+          .insert({
+            artifact_id: artifactId,
+            user_id: user.id,
+          });
 
-      const result = data as unknown as RpcResult;
-      
-      if (!result.success) {
-        throw new Error(result.error || 'Vote operation failed');
-      }
-
-      // Update with actual count from DB
-      if (typeof result.votes_count === 'number') {
-        setVotesCount(result.votes_count);
-      }
-
-      if (!wasVoted) {
+        if (error) throw error;
         toast.success('Desire registered.');
       }
     } catch (err) {

@@ -4,7 +4,6 @@ import { ArchivesNavbar } from '@/components/archives/ArchivesNavbar';
 import { FiltersBar } from '@/components/archives/FiltersBar';
 import { GalleryGrid } from '@/components/archives/GalleryGrid';
 import { ArchivesLoginModal } from '@/components/archives/ArchivesLoginModal';
-import { TokenPulseStrip } from '@/components/archives/TokenPulseStrip';
 import { useArtifacts } from '@/hooks/useArtifacts';
 import Footer from '@/components/layout/Footer';
 import type { SortOption } from '@/lib/archives/types';
@@ -28,14 +27,9 @@ export default function Archives() {
   return (
     <div className="min-h-screen bg-background">
       <ArchivesNavbar />
-      
-      {/* Token Pulse Strip */}
-      <div className="fixed top-16 left-0 right-0 z-30">
-        <TokenPulseStrip />
-      </div>
 
       {/* Hero Header */}
-      <section className="pt-32 pb-12 relative overflow-hidden">
+      <section className="pt-24 pb-12 relative overflow-hidden">
         {/* Background glow */}
         <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent pointer-events-none" />
         
