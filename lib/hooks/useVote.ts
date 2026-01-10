@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useAuth } from "lib/hooks/useAuth";
 import { hasUserVoted, rpcUnvote, rpcVote, type VoteRpcResponse } from "lib/supabase/queries";
+import { postGamificationEvent } from "@/lib/api/event";
 
 interface UseVoteOptions {
   artifactId: string;
@@ -72,7 +73,11 @@ export function useVote({ artifactId, initialVotesCount }: UseVoteOptions) {
       if (!rpc.data.success) throw new Error(rpc.data.error ?? "Vote RPC failed");
 
       setVotesCount(rpc.data.votes_count);
-      if (!wasVoted) toast.success("Desire registered.");
+      if (!wasVoted) {
+        toast.success("Desire registered.");
+        void postGamificationEvent({ type: "vote_cast" });
+        void postGamificationEvent({ type: "vote_received", artifact_id: artifactId });
+      }
     } catch (err) {
       // revert optimistic state
       setHasVoted(wasVoted);
@@ -88,4 +93,3 @@ export function useVote({ artifactId, initialVotesCount }: UseVoteOptions) {
 
   return { hasVoted, votesCount, toggleVote, loading, checkingVote };
 }
-

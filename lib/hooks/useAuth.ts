@@ -2,6 +2,13 @@ import { useCallback, useEffect, useState } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "lib/supabase/client";
 import type { ArchivesUser } from "@/lib/archives/types";
+import { postGamificationEvent } from "@/lib/api/event";
+
+const DAILY_RETURN_KEY = "horny_daily_return";
+
+function getTodayKey() {
+  return new Date().toISOString().slice(0, 10);
+}
 
 function getPreferredHandle(user: User): string {
   const md = user.user_metadata ?? {};
@@ -68,6 +75,19 @@ export function useAuth() {
     return () => subscription.unsubscribe();
   }, []);
 
+  useEffect(() => {
+    if (!session?.user) return;
+    const todayKey = getTodayKey();
+    const lastReturn = localStorage.getItem(DAILY_RETURN_KEY);
+    if (lastReturn === todayKey) return;
+
+    void postGamificationEvent({ type: "daily_return" }).then(({ error }) => {
+      if (!error) {
+        localStorage.setItem(DAILY_RETURN_KEY, todayKey);
+      }
+    });
+  }, [session]);
+
   const signInWithTwitter = useCallback(async () => {
     const redirectUrl = `${window.location.origin}/archives`;
     const { error } = await supabase.auth.signInWithOAuth({
@@ -92,4 +112,3 @@ export function useAuth() {
     isAuthenticated: !!user,
   };
 }
-

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import type { Artifact, SortOption } from "@/lib/archives/types";
-import { fetchArtifactById, fetchArtifacts } from "lib/supabase/queries";
+import { fetchArtifactById, fetchArtifacts, fetchUserStatsByIds, fetchUserTopBadgesByIds } from "lib/supabase/queries";
 
 interface UseArtifactsOptions {
   sort?: SortOption;
@@ -39,7 +39,31 @@ export function useArtifacts(options: UseArtifactsOptions = {}) {
         return;
       }
 
-      setArtifacts((prev) => (append ? [...prev, ...data] : data));
+      const authorIds = Array.from(new Set(data.map((artifact) => artifact.author_id).filter(Boolean)));
+      const [statsResult, badgesResult] = await Promise.all([
+        fetchUserStatsByIds(authorIds),
+        fetchUserTopBadgesByIds(authorIds),
+      ]);
+
+      const levelMap = new Map<string, number>();
+      (statsResult.data ?? []).forEach((entry) => {
+        levelMap.set(entry.user_id, entry.level ?? 1);
+      });
+
+      const badgeMap = new Map<string, string>();
+      (badgesResult.data ?? []).forEach((entry) => {
+        if (!badgeMap.has(entry.user_id)) {
+          badgeMap.set(entry.user_id, entry.badge_id);
+        }
+      });
+
+      const enriched = data.map((artifact) => ({
+        ...artifact,
+        author_level: levelMap.get(artifact.author_id) ?? 1,
+        author_top_badge_id: badgeMap.get(artifact.author_id) ?? null,
+      }));
+
+      setArtifacts((prev) => (append ? [...prev, ...enriched] : enriched));
       setHasMore(data.length === limit);
       setPage(pageNum);
       setLoading(false);
@@ -96,4 +120,3 @@ export function useArtifact(id: string | undefined) {
 
   return { artifact, loading, error };
 }
-

@@ -10,6 +10,8 @@ export interface Artifact {
   author_avatar: string | null;
   created_at: string;
   votes_count: number;
+  author_level?: number | null;
+  author_top_badge_id?: string | null;
 }
 
 export interface Vote {

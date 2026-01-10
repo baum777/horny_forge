@@ -8,10 +8,14 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { useArtifacts } from '@/hooks/useArtifacts';
 import Footer from '@/components/layout/Footer';
+import { useGamification } from '@/hooks/useGamification';
+import { LevelBar } from '@/components/profile/LevelBar';
+import { BadgeGrid } from '@/components/profile/BadgeGrid';
 
 export default function Profile() {
   const navigate = useNavigate();
   const { archivesUser, isAuthenticated, loading: authLoading } = useAuth();
+  const { stats, badges } = useGamification(archivesUser?.id);
 
   const { artifacts, loading, hasMore, loadMore } = useArtifacts({
     authorId: archivesUser?.id,
@@ -49,6 +53,9 @@ export default function Profile() {
   }
 
   const totalVotes = artifacts.reduce((sum, a) => sum + a.votes_count, 0);
+  const level = stats?.level ?? 1;
+  const xpTotal = stats?.xp_total ?? 0;
+  const streakDays = stats?.streak_days ?? 0;
 
   return (
     <div className="min-h-screen bg-background">
@@ -98,6 +105,26 @@ export default function Profile() {
             </div>
           </div>
         </motion.div>
+
+        <div className="grid lg:grid-cols-[2fr,1fr] gap-6 mb-10">
+          <LevelBar xpTotal={xpTotal} level={level} />
+          <div className="glass-card p-5 rounded-2xl flex flex-col justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-widest text-muted-foreground">Streak</p>
+              <p className="text-3xl font-bold text-gradient mt-2">{streakDays} days</p>
+              <p className="text-xs text-muted-foreground mt-2">
+                Return daily to keep the flame alive.
+              </p>
+            </div>
+            <div className="text-xs text-muted-foreground mt-6">
+              Weekly streak bonus fuels your ascent.
+            </div>
+          </div>
+        </div>
+
+        <div className="mb-10">
+          <BadgeGrid unlockedBadges={badges.map((badge) => badge.badge_id)} />
+        </div>
 
         {/* My Artifacts */}
         <section>

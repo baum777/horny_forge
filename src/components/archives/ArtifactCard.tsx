@@ -5,6 +5,7 @@ import { VoteButton } from './VoteButton';
 import { SharePanel } from './SharePanel';
 import { TokenPulseTooltip } from './TokenPulseTooltip';
 import type { Artifact } from '@/lib/archives/types';
+import { BADGE_ICON_PATHS } from 'lib/gamification/badgeRules';
 
 interface ArtifactCardProps {
   artifact: Artifact;
@@ -13,6 +14,9 @@ interface ArtifactCardProps {
 
 export function ArtifactCard({ artifact, onRequiresAuth }: ArtifactCardProps) {
   const navigate = useNavigate();
+  const badgeIcon = artifact.author_top_badge_id
+    ? BADGE_ICON_PATHS[artifact.author_top_badge_id as keyof typeof BADGE_ICON_PATHS]
+    : null;
 
   const handleClick = () => {
     navigate(`/archives/${artifact.id}`);
@@ -81,6 +85,16 @@ export function ArtifactCard({ artifact, onRequiresAuth }: ArtifactCardProps) {
           <span className="text-sm font-medium truncate flex-1">
             {artifact.author_handle || 'Anonymous'}
           </span>
+          <div className="flex items-center gap-1 rounded-full bg-muted/60 px-2 py-0.5 text-[10px] text-muted-foreground">
+            <span>Lv {artifact.author_level ?? 1}</span>
+            {badgeIcon && (
+              <img
+                src={badgeIcon}
+                alt="Top badge"
+                className="w-3 h-3"
+              />
+            )}
+          </div>
           <span className="text-xs text-muted-foreground">
             {timeAgo}
           </span>

@@ -2,10 +2,12 @@ import express from 'express';
 import cors from 'cors';
 import { config } from './config';
 import { ForgeController } from './controllers/ForgeController';
-import { authMiddleware } from './middleware/auth';
+import { EventController } from './controllers/EventController';
+import { authMiddleware, requireAuth } from './middleware/auth';
 
 const app = express();
 const forgeController = new ForgeController();
+const eventController = new EventController();
 
 // Middleware
 app.use(cors({
@@ -29,6 +31,7 @@ app.get('/health', (req, res) => {
 // API Routes
 app.post('/api/forge', (req, res) => forgeController.forge(req as any, res));
 app.post('/api/forge/release', (req, res) => forgeController.release(req as any, res));
+app.post('/api/event', requireAuth, (req, res) => eventController.handle(req as any, res));
 
 // Error handling
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -55,4 +58,3 @@ app.listen(port, () => {
   console.log(`   OpenAI: ${config.openai.apiKey ? '✅' : '❌'}`);
   console.log(`   Supabase: ${config.supabase.url ? '✅' : '❌'}`);
 });
-
