@@ -6,6 +6,9 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Interact from "./pages/Interact";
 import Legal from "./pages/Legal";
+import Archives from "./pages/Archives";
+import ArtifactDetail from "./pages/ArtifactDetail";
+import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -20,6 +23,9 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/interact" element={<Interact />} />
           <Route path="/legal" element={<Legal />} />
+          <Route path="/archives" element={<Archives />} />
+          <Route path="/archives/:id" element={<ArtifactDetail />} />
+          <Route path="/profile" element={<Profile />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
