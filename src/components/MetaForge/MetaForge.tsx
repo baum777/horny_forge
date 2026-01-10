@@ -11,11 +11,15 @@ import { ForgePreview } from './ForgePreview';
 import { Button } from '@/components/ui/button';
 import { type PredefinedTag } from '@/lib/archives/types';
 import { uploadArtifactImage } from 'lib/supabase/queries';
-import { openXShare, getMemeShareText, getShareUrl } from '@/lib/share';
+import { openXShare, getShareUrl } from '@/lib/share';
+import { useGamification } from '@/hooks/useGamification';
+import { postGamificationEvent } from '@/lib/api/event';
+import { isBaseUnlocked, isPresetUnlocked } from 'lib/gamification/eventProcessor';
 
 export default function MetaForge() {
   const { archivesUser, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const { stats } = useGamification(archivesUser?.id);
 
   // Form State
   const [selectedBaseId, setSelectedBaseId] = useState<BaseId | null>(null);
@@ -29,6 +33,19 @@ export default function MetaForge() {
   const [generatedResult, setGeneratedResult] = useState<ForgeResponse | null>(null);
   const [isReleasing, setIsReleasing] = useState(false);
   const [releasedId, setReleasedId] = useState<string | null>(null);
+  const userLevel = stats?.level ?? 1;
+
+  useEffect(() => {
+    if (selectedBaseId && !isBaseUnlocked(userLevel, selectedBaseId)) {
+      setSelectedBaseId(null);
+    }
+  }, [selectedBaseId, userLevel]);
+
+  useEffect(() => {
+    if (!isPresetUnlocked(userLevel, selectedPreset)) {
+      setSelectedPreset('HORNY_CORE_SKETCH');
+    }
+  }, [selectedPreset, userLevel]);
 
   const handleInfuse = async () => {
     if (!selectedBaseId) {
@@ -56,6 +73,9 @@ export default function MetaForge() {
       });
       setGeneratedResult(result);
       toast.success('Artifact stabilized.');
+      if (isAuthenticated) {
+        void postGamificationEvent({ type: 'forge_generate' });
+      }
     } catch (error: any) {
       console.error('Forge error:', error);
       toast.error(error.error || 'Artifact unstable. Retry.');
@@ -109,6 +129,7 @@ export default function MetaForge() {
 
       setReleasedId(artifact.id);
       toast.success('Artifact released to THE ARCHIVES.');
+      void postGamificationEvent({ type: 'artifact_release', artifact_id: artifact.id });
       
       // Redirect after a short delay so user can see the share button or the success state
       setTimeout(() => {
@@ -129,6 +150,7 @@ export default function MetaForge() {
       text: `Just forged a legendary artifact in THE HORNY ARCHIVES! ${caption}`,
       url: url,
     });
+    void postGamificationEvent({ type: 'share_click' });
   };
 
   return (
@@ -148,11 +170,13 @@ export default function MetaForge() {
           <BasePicker
             selectedBaseId={selectedBaseId}
             onSelect={setSelectedBaseId}
+            userLevel={userLevel}
           />
 
           <PresetPicker
             selectedPreset={selectedPreset}
             onSelect={setSelectedPreset}
+            userLevel={userLevel}
           />
 
           <ForgeForm
@@ -197,4 +221,3 @@ export default function MetaForge() {
     </div>
   );
 }
-

@@ -1,5 +1,6 @@
 import { supabase } from "./client";
 import type { Artifact, SortOption } from "@/lib/archives/types";
+import type { BadgeId } from "lib/gamification/badgeRules";
 
 export type VoteRpcResponse = {
   success: boolean;
@@ -80,6 +81,30 @@ export async function fetchMoreFromAuthor(params: {
   return { data: (data ?? []) as Artifact[], error };
 }
 
+export async function fetchUserStatsByIds(userIds: string[]) {
+  if (userIds.length === 0) return { data: [], error: null };
+  const { data, error } = await supabase
+    .from("user_stats")
+    .select("user_id, level")
+    .in("user_id", userIds);
+
+  return { data: (data ?? []) as { user_id: string; level: number }[], error };
+}
+
+export async function fetchUserTopBadgesByIds(userIds: string[]) {
+  if (userIds.length === 0) return { data: [], error: null };
+  const { data, error } = await supabase
+    .from("user_badges")
+    .select("user_id, badge_id, unlocked_at")
+    .in("user_id", userIds)
+    .order("unlocked_at", { ascending: false });
+
+  return {
+    data: (data ?? []) as { user_id: string; badge_id: BadgeId; unlocked_at: string }[],
+    error,
+  };
+}
+
 export async function hasUserVoted(params: { artifactId: string; userId: string }) {
   const { artifactId, userId } = params;
   const { data, error } = await supabase
@@ -124,4 +149,3 @@ export async function uploadArtifactImage(params: { userId: string; file: File }
   const { data } = supabase.storage.from("artifacts").getPublicUrl(objectName);
   return { data: { objectName, publicUrl: data.publicUrl }, error: null };
 }
-

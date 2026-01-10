@@ -131,6 +131,26 @@ RPC nutzt **`auth.uid()`** (kein `user_id` Parameter) und liefert:
 - `votes_count` (int)
 - `error` (text | null)
 
+## Gamification tables + service role (required)
+
+Für XP, Levels, Badges und tägliche Limits werden zusätzliche Tabellen benötigt:
+
+- `user_stats`
+- `badges`
+- `user_badges`
+- `user_daily_limits`
+
+Die SQL-Vorlage inkl. RLS-Hinweisen findest du in:
+
+- `docs/SUPABASE_SQL.md`
+
+**Wichtig:** `/api/event` schreibt serverseitig über den **Service Role Key**. Stelle sicher, dass das Backend folgende Umgebungsvariablen kennt:
+
+```bash
+SUPABASE_URL="https://<project-ref>.supabase.co"
+SUPABASE_SERVICE_ROLE_KEY="<service-role-key>"
+```
+
 ## App Routes
 
 - `/archives` — Feed (Live / Top all time / Top 24h, Tag-Filter, Search)

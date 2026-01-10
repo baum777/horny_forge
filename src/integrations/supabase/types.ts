@@ -76,6 +76,99 @@ export type Database = {
           },
         ]
       }
+      user_stats: {
+        Row: {
+          user_id: string
+          xp_total: number | null
+          level: number | null
+          streak_days: number | null
+          last_active_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          user_id: string
+          xp_total?: number | null
+          level?: number | null
+          streak_days?: number | null
+          last_active_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          user_id?: string
+          xp_total?: number | null
+          level?: number | null
+          streak_days?: number | null
+          last_active_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      badges: {
+        Row: {
+          badge_id: string
+          name: string | null
+          description: string | null
+          visual_type: string | null
+          rarity: string | null
+        }
+        Insert: {
+          badge_id: string
+          name?: string | null
+          description?: string | null
+          visual_type?: string | null
+          rarity?: string | null
+        }
+        Update: {
+          badge_id?: string
+          name?: string | null
+          description?: string | null
+          visual_type?: string | null
+          rarity?: string | null
+        }
+        Relationships: []
+      }
+      user_badges: {
+        Row: {
+          user_id: string
+          badge_id: string
+          unlocked_at: string | null
+        }
+        Insert: {
+          user_id: string
+          badge_id: string
+          unlocked_at?: string | null
+        }
+        Update: {
+          user_id?: string
+          badge_id?: string
+          unlocked_at?: string | null
+        }
+        Relationships: []
+      }
+      user_daily_limits: {
+        Row: {
+          user_id: string
+          day: string
+          xp_today: number | null
+          counters: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          user_id: string
+          day: string
+          xp_today?: number | null
+          counters?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          user_id?: string
+          day?: string
+          xp_today?: number | null
+          counters?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

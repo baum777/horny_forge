@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Twitter, Link2, Copy, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { useAuth } from '@/hooks/useAuth';
+import { postGamificationEvent } from '@/lib/api/event';
 
 interface SharePanelProps {
   artifactId: string;
@@ -11,6 +13,7 @@ interface SharePanelProps {
 
 export function SharePanel({ artifactId, caption, compact = false }: SharePanelProps) {
   const [copied, setCopied] = useState<'link' | 'text' | null>(null);
+  const { isAuthenticated } = useAuth();
 
   const artifactUrl = `${window.location.origin}/archives/${artifactId}`;
   const shareText = `My artifact just entered THE HORNY ARCHIVES: ${caption}`;
@@ -19,6 +22,9 @@ export function SharePanel({ artifactId, caption, compact = false }: SharePanelP
   const shareToX = () => {
     const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(artifactUrl)}&hashtags=${hashtags}`;
     window.open(url, '_blank', 'noopener,noreferrer,width=600,height=400');
+    if (isAuthenticated) {
+      void postGamificationEvent({ type: 'share_click' });
+    }
   };
 
   const copyLink = async () => {
@@ -26,6 +32,9 @@ export function SharePanel({ artifactId, caption, compact = false }: SharePanelP
       await navigator.clipboard.writeText(artifactUrl);
       setCopied('link');
       toast.success('Link copied!');
+      if (isAuthenticated) {
+        void postGamificationEvent({ type: 'share_click' });
+      }
       setTimeout(() => setCopied(null), 2000);
     } catch {
       toast.error('Failed to copy');
@@ -37,6 +46,9 @@ export function SharePanel({ artifactId, caption, compact = false }: SharePanelP
       await navigator.clipboard.writeText(`${shareText} ${artifactUrl} #HORNY #HornyArchives`);
       setCopied('text');
       toast.success('Share text copied!');
+      if (isAuthenticated) {
+        void postGamificationEvent({ type: 'share_click' });
+      }
       setTimeout(() => setCopied(null), 2000);
     } catch {
       toast.error('Failed to copy');
