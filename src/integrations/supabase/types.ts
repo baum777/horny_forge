@@ -14,7 +14,68 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      artifacts: {
+        Row: {
+          author_avatar: string | null
+          author_handle: string | null
+          author_id: string
+          caption: string
+          created_at: string | null
+          id: string
+          image_url: string
+          tags: string[]
+          votes_count: number | null
+        }
+        Insert: {
+          author_avatar?: string | null
+          author_handle?: string | null
+          author_id: string
+          caption: string
+          created_at?: string | null
+          id?: string
+          image_url: string
+          tags: string[]
+          votes_count?: number | null
+        }
+        Update: {
+          author_avatar?: string | null
+          author_handle?: string | null
+          author_id?: string
+          caption?: string
+          created_at?: string | null
+          id?: string
+          image_url?: string
+          tags?: string[]
+          votes_count?: number | null
+        }
+        Relationships: []
+      }
+      votes: {
+        Row: {
+          artifact_id: string
+          created_at: string | null
+          user_id: string
+        }
+        Insert: {
+          artifact_id: string
+          created_at?: string | null
+          user_id: string
+        }
+        Update: {
+          artifact_id?: string
+          created_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "votes_artifact_id_fkey"
+            columns: ["artifact_id"]
+            isOneToOne: false
+            referencedRelation: "artifacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
