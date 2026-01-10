@@ -3,8 +3,8 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 type FloatingItem = {
   id: string;
   src: string;
-  x: number;
-  y: number;
+  x: number; // px (left)
+  y: number; // px (top)
   w: number;      // px
   ar: number;     // aspect ratio
   z: number;
@@ -74,8 +74,8 @@ export function FloatingImages(props: {
       setItems((prev) => {
         if (prev.length >= maxOnScreen) return prev;
 
-        const vw = stage.clientWidth;
-        const vh = stage.clientHeight;
+        const vw = stage.clientWidth || window.innerWidth;
+        const vh = stage.clientHeight || window.innerHeight;
 
         // Größe + leicht variierende AR (für maximale Konsistenz: ar = 1)
         const w = rand(minWidthPx, Math.min(maxWidthPx, vw * 0.28));
@@ -116,13 +116,22 @@ export function FloatingImages(props: {
     };
 
     // initial burst
-    for (let i = 0; i < Math.min(7, maxOnScreen); i++) spawnOne();
+    for (let i = 0; i < Math.min(6, maxOnScreen); i++) spawnOne();
 
-    // spawn loop
-    interval = window.setInterval(() => {
-      const n = Math.random() < 0.25 ? 0 : Math.random() < 0.15 ? 2 : 1;
-      for (let i = 0; i < n; i++) spawnOne();
-    }, spawnEveryMs);
+    const startInterval = () => {
+      if (interval) return;
+      interval = window.setInterval(() => {
+        // random: manchmal 0, manchmal 1–2 spawns
+        const n = Math.random() < 0.25 ? 0 : Math.random() < 0.15 ? 2 : 1;
+        for (let i = 0; i < n; i++) spawnOne();
+      }, spawnEveryMs);
+    };
+    const stopInterval = () => {
+      if (!interval) return;
+      window.clearInterval(interval);
+      interval = null;
+    };
+    startInterval();
 
     const onResize = () => {
       // reset für neue Positionen
@@ -130,24 +139,14 @@ export function FloatingImages(props: {
     };
     window.addEventListener("resize", onResize);
 
-    // optional: pause when tab hidden
     const onVis = () => {
-      if (document.visibilityState === "hidden") {
-        if (interval) window.clearInterval(interval);
-        interval = null;
-      } else {
-        if (!interval) {
-          interval = window.setInterval(() => {
-            const n = Math.random() < 0.25 ? 0 : Math.random() < 0.15 ? 2 : 1;
-            for (let i = 0; i < n; i++) spawnOne();
-          }, spawnEveryMs);
-        }
-      }
+      if (document.visibilityState === "hidden") stopInterval();
+      else startInterval();
     };
     document.addEventListener("visibilitychange", onVis);
 
     return () => {
-      if (interval) window.clearInterval(interval);
+      stopInterval();
       window.removeEventListener("resize", onResize);
       document.removeEventListener("visibilitychange", onVis);
       timeouts.forEach((t) => window.clearTimeout(t));
@@ -165,41 +164,44 @@ export function FloatingImages(props: {
     edgePaddingPx,
   ]);
 
+  if (!images || images.length === 0) return null;
+
   return (
     <div
       ref={stageRef}
       className={[
-        "pointer-events-none fixed inset-0 overflow-hidden -z-10",
+        "pointer-events-none fixed inset-0 overflow-hidden z-0",
         className,
       ].join(" ")}
       aria-hidden="true"
     >
       <style>{`
         @keyframes horny-breathe {
-          0%   { opacity: 0; transform: translate3d(var(--x), var(--y), 0) scale(var(--s0)); }
+          0%   { opacity: 0; transform: scale(var(--s0)); }
           12%  { opacity: var(--op); }
-          55%  { opacity: var(--op); transform: translate3d(var(--x), var(--y), 0) scale(var(--s1)); }
+          55%  { opacity: var(--op); transform: scale(var(--s1)); }
           88%  { opacity: var(--op); }
-          100% { opacity: 0; transform: translate3d(var(--x), var(--y), 0) scale(var(--s2)); }
+          100% { opacity: 0; transform: scale(var(--s2)); }
         }
       `}</style>
 
       {items.map((it) => (
         <div
           key={it.id}
-          className="absolute left-0 top-0 will-change-transform"
+          className="absolute will-change-transform"
           style={{
+            left: it.x,
+            top: it.y,
             width: `${it.w}px`,
             aspectRatio: `${it.ar}`,
             zIndex: it.z,
-            ["--x" as any]: `${it.x}px`,
-            ["--y" as any]: `${it.y}px`,
             ["--op" as any]: `${it.op}`,
             ["--s0" as any]: `${it.s0}`,
             ["--s1" as any]: `${it.s1}`,
             ["--s2" as any]: `${it.s2}`,
             opacity: 0,
-            transform: `translate3d(${it.x}px, ${it.y}px, 0) scale(${it.s0})`,
+            transform: `scale(${it.s0})`,
+            transformOrigin: "center",
             animation: `horny-breathe ${it.dur}ms cubic-bezier(.2,.8,.2,1) ${it.delay}ms 1 forwards`,
           }}
         >
@@ -214,4 +216,3 @@ export function FloatingImages(props: {
     </div>
   );
 }
-
