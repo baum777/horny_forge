@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import { VoteButton } from './VoteButton';
 import { SharePanel } from './SharePanel';
+import { TokenPulseTooltip } from './TokenPulseTooltip';
 import type { Artifact } from '@/lib/archives/types';
 
 interface ArtifactCardProps {
@@ -88,11 +89,14 @@ export function ArtifactCard({ artifact, onRequiresAuth }: ArtifactCardProps) {
             onRequiresAuth={onRequiresAuth}
             size="sm"
           />
-          <SharePanel
-            artifactId={artifact.id}
-            caption={artifact.caption}
-            compact
-          />
+          <div className="flex items-center gap-1">
+            <TokenPulseTooltip />
+            <SharePanel
+              artifactId={artifact.id}
+              caption={artifact.caption}
+              compact
+            />
+          </div>
         </div>
       </div>
     </motion.div>

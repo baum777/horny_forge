@@ -81,7 +81,8 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      rpc_unvote: { Args: { p_artifact_id: string }; Returns: Json }
+      rpc_vote: { Args: { p_artifact_id: string }; Returns: Json }
     }
     Enums: {
       [_ in never]: never

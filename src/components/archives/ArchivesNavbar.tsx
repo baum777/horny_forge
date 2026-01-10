@@ -7,10 +7,13 @@ import { useAuth } from '@/hooks/useAuth';
 import { ArchivesLoginModal } from './ArchivesLoginModal';
 import { UploadArtifactModal } from './UploadArtifactModal';
 
+const X_COMMUNITY_URL = 'https://x.com/i/communities/2009563480613949770';
+
 const navLinks = [
   { href: '/', label: 'Home' },
   { href: '/archives', label: 'Archives' },
   { href: '/interact', label: 'Interact' },
+  { href: X_COMMUNITY_URL, label: 'Community', external: true },
 ];
 
 export function ArchivesNavbar() {
@@ -58,21 +61,32 @@ export function ArchivesNavbar() {
               <span className="text-xs text-muted-foreground hidden sm:inline">ARCHIVES</span>
             </Link>
 
-            {/* Desktop Nav */}
             <div className="hidden md:flex items-center gap-6">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  to={link.href}
-                  className={`text-sm font-medium transition-colors ${
-                    location.pathname === link.href
-                      ? 'text-primary'
-                      : 'text-muted-foreground hover:text-foreground'
-                  }`}
-                >
-                  {link.label}
-                </Link>
-              ))}
+              {navLinks.map((link) => 
+                link.external ? (
+                  <a
+                    key={link.href}
+                    href={link.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {link.label}
+                  </a>
+                ) : (
+                  <Link
+                    key={link.href}
+                    to={link.href}
+                    className={`text-sm font-medium transition-colors ${
+                      location.pathname === link.href
+                        ? 'text-primary'
+                        : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    {link.label}
+                  </Link>
+                )
+              )}
             </div>
 
             {/* Actions */}
@@ -149,20 +163,33 @@ export function ArchivesNavbar() {
               className="md:hidden bg-background/95 backdrop-blur-lg border-b border-border"
             >
               <div className="container mx-auto px-4 py-4 space-y-4">
-                {navLinks.map((link) => (
-                  <Link
-                    key={link.href}
-                    to={link.href}
-                    onClick={() => setIsOpen(false)}
-                    className={`block py-2 font-medium ${
-                      location.pathname === link.href
-                        ? 'text-primary'
-                        : 'text-muted-foreground'
-                    }`}
-                  >
-                    {link.label}
-                  </Link>
-                ))}
+                {navLinks.map((link) => 
+                  link.external ? (
+                    <a
+                      key={link.href}
+                      href={link.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => setIsOpen(false)}
+                      className="block py-2 font-medium text-muted-foreground"
+                    >
+                      {link.label}
+                    </a>
+                  ) : (
+                    <Link
+                      key={link.href}
+                      to={link.href}
+                      onClick={() => setIsOpen(false)}
+                      className={`block py-2 font-medium ${
+                        location.pathname === link.href
+                          ? 'text-primary'
+                          : 'text-muted-foreground'
+                      }`}
+                    >
+                      {link.label}
+                    </Link>
+                  )
+                )}
                 
                 {isAuthenticated && (
                   <Link
