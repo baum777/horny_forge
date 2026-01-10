@@ -1,78 +1,138 @@
-# THE HORNY ARCHIVES - Setup Guide
+# THE HORNY ARCHIVES — Supabase Setup Guide
 
 ## Overview
 
-THE HORNY ARCHIVES is a community meme gallery with voting, sharing, and user profiles.
+Dieses Projekt nutzt **Supabase ausschließlich** für:
 
-## Features
+- **Auth** (X/Twitter OAuth)
+- **Database** (`artifacts` + `votes`)
+- **Storage** (Artifact Images)
 
-- 🖼️ Gallery feed with filtering and sorting
-- 🔐 Authentication (Email/Password + X/Twitter OAuth)
-- 📤 Image upload with captions and tags
-- ❤️ Voting system with optimistic UI
-- 🔗 Share to X + copy link/text
-- 👤 User profiles with uploaded artifacts
+Keine weiteren Backend-Services.
 
-## Environment Variables
+## Environment Variables (required)
 
-The following are automatically configured by Lovable Cloud:
+> In Vite sind `NEXT_PUBLIC_*` Variablen erlaubt (siehe `vite.config.ts` `envPrefix`).
 
+Beispiel `.env`:
+
+```bash
+# Supabase (required)
+NEXT_PUBLIC_SUPABASE_URL="https://<project-ref>.supabase.co"
+NEXT_PUBLIC_SUPABASE_ANON_KEY="<anon-key>"
+
+# Project constants
+NEXT_PUBLIC_TOKEN_MINT="7S2bVZJYAYQwN6iwwf2fMMWu15ajLveh2QDYhtJ3pump"
+NEXT_PUBLIC_DEX_LINK="https://dexscreener.com/solana/earthgewsskrbg6cmvx9ddxntniac4shmsthr5nnxwji"
+NEXT_PUBLIC_X_COMMUNITY_URL="https://x.com/i/communities/2009563480613949770"
+NEXT_PUBLIC_TOKEN_SYMBOL="HORNY"
+
+# Optional holders provider (default OFF)
+# none | solscan | helius
+NEXT_PUBLIC_HOLDERS_PROVIDER="none"
 ```
-VITE_SUPABASE_URL=<your-project-url>
-VITE_SUPABASE_PUBLISHABLE_KEY=<your-anon-key>
-```
 
-## Database Schema
+## Supabase Project Setup
 
-### Tables
+### Create project
 
-1. **artifacts** - Stores uploaded meme artifacts
-   - id, image_url, caption, tags, author_id, author_handle, author_avatar, created_at, votes_count
+1. Neues Supabase Projekt anlegen.
+2. Unter **Project Settings → API**:
+   - `Project URL` → `NEXT_PUBLIC_SUPABASE_URL`
+   - `anon public` → `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 
-2. **votes** - Tracks user votes on artifacts
-   - artifact_id, user_id, created_at
+### Auth: X/Twitter OAuth
 
-### Triggers
+1. In Supabase: **Authentication → Providers → Twitter** aktivieren.
+2. In X Developer Portal eine App erstellen (OAuth 2.0).
+3. In Supabase **Redirect URLs** hinzufügen:
+   - `http://localhost:5173/archives`
+   - `https://<your-prod-domain>/archives`
 
-- `on_vote_insert`: Increments `votes_count` on artifact
-- `on_vote_delete`: Decrements `votes_count` on artifact
+Nach erfolgreichem Callback wird der User auf **`/archives`** geleitet.
+
+In der UI werden folgende Profilfelder genutzt:
+
+- `user.id`
+- `user.user_metadata.user_name` (fallbacks: `preferred_username`, `name`)
+- `user.user_metadata.avatar_url`
 
 ## Storage
 
-- **Bucket**: `artifacts` (public read, authenticated write)
-- **Path pattern**: `artifacts/{userId}/{uuid}.{ext}`
+Bucket: **`artifacts`**
 
-## Authentication Setup (X/Twitter OAuth)
+- **Public read**
+- **Authenticated write**
+- Upload-Pfad (Object Name) **muss** sein:
+  - `artifacts/{userId}/{uuid}`
 
-### Important: URL Configuration
+Client-seitige Validation vor Upload:
 
-1. In Lovable Cloud settings, configure:
-   - **Site URL**: Your app's URL (e.g., `https://your-app.lovable.app`)
-   - **Redirect URLs**: 
-     - `https://your-app.lovable.app/archives`
-     - `http://localhost:5173/archives` (for local dev)
+- Typen: `png` / `jpg` / `webp`
+- Max: **5MB**
 
-### Setting up X/Twitter Provider
+## Database schema + RLS + RPC (required)
 
-1. Create a Twitter Developer account at https://developer.twitter.com
-2. Create a new App and get your API Key and API Secret
-3. In your app settings, add callback URL matching your redirect URL
-4. Enable OAuth 2.0 and set "Type of App" to "Web App"
-5. Add the credentials in Lovable Cloud under Authentication > Providers > Twitter
+Die vollständige SQL (Tables, RLS, Storage-Policies, Voting-Trigger + RPC) liegt als Migration in:
 
-## Routes
+- `supabase/migrations/20260110112710_610ed6e7-069d-45f4-b153-ba23e9136b34.sql`
 
-- `/archives` - Main gallery feed
-- `/archives/:id` - Artifact detail page
-- `/profile` - User's uploaded artifacts (auth required)
+Du kannst sie ausführen über:
 
-## Predefined Tags
+- Supabase SQL Editor (Copy/Paste), oder
+- Supabase CLI (wenn im Projekt genutzt).
 
-#CroisHorney, #EichHorney, #PopHorney, #CornyHorney, #PixelHorney, #ChromeHorney, #UniHorney, #WildHorney, #BrainHorney, #MetaHorney, #CosmicHorney, #ZenHorney, #PumpHorney, #BagHorney, #SignalHorney, #MoonHorney, #GoldHorney
+### Tabellen
 
-## Future Integration Points
+**`artifacts`**
 
-- Real-time updates via Supabase Realtime (already prepared with RLS)
-- Image moderation (content filtering before upload)
-- Reporting system
-- Leaderboards
+- `id uuid primary key default gen_random_uuid()`
+- `image_url text not null`
+- `caption text not null`
+- `tags text[] not null`
+- `author_id uuid not null`
+- `author_handle text`
+- `author_avatar text`
+- `created_at timestamptz default now()`
+- `votes_count int default 0`
+
+**`votes`**
+
+- `artifact_id uuid references artifacts(id) on delete cascade`
+- `user_id uuid not null`
+- `created_at timestamptz default now()`
+- `primary key (artifact_id, user_id)`
+
+### RLS Policies
+
+RLS ist für beide Tabellen aktiv.
+
+**artifacts**
+
+- SELECT: erlaubt für alle
+- INSERT: nur wenn `auth.uid() = author_id`
+
+**votes**
+
+- SELECT: erlaubt für alle
+- INSERT: nur wenn `auth.uid() = user_id`
+- DELETE: nur wenn `auth.uid() = user_id`
+
+### Voting atomicity (RPC)
+
+Client sollte **nur** über RPC voten (optimistic UI + revert on error):
+
+- `rpc_vote(p_artifact_id uuid) returns json`
+- `rpc_unvote(p_artifact_id uuid) returns json`
+
+RPC nutzt **`auth.uid()`** (kein `user_id` Parameter) und liefert:
+
+- `success` (boolean)
+- `votes_count` (int)
+- `error` (text | null)
+
+## App Routes
+
+- `/archives` — Feed (Live / Top all time / Top 24h, Tag-Filter, Search)
+- `/archives/:id` — Detail + “more from author”
+- `/profile` — Eigene Artifacts (`author_id = auth.uid()`)

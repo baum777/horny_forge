@@ -65,15 +65,16 @@ export default function HornyMeter() {
 
   // Expose method to add to meter from other components
   useEffect(() => {
-    const handleMeterAdd = (e: CustomEvent<number>) => {
-      const newLevel = addToHornyMeter(e.detail);
+    const handleMeterAdd = (e: Event) => {
+      const custom = e as CustomEvent<number>;
+      const newLevel = addToHornyMeter(custom.detail);
       setLevel(newLevel);
       setShowPulse(true);
       setTimeout(() => setShowPulse(false), 500);
     };
 
-    window.addEventListener('horny-meter-add' as any, handleMeterAdd as any);
-    return () => window.removeEventListener('horny-meter-add' as any, handleMeterAdd as any);
+    window.addEventListener('horny-meter-add', handleMeterAdd);
+    return () => window.removeEventListener('horny-meter-add', handleMeterAdd);
   }, []);
 
   const glowIntensity = Math.min(30, level / 3);

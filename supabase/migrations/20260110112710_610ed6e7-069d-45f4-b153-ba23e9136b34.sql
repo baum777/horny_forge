@@ -95,9 +95,85 @@ CREATE TRIGGER on_vote_delete
   FOR EACH ROW
   EXECUTE FUNCTION public.decrement_votes_count();
 
+-- Voting atomicity (RPC) — client should call these for toggle + count
+CREATE OR REPLACE FUNCTION public.rpc_vote(p_artifact_id uuid)
+RETURNS json
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_user_id uuid := auth.uid();
+  v_votes_count int;
+BEGIN
+  IF v_user_id IS NULL THEN
+    RETURN json_build_object('success', false, 'votes_count', 0, 'error', 'Not authenticated');
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM public.artifacts a WHERE a.id = p_artifact_id) THEN
+    RETURN json_build_object('success', false, 'votes_count', 0, 'error', 'Artifact not found');
+  END IF;
+
+  INSERT INTO public.votes (artifact_id, user_id)
+  VALUES (p_artifact_id, v_user_id)
+  ON CONFLICT DO NOTHING;
+
+  SELECT a.votes_count INTO v_votes_count
+  FROM public.artifacts a
+  WHERE a.id = p_artifact_id;
+
+  RETURN json_build_object('success', true, 'votes_count', COALESCE(v_votes_count, 0), 'error', NULL);
+EXCEPTION
+  WHEN OTHERS THEN
+    SELECT a.votes_count INTO v_votes_count
+    FROM public.artifacts a
+    WHERE a.id = p_artifact_id;
+    RETURN json_build_object('success', false, 'votes_count', COALESCE(v_votes_count, 0), 'error', SQLERRM);
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.rpc_unvote(p_artifact_id uuid)
+RETURNS json
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_user_id uuid := auth.uid();
+  v_votes_count int;
+BEGIN
+  IF v_user_id IS NULL THEN
+    RETURN json_build_object('success', false, 'votes_count', 0, 'error', 'Not authenticated');
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM public.artifacts a WHERE a.id = p_artifact_id) THEN
+    RETURN json_build_object('success', false, 'votes_count', 0, 'error', 'Artifact not found');
+  END IF;
+
+  DELETE FROM public.votes
+  WHERE artifact_id = p_artifact_id
+    AND user_id = v_user_id;
+
+  SELECT a.votes_count INTO v_votes_count
+  FROM public.artifacts a
+  WHERE a.id = p_artifact_id;
+
+  RETURN json_build_object('success', true, 'votes_count', COALESCE(v_votes_count, 0), 'error', NULL);
+EXCEPTION
+  WHEN OTHERS THEN
+    SELECT a.votes_count INTO v_votes_count
+    FROM public.artifacts a
+    WHERE a.id = p_artifact_id;
+    RETURN json_build_object('success', false, 'votes_count', COALESCE(v_votes_count, 0), 'error', SQLERRM);
+END;
+$$;
+
 -- Create storage bucket for artifacts
 INSERT INTO storage.buckets (id, name, public)
-VALUES ('artifacts', 'artifacts', true);
+VALUES ('artifacts', 'artifacts', true)
+ON CONFLICT (id) DO UPDATE
+SET name = EXCLUDED.name,
+    public = EXCLUDED.public;
 
 -- Storage policies
 CREATE POLICY "Anyone can view artifact images"
@@ -106,12 +182,25 @@ CREATE POLICY "Anyone can view artifact images"
 
 CREATE POLICY "Authenticated users can upload artifact images"
   ON storage.objects FOR INSERT
-  WITH CHECK (bucket_id = 'artifacts' AND auth.role() = 'authenticated');
+  WITH CHECK (
+    bucket_id = 'artifacts'
+    AND auth.role() = 'authenticated'
+    AND (storage.foldername(name))[1] = 'artifacts'
+    AND (storage.foldername(name))[2] = auth.uid()::text
+  );
 
 CREATE POLICY "Users can update their own artifact images"
   ON storage.objects FOR UPDATE
-  USING (bucket_id = 'artifacts' AND auth.uid()::text = (storage.foldername(name))[1]);
+  USING (
+    bucket_id = 'artifacts'
+    AND (storage.foldername(name))[1] = 'artifacts'
+    AND auth.uid()::text = (storage.foldername(name))[2]
+  );
 
 CREATE POLICY "Users can delete their own artifact images"
   ON storage.objects FOR DELETE
-  USING (bucket_id = 'artifacts' AND auth.uid()::text = (storage.foldername(name))[1]);
+  USING (
+    bucket_id = 'artifacts'
+    AND (storage.foldername(name))[1] = 'artifacts'
+    AND auth.uid()::text = (storage.foldername(name))[2]
+  );
