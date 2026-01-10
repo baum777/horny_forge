@@ -7,7 +7,12 @@ import { useAuth } from '@/hooks/useAuth';
 import { ArchivesLoginModal } from './ArchivesLoginModal';
 import { UploadArtifactModal } from './UploadArtifactModal';
 
-const X_COMMUNITY_URL = import.meta.env.VITE_X_COMMUNITY_URL || 'https://twitter.com/i/communities/horny';
+const X_COMMUNITY_URL =
+  import.meta.env.NEXT_PUBLIC_X_COMMUNITY_URL ||
+  import.meta.env.VITE_X_COMMUNITY_URL ||
+  'https://x.com/i/communities/2009563480613949770';
+const TOKEN_SYMBOL =
+  import.meta.env.NEXT_PUBLIC_TOKEN_SYMBOL || import.meta.env.VITE_TOKEN_SYMBOL || 'HORNY';
 
 const navLinks = [
   { href: '/archives', label: 'Archives', external: false },
@@ -64,7 +69,7 @@ export function ArchivesNavbar() {
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <Link to="/archives" className="flex items-center gap-2 group">
-              <span className="text-xl font-bold text-gradient">$HORNY</span>
+              <span className="text-xl font-bold text-gradient">${TOKEN_SYMBOL}</span>
               <span className="text-xs text-muted-foreground group-hover:text-foreground transition-colors hidden sm:inline">
                 ARCHIVES
               </span>

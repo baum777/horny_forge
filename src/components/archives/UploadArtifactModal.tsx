@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { PREDEFINED_TAGS, type PredefinedTag } from '@/lib/archives/types';
+import { uploadArtifactImage } from 'lib/supabase/queries';
 
 interface UploadArtifactModalProps {
   isOpen: boolean;
@@ -75,23 +76,19 @@ export function UploadArtifactModal({ isOpen, onClose }: UploadArtifactModalProp
 
     try {
       // Upload image to storage
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${archivesUser.id}/${crypto.randomUUID()}.${fileExt}`;
-      
       setUploadProgress(30);
 
-      const { error: uploadError } = await supabase.storage
-        .from('artifacts')
-        .upload(fileName, file);
-
+      const { data: uploadData, error: uploadError } = await uploadArtifactImage({
+        userId: archivesUser.id,
+        file,
+      });
       if (uploadError) throw uploadError;
 
       setUploadProgress(60);
 
       // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('artifacts')
-        .getPublicUrl(fileName);
+      const publicUrl = uploadData?.publicUrl;
+      if (!publicUrl) throw new Error('Failed to resolve public URL');
 
       setUploadProgress(80);
 

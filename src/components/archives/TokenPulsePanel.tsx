@@ -1,16 +1,41 @@
 import { motion } from 'framer-motion';
-import { RefreshCw, ExternalLink, Activity, AlertTriangle, TrendingUp, TrendingDown } from 'lucide-react';
+import { RefreshCw, ExternalLink, Activity, AlertTriangle } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
-import { useTokenPulse } from '@/context/TokenPulseContext';
+import { useTokenStats } from 'lib/hooks/useTokenStats';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 
-const DEX_LINK = import.meta.env.VITE_DEX_LINK || 'https://dexscreener.com';
+const DEX_LINK =
+  import.meta.env.NEXT_PUBLIC_DEX_LINK ||
+  import.meta.env.VITE_DEX_LINK ||
+  'https://dexscreener.com';
+
+function formatUsd(value: number | null) {
+  if (value === null) return '—';
+  if (value < 0.01) return `$${value.toFixed(6)}`;
+  if (value < 1) return `$${value.toFixed(4)}`;
+  if (value < 1000) return `$${value.toFixed(2)}`;
+  return `$${Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 2 }).format(value)}`;
+}
+
+function formatCompactNumber(value: number | null) {
+  if (value === null) return '—';
+  return Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 2 }).format(value);
+}
 
 export function TokenPulsePanel() {
-  const { stats, loading, error, isLive, lastUpdated, refresh } = useTokenPulse();
+  const { stats, holders, loading, error, refresh } = useTokenStats();
+  const isLive = !stats.isStale && !error;
+  const lastUpdated = stats.updatedAt ? new Date(stats.updatedAt) : null;
 
-  if (loading && !stats) {
+  const hasAnyValue =
+    stats.priceUsd !== null ||
+    stats.fdvUsd !== null ||
+    stats.liquidityUsd !== null ||
+    stats.volume24hUsd !== null ||
+    holders !== null;
+
+  if (loading && !hasAnyValue) {
     return (
       <div className="glass-card p-4 rounded-xl space-y-3">
         <div className="flex items-center justify-between">
@@ -25,9 +50,6 @@ export function TokenPulsePanel() {
       </div>
     );
   }
-
-  const priceChange = stats?.priceChange24h ?? 0;
-  const isPositive = priceChange >= 0;
 
   return (
     <motion.div
@@ -60,7 +82,7 @@ export function TokenPulsePanel() {
         </Button>
       </div>
 
-      {error && !stats ? (
+      {error && !hasAnyValue ? (
         <div className="flex items-center gap-2 text-muted-foreground py-4">
           <AlertTriangle className="w-4 h-4 text-accent" />
           <span className="text-sm">Token pulse unstable.</span>
@@ -71,20 +93,12 @@ export function TokenPulsePanel() {
           <div className="grid grid-cols-2 gap-3 mb-4">
             <StatItem 
               label="Price" 
-              value={stats?.price || '—'} 
-              badge={
-                priceChange !== 0 && (
-                  <span className={`flex items-center text-xs ${isPositive ? 'text-green-500' : 'text-destructive'}`}>
-                    {isPositive ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-                    {isPositive ? '+' : ''}{priceChange.toFixed(1)}%
-                  </span>
-                )
-              }
+              value={formatUsd(stats.priceUsd)} 
             />
-            <StatItem label={stats?.mcap ? 'MCAP' : 'FDV'} value={stats?.mcap || stats?.fdv || '—'} />
-            <StatItem label="Liquidity" value={stats?.liquidity || '—'} />
-            <StatItem label="24h Volume" value={stats?.volume24h || '—'} />
-            <StatItem label="Holders" value={stats?.holders || '—'} />
+            <StatItem label="FDV" value={formatUsd(stats.fdvUsd)} />
+            <StatItem label="Liquidity" value={formatUsd(stats.liquidityUsd)} />
+            <StatItem label="24h Volume" value={formatUsd(stats.volume24hUsd)} />
+            <StatItem label="Holders" value={formatCompactNumber(holders)} />
           </div>
 
           {/* Last Updated */}
@@ -96,7 +110,7 @@ export function TokenPulsePanel() {
 
           {/* DEX Link */}
           <a
-            href={stats?.pairUrl || DEX_LINK}
+            href={stats.pairUrl || DEX_LINK}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center justify-center gap-2 w-full py-2 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors text-sm font-medium"

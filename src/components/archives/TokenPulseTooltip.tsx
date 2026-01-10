@@ -1,21 +1,38 @@
-import { Info, TrendingUp, TrendingDown, AlertTriangle, Activity } from 'lucide-react';
-import { useTokenPulse } from '@/context/TokenPulseContext';
+import { Info, AlertTriangle, Activity } from 'lucide-react';
+import { useTokenStats } from 'lib/hooks/useTokenStats';
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 
+function formatUsd(value: number | null) {
+  if (value === null) return '—';
+  if (value < 0.01) return `$${value.toFixed(6)}`;
+  if (value < 1) return `$${value.toFixed(4)}`;
+  if (value < 1000) return `$${value.toFixed(2)}`;
+  return `$${Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 2 }).format(value)}`;
+}
+
+function formatCompactNumber(value: number | null) {
+  if (value === null) return '—';
+  return Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 2 }).format(value);
+}
+
 export function TokenPulseTooltip() {
-  const { stats, loading, error, isLive } = useTokenPulse();
+  const { stats, holders, loading, error } = useTokenStats();
+  const isLive = !stats.isStale && !error;
+  const hasAnyValue =
+    stats.priceUsd !== null ||
+    stats.fdvUsd !== null ||
+    stats.liquidityUsd !== null ||
+    stats.volume24hUsd !== null ||
+    holders !== null;
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
   };
-
-  const priceChange = stats?.priceChange24h ?? 0;
-  const isPositive = priceChange >= 0;
 
   return (
     <Tooltip delayDuration={200}>
@@ -47,9 +64,9 @@ export function TokenPulseTooltip() {
             </div>
           </div>
 
-          {loading && !stats ? (
+          {loading && !hasAnyValue ? (
             <div className="text-xs text-muted-foreground">Loading pulse...</div>
-          ) : error && !stats ? (
+          ) : error && !hasAnyValue ? (
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <AlertTriangle className="w-3 h-3 text-accent" />
               Token pulse unstable.
@@ -59,29 +76,24 @@ export function TokenPulseTooltip() {
               <div>
                 <span className="text-muted-foreground">Price</span>
                 <div className="flex items-center gap-1">
-                  <span className="font-semibold">{stats?.price || '—'}</span>
-                  {priceChange !== 0 && (
-                    <span className={isPositive ? 'text-green-500' : 'text-destructive'}>
-                      {isPositive ? <TrendingUp className="w-3 h-3 inline" /> : <TrendingDown className="w-3 h-3 inline" />}
-                    </span>
-                  )}
+                  <span className="font-semibold">{formatUsd(stats.priceUsd)}</span>
                 </div>
               </div>
               <div>
-                <span className="text-muted-foreground">{stats?.mcap ? 'MCAP' : 'FDV'}</span>
-                <p className="font-semibold">{stats?.mcap || stats?.fdv || '—'}</p>
+                <span className="text-muted-foreground">FDV</span>
+                <p className="font-semibold">{formatUsd(stats.fdvUsd)}</p>
               </div>
               <div>
                 <span className="text-muted-foreground">Liquidity</span>
-                <p className="font-semibold">{stats?.liquidity || '—'}</p>
+                <p className="font-semibold">{formatUsd(stats.liquidityUsd)}</p>
               </div>
               <div>
                 <span className="text-muted-foreground">24h Vol</span>
-                <p className="font-semibold">{stats?.volume24h || '—'}</p>
+                <p className="font-semibold">{formatUsd(stats.volume24hUsd)}</p>
               </div>
               <div className="col-span-2">
                 <span className="text-muted-foreground">Holders</span>
-                <p className="font-semibold">{stats?.holders || '—'}</p>
+                <p className="font-semibold">{formatCompactNumber(holders)}</p>
               </div>
             </div>
           )}

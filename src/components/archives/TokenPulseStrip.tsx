@@ -1,14 +1,37 @@
 import { motion } from 'framer-motion';
-import { ExternalLink, Activity, AlertTriangle, TrendingUp, TrendingDown } from 'lucide-react';
-import { useTokenPulse } from '@/context/TokenPulseContext';
+import { ExternalLink, Activity, AlertTriangle } from 'lucide-react';
+import { useTokenStats } from 'lib/hooks/useTokenStats';
 import { Skeleton } from '@/components/ui/skeleton';
 
-const DEX_LINK = import.meta.env.VITE_DEX_LINK || 'https://dexscreener.com';
+const DEX_LINK =
+  import.meta.env.NEXT_PUBLIC_DEX_LINK ||
+  import.meta.env.VITE_DEX_LINK ||
+  'https://dexscreener.com';
+
+function formatUsdShort(value: number | null) {
+  if (value === null) return '—';
+  if (value < 0.01) return `$${value.toFixed(6)}`;
+  if (value < 1) return `$${value.toFixed(4)}`;
+  if (value < 1000) return `$${value.toFixed(2)}`;
+  return `$${Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 2 }).format(value)}`;
+}
+
+function formatCompactNumber(value: number | null) {
+  if (value === null) return '—';
+  return Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 2 }).format(value);
+}
 
 export function TokenPulseStrip() {
-  const { stats, loading, error, isLive } = useTokenPulse();
+  const { stats, holders, loading, error } = useTokenStats();
+  const isLive = !stats.isStale && !error;
+  const hasAnyValue =
+    stats.priceUsd !== null ||
+    stats.fdvUsd !== null ||
+    stats.liquidityUsd !== null ||
+    stats.volume24hUsd !== null ||
+    holders !== null;
 
-  if (loading && !stats) {
+  if (loading && !hasAnyValue) {
     return (
       <div className="glass-card border-b border-border/50">
         <div className="container mx-auto px-4">
@@ -22,7 +45,7 @@ export function TokenPulseStrip() {
     );
   }
 
-  if (error && !stats) {
+  if (error && !hasAnyValue) {
     return (
       <div className="glass-card border-b border-border/50">
         <div className="container mx-auto px-4">
@@ -34,9 +57,6 @@ export function TokenPulseStrip() {
       </div>
     );
   }
-
-  const priceChange = stats?.priceChange24h ?? 0;
-  const isPositive = priceChange >= 0;
 
   return (
     <motion.div
@@ -59,21 +79,15 @@ export function TokenPulseStrip() {
           {/* Price */}
           <div className="flex items-center gap-2 flex-shrink-0">
             <span className="text-xs text-muted-foreground">Price</span>
-            <span className="text-sm font-bold text-foreground">{stats?.price || '—'}</span>
-            {priceChange !== 0 && (
-              <span className={`flex items-center text-xs font-medium ${isPositive ? 'text-green-500' : 'text-destructive'}`}>
-                {isPositive ? <TrendingUp className="w-3 h-3 mr-0.5" /> : <TrendingDown className="w-3 h-3 mr-0.5" />}
-                {isPositive ? '+' : ''}{priceChange.toFixed(1)}%
-              </span>
-            )}
+            <span className="text-sm font-bold text-foreground">{formatUsdShort(stats.priceUsd)}</span>
           </div>
 
           <div className="h-4 w-px bg-border flex-shrink-0" />
 
           {/* FDV/MCAP */}
           <div className="flex items-center gap-2 flex-shrink-0">
-            <span className="text-xs text-muted-foreground">{stats?.mcap ? 'MCAP' : 'FDV'}</span>
-            <span className="text-sm font-semibold">{stats?.mcap || stats?.fdv || '—'}</span>
+            <span className="text-xs text-muted-foreground">FDV</span>
+            <span className="text-sm font-semibold">{formatUsdShort(stats.fdvUsd)}</span>
           </div>
 
           <div className="h-4 w-px bg-border flex-shrink-0 hidden sm:block" />
@@ -81,7 +95,7 @@ export function TokenPulseStrip() {
           {/* Liquidity */}
           <div className="hidden sm:flex items-center gap-2 flex-shrink-0">
             <span className="text-xs text-muted-foreground">Liquidity</span>
-            <span className="text-sm font-semibold">{stats?.liquidity || '—'}</span>
+            <span className="text-sm font-semibold">{formatUsdShort(stats.liquidityUsd)}</span>
           </div>
 
           <div className="h-4 w-px bg-border flex-shrink-0 hidden md:block" />
@@ -89,7 +103,7 @@ export function TokenPulseStrip() {
           {/* Volume */}
           <div className="hidden md:flex items-center gap-2 flex-shrink-0">
             <span className="text-xs text-muted-foreground">24h Vol</span>
-            <span className="text-sm font-semibold">{stats?.volume24h || '—'}</span>
+            <span className="text-sm font-semibold">{formatUsdShort(stats.volume24hUsd)}</span>
           </div>
 
           <div className="h-4 w-px bg-border flex-shrink-0 hidden lg:block" />
@@ -97,12 +111,12 @@ export function TokenPulseStrip() {
           {/* Holders */}
           <div className="hidden lg:flex items-center gap-2 flex-shrink-0">
             <span className="text-xs text-muted-foreground">Holders</span>
-            <span className="text-sm font-semibold">{stats?.holders || '—'}</span>
+            <span className="text-sm font-semibold">{formatCompactNumber(holders)}</span>
           </div>
 
           {/* DEX Link */}
           <a
-            href={stats?.pairUrl || DEX_LINK}
+            href={stats.pairUrl || DEX_LINK}
             target="_blank"
             rel="noopener noreferrer"
             className="ml-auto flex items-center gap-1 text-xs text-primary hover:text-primary/80 transition-colors flex-shrink-0"
