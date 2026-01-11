@@ -30,7 +30,7 @@ export interface ForgeResponse {
 
 export interface ForgeError {
   error: string;
-  code: 'INVALID_INPUT' | 'UNAUTHORIZED' | 'RATE_LIMIT' | 'PROMPT_REJECTED' | 'GEN_FAIL' | 'STORAGE_FAIL';
+  code: 'INVALID_INPUT' | 'UNAUTHORIZED' | 'RATE_LIMIT' | 'PROMPT_REJECTED' | 'UNSAFE_PROMPT' | 'GEN_FAIL' | 'STORAGE_FAIL';
   generation_id?: string;
 }
 
@@ -64,4 +64,3 @@ export interface PromptBuilderOutput {
     composition_notes?: string;
   };
 }
-

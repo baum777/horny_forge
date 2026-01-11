@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { GlassCard } from '@/components/ui/glass-card';
 import { Button } from '@/components/ui/button';
 import { Download, Share2, RefreshCw, Rocket, Eye, Clock, Layers, Zap } from 'lucide-react';
-import { ForgeResponse } from '@/lib/api/forge';
+import { ForgeResponse, type ReleaseError } from '@/lib/api/forge';
 
 interface ForgePreviewProps {
   image: string | null;
@@ -15,6 +15,7 @@ interface ForgePreviewProps {
     loadingCopy?: string;
     isReleasing?: boolean;
     releasedId?: string | null;
+    releaseError?: ReleaseError | null;
 }
 
 export const ForgePreview: React.FC<ForgePreviewProps> = ({
@@ -27,7 +28,11 @@ export const ForgePreview: React.FC<ForgePreviewProps> = ({
     loadingCopy = 'Desire is forming...',
     isReleasing = false,
     releasedId = null,
+    releaseError = null,
 }) => {
+    const showOffBrand = releaseError?.code === 'OFF_BRAND' || releaseError?.error === 'off_brand';
+    const showUnsafe = releaseError?.code === 'UNSAFE_PROMPT' || releaseError?.error === 'unsafe_prompt';
+
     return (
         <div className="space-y-6 sticky top-8">
             <label className="text-sm font-semibold block">Artifact Preview</label>
@@ -139,6 +144,34 @@ export const ForgePreview: React.FC<ForgePreviewProps> = ({
                     animate={{ opacity: 1, y: 0 }}
                     className="space-y-3"
                 >
+                    {(showOffBrand || showUnsafe) && (
+                        <div className="rounded-xl border border-white/10 bg-black/40 p-4 text-xs text-muted-foreground space-y-3">
+                            {showOffBrand && (
+                                <>
+                                    <p className="text-foreground font-semibold">Release blocked: off-brand output.</p>
+                                    <p>
+                                        Use base{' '}
+                                        <span className="text-foreground font-mono">
+                                            {releaseError?.base_match_id ?? metadata?.base_id ?? 'base-01'}
+                                        </span>{' '}
+                                        / preset{' '}
+                                        <span className="text-foreground font-mono">
+                                            {metadata?.preset ?? 'HORNY_CORE_SKETCH'}
+                                        </span>{' '}
+                                        and try again.
+                                    </p>
+                                    <Button variant="outline" size="sm" onClick={onRegenerate}>
+                                        Try again
+                                    </Button>
+                                </>
+                            )}
+                            {showUnsafe && (
+                                <p className="text-foreground font-semibold">
+                                    Release blocked by safety checks. Please try a different idea.
+                                </p>
+                            )}
+                        </div>
+                    )}
                     <div className="flex gap-2">
                         <Button
                             variant="outline"
@@ -175,4 +208,3 @@ export const ForgePreview: React.FC<ForgePreviewProps> = ({
         </div>
     );
 };
-

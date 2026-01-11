@@ -25,8 +25,36 @@ export interface ForgeResponse {
 
 export interface ForgeError {
   error: string;
-  code: 'INVALID_INPUT' | 'UNAUTHORIZED' | 'RATE_LIMIT' | 'PROMPT_REJECTED' | 'GEN_FAIL' | 'STORAGE_FAIL' | 'DB_FAIL' | 'NOT_FOUND';
+  code:
+    | 'INVALID_INPUT'
+    | 'UNAUTHORIZED'
+    | 'RATE_LIMIT'
+    | 'PROMPT_REJECTED'
+    | 'UNSAFE_PROMPT'
+    | 'GEN_FAIL'
+    | 'STORAGE_FAIL'
+    | 'DB_FAIL'
+    | 'NOT_FOUND';
   generation_id?: string;
+}
+
+export interface ReleaseRequest {
+  generation_id: string;
+  caption?: string;
+  tags: string[];
+}
+
+export interface ReleaseResponse {
+  artifact_id: string;
+  image_url: string;
+  redirect_url: string;
+}
+
+export interface ReleaseError {
+  error: string;
+  code: 'INVALID_INPUT' | 'UNAUTHORIZED' | 'RATE_LIMIT' | 'UNSAFE_PROMPT' | 'OFF_BRAND' | 'STORAGE_FAIL' | 'DB_FAIL' | 'NOT_FOUND';
+  brand_similarity?: number;
+  base_match_id?: string | null;
 }
 
 import { supabase } from '@/integrations/supabase/client';
@@ -57,6 +85,36 @@ export async function forgeArtifact(data: ForgeRequest): Promise<ForgeResponse> 
     const errorData: ForgeError = await response.json().catch(() => ({
       error: 'Artifact unstable. Retry.',
       code: 'GEN_FAIL',
+    }));
+    throw errorData;
+  }
+
+  return response.json();
+}
+
+export async function releaseArtifact(data: ReleaseRequest): Promise<ReleaseResponse> {
+  const { data: sessionData } = await supabase.auth.getSession();
+  const accessToken = sessionData.session?.access_token;
+  if (!accessToken) {
+    throw {
+      error: 'Authentication required',
+      code: 'UNAUTHORIZED',
+    } satisfies ReleaseError;
+  }
+
+  const response = await fetch('/api/forge/release', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const errorData: ReleaseError = await response.json().catch(() => ({
+      error: 'Failed to release artifact',
+      code: 'STORAGE_FAIL',
     }));
     throw errorData;
   }

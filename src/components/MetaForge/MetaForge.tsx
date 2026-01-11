@@ -2,15 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
-import { forgeArtifact, type ForgeResponse } from '@/lib/api/forge';
+import { forgeArtifact, releaseArtifact, type ForgeResponse, type ReleaseError } from '@/lib/api/forge';
 import { BasePicker, type BaseId } from './BasePicker';
 import { PresetPicker, type PresetId } from './PresetPicker';
 import { ForgeForm } from './ForgeForm';
 import { ForgePreview } from './ForgePreview';
 import { Button } from '@/components/ui/button';
 import { type PredefinedTag } from '@/lib/archives/types';
-import { uploadArtifactImage } from 'lib/supabase/queries';
 import { openXShare } from '@/lib/share';
 import { getShareRedirectUrl } from '@/lib/api/share';
 import { useGamification } from '@/hooks/useGamification';
@@ -34,6 +32,7 @@ export default function MetaForge() {
   const [generatedResult, setGeneratedResult] = useState<ForgeResponse | null>(null);
   const [isReleasing, setIsReleasing] = useState(false);
   const [releasedId, setReleasedId] = useState<string | null>(null);
+  const [releaseError, setReleaseError] = useState<ReleaseError | null>(null);
   const userLevel = stats?.level ?? 1;
 
   useEffect(() => {
@@ -65,6 +64,7 @@ export default function MetaForge() {
     setIsGenerating(true);
     setGeneratedResult(null);
     setReleasedId(null);
+    setReleaseError(null);
 
     try {
       const result = await forgeArtifact({
@@ -82,7 +82,11 @@ export default function MetaForge() {
       }
     } catch (error: any) {
       console.error('Forge error:', error);
-      toast.error(error.error || 'Artifact unstable. Retry.');
+      if (error?.code === 'UNSAFE_PROMPT' || error?.error === 'unsafe_prompt') {
+        toast.error('Prompt blocked by safety checks. Try a different idea.');
+      } else {
+        toast.error(error.error || 'Artifact unstable. Retry.');
+      }
     } finally {
       setIsGenerating(false);
     }
@@ -100,52 +104,37 @@ export default function MetaForge() {
     }
 
     setIsReleasing(true);
+    setReleaseError(null);
     try {
-      // 1. Download image from generated URL
-      const response = await fetch(generatedResult.image_url);
-      const blob = await response.blob();
-      const file = new File([blob], `artifact-${Date.now()}.png`, { type: 'image/png' });
-
-      // 2. Upload to Supabase Storage
-      const { data: uploadData, error: uploadError } = await uploadArtifactImage({
-        userId: archivesUser.id,
-        file,
+      const releaseResponse = await releaseArtifact({
+        generation_id: generatedResult.generation_id,
+        caption: caption.trim() || 'Untitled Artifact',
+        tags: selectedTags,
       });
 
-      if (uploadError) throw uploadError;
-      if (!uploadData?.publicUrl) throw new Error('Failed to get public URL');
-
-      // 3. Insert into artifacts table
-      const { data: artifact, error: insertError } = await supabase
-        .from('artifacts')
-        .insert({
-          image_url: uploadData.publicUrl,
-          caption: caption.trim() || 'Untitled Artifact',
-          tags: selectedTags,
-          author_id: archivesUser.id,
-          author_handle: archivesUser.handle,
-          author_avatar: archivesUser.avatar,
-        })
-        .select()
-        .single();
-
-      if (insertError) throw insertError;
-
-      setReleasedId(artifact.id);
+      setReleasedId(releaseResponse.artifact_id);
       toast.success('Artifact released to THE ARCHIVES.');
       void postGamificationEvent({
         event_id: crypto.randomUUID(),
         type: 'artifact_release',
-        subject_id: artifact.id,
+        subject_id: releaseResponse.artifact_id,
       });
       
       // Redirect after a short delay so user can see the share button or the success state
       setTimeout(() => {
-        navigate(`/archives/${artifact.id}`);
+        navigate(releaseResponse.redirect_url);
       }, 2000);
     } catch (error: any) {
       console.error('Release error:', error);
-      toast.error('Failed to release artifact. Try again.');
+      if (error?.code === 'OFF_BRAND' || error?.error === 'off_brand') {
+        setReleaseError(error);
+        toast.error('Off-brand artifact. Try again using the suggested base.');
+      } else if (error?.code === 'UNSAFE_PROMPT' || error?.error === 'unsafe_prompt') {
+        setReleaseError(error);
+        toast.error('Release blocked by safety checks.');
+      } else {
+        toast.error('Failed to release artifact. Try again.');
+      }
     } finally {
       setIsReleasing(false);
     }
@@ -223,6 +212,7 @@ export default function MetaForge() {
             onShare={handleShare}
             isReleasing={isReleasing}
             releasedId={releasedId}
+            releaseError={releaseError}
           />
         </div>
       </div>

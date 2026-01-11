@@ -23,6 +23,7 @@ export const config = {
       windowMs: parseInt(process.env.FORGE_RATE_LIMIT_WINDOW_MS || '600000', 10), // 10 min
     },
     releaseRateLimitPerDay: parseInt(process.env.RELEASE_RATE_LIMIT_PER_DAY || '20', 10),
+    brandSimilarityThreshold: parseFloat(process.env.BRAND_SIMILARITY_THRESHOLD || '0.82'),
   },
   
   baseImages: {
@@ -38,4 +39,3 @@ if (!config.openai.apiKey) {
 if (!config.supabase.url || !config.supabase.serviceRoleKey) {
   console.warn('⚠️  Supabase credentials not set');
 }
-

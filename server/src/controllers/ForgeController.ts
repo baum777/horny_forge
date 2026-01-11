@@ -2,6 +2,8 @@ import type { Request, Response } from 'express';
 import { PromptEngine } from '../services/PromptEngine';
 import { ImageGenAdapter } from '../services/ImageGenAdapter';
 import { StorageAdapter } from '../services/StorageAdapter';
+import { ModerationService } from '../services/ModerationService';
+import { SimilarityService } from '../services/SimilarityService';
 import { config } from '../config';
 import type { ForgeResponse, ForgeError, ReleaseResponse } from '../types';
 import type { AuthenticatedRequest } from '../middleware/auth';
@@ -27,11 +29,15 @@ export class ForgeController {
   private imageGen: ImageGenAdapter;
   private storage: StorageAdapter;
   private supabase;
+  private moderation: ModerationService;
+  private similarity: SimilarityService;
 
   constructor() {
     this.imageGen = new ImageGenAdapter();
     this.storage = new StorageAdapter();
     this.supabase = createClient(config.supabase.url, config.supabase.serviceRoleKey);
+    this.moderation = new ModerationService();
+    this.similarity = new SimilarityService();
   }
 
   private getForgeDailyLimit(level: number): number {
@@ -177,6 +183,15 @@ export class ForgeController {
         return;
       }
 
+      const moderationResult = await this.moderation.moderateText([user_input, promptResult.final_prompt]);
+      if (moderationResult.status === 'fail') {
+        res.status(400).json({
+          error: 'unsafe_prompt',
+          code: 'UNSAFE_PROMPT',
+        });
+        return;
+      }
+
       // Generate image
       let imageBytes: Buffer;
       let modelMeta: { model: string; size: string };
@@ -206,6 +221,26 @@ export class ForgeController {
         res.status(500).json({
           error: 'Failed to store preview',
           code: 'STORAGE_FAIL',
+        });
+        return;
+      }
+
+      const safetyCheckedAt = new Date().toISOString();
+      const { error: previewDbError } = await this.supabase.from('forge_previews').insert({
+        generation_id: previewResult.generationId,
+        user_id: req.userId,
+        base_id,
+        preset,
+        moderation_status: moderationResult.status,
+        moderation_reasons: moderationResult.reasons,
+        safety_checked_at: safetyCheckedAt,
+      });
+
+      if (previewDbError) {
+        console.error('Preview safety insert failed:', previewDbError);
+        res.status(500).json({
+          error: 'Failed to record safety checks',
+          code: 'DB_FAIL',
         });
         return;
       }
@@ -301,6 +336,60 @@ export class ForgeController {
         return;
       }
 
+      const { data: previewRecord, error: previewRecordError } = await this.supabase
+        .from('forge_previews')
+        .select('moderation_status, moderation_reasons')
+        .eq('generation_id', generation_id)
+        .maybeSingle();
+
+      if (previewRecordError) {
+        console.error('Preview lookup failed:', previewRecordError);
+        res.status(500).json({
+          error: 'Failed to verify safety checks',
+          code: 'DB_FAIL',
+        });
+        return;
+      }
+
+      if (!previewRecord || previewRecord.moderation_status !== 'pass') {
+        res.status(403).json({
+          error: 'unsafe_prompt',
+          code: 'UNSAFE_PROMPT',
+        });
+        return;
+      }
+
+      const similarityResult = await this.similarity.compareToBase(previewBytes);
+      const safetyCheckedAt = new Date().toISOString();
+
+      const { error: previewUpdateError } = await this.supabase
+        .from('forge_previews')
+        .update({
+          brand_similarity: similarityResult.similarity,
+          base_match_id: similarityResult.baseMatchId,
+          safety_checked_at: safetyCheckedAt,
+        })
+        .eq('generation_id', generation_id);
+
+      if (previewUpdateError) {
+        console.error('Preview similarity update failed:', previewUpdateError);
+        res.status(500).json({
+          error: 'Failed to record similarity checks',
+          code: 'DB_FAIL',
+        });
+        return;
+      }
+
+      if (similarityResult.similarity < config.forge.brandSimilarityThreshold) {
+        res.status(403).json({
+          error: 'off_brand',
+          code: 'OFF_BRAND',
+          brand_similarity: similarityResult.similarity,
+          base_match_id: similarityResult.baseMatchId,
+        });
+        return;
+      }
+
       // Release to permanent storage
       let releaseResult;
       try {
@@ -329,6 +418,11 @@ export class ForgeController {
           author_id: req.userId,
           author_handle: req.userHandle || null,
           author_avatar: req.userAvatar || null,
+          moderation_status: previewRecord.moderation_status,
+          moderation_reasons: previewRecord.moderation_reasons,
+          brand_similarity: similarityResult.similarity,
+          base_match_id: similarityResult.baseMatchId,
+          safety_checked_at: safetyCheckedAt,
         })
         .select()
         .single();
