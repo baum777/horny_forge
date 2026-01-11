@@ -4,7 +4,6 @@ import { z } from 'zod';
 import { config } from '../config';
 import { requireAuth, type AuthenticatedRequest } from '../middleware/auth';
 import { signShareToken, verifySignedShareToken } from '../utils/signing';
-import { renderArtifactHtml } from '../utils/og';
 import crypto from 'crypto';
 
 type SupabaseAdmin = ReturnType<typeof createClient>;
@@ -67,34 +66,7 @@ export function createShareRouters(supabaseAdmin?: SupabaseAdmin) {
       }
     }
 
-    let artifact: { id: string; caption: string; author_handle: string | null; image_url: string } | null =
-      null;
-
-    try {
-      const { data } = await client
-        .from('artifacts')
-        .select('id, caption, author_handle, image_url')
-        .eq('id', artifactId)
-        .maybeSingle();
-      if (data) {
-        artifact = {
-          id: data.id,
-          caption: data.caption,
-          author_handle: data.author_handle,
-          image_url: data.image_url,
-        };
-      }
-    } catch {
-      // ignore fetch errors for share preview
-    }
-
-    const html = renderArtifactHtml({
-      request: req,
-      artifact,
-      redirectPath: `/archives/${artifactId}`,
-    });
-    res.setHeader('Content-Type', 'text/html; charset=utf-8');
-    return res.status(200).send(html);
+    return res.redirect(302, `/artifact/${artifactId}`);
   });
 
   return { shareApiRouter, shareRedirectRouter };
