@@ -36,7 +36,10 @@ export const BRAND_DNA_BLOCK = `STYLE GUARDRAIL: neon-yellow glowing sketch line
 export const FORBIDDEN_KEYWORDS = [
   '3d',
   'photorealistic',
+  'photorealism',
+  'photo realistic',
   'realistic',
+  'ultra realistic',
   'hyperreal',
   'cinematic photo',
   'dslr',

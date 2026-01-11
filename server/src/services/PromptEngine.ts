@@ -11,6 +11,9 @@ import {
 } from '../constants';
 
 export class PromptEngine {
+  private static escapeRegex(input: string): string {
+    return input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
   /**
    * Sanitizes user input: normalizes whitespace, blocks forbidden content, truncates if needed.
    */
@@ -42,24 +45,25 @@ export class PromptEngine {
     }
 
     // Check for forbidden keywords
-    const lowerInput = sanitized.toLowerCase();
     const foundForbidden: string[] = [];
 
     for (const keyword of FORBIDDEN_KEYWORDS) {
-      if (lowerInput.includes(keyword.toLowerCase())) {
+      const escapedKeyword = this.escapeRegex(keyword);
+      const regex = new RegExp(`\\b${escapedKeyword}\\b`, 'gi');
+      if (regex.test(sanitized)) {
         foundForbidden.push(keyword);
         // Remove or replace forbidden keyword
-        const regex = new RegExp(keyword, 'gi');
         sanitized = sanitized.replace(regex, '').trim();
       }
     }
 
     // Check for forbidden persons
     for (const person of FORBIDDEN_PERSONS) {
-      if (lowerInput.includes(person.toLowerCase())) {
+      const escapedPerson = this.escapeRegex(person);
+      const regex = new RegExp(`\\b${escapedPerson}\\b`, 'gi');
+      if (regex.test(sanitized)) {
         foundForbidden.push(person);
         // Replace with generic term
-        const regex = new RegExp(person, 'gi');
         sanitized = sanitized.replace(regex, 'symbolic figure').trim();
       }
     }
@@ -143,4 +147,3 @@ export class PromptEngine {
     };
   }
 }
-
