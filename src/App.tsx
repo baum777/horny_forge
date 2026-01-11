@@ -13,6 +13,7 @@ import Legal from "./pages/Legal";
 import Archives from "./pages/Archives";
 import ArtifactDetail from "./pages/ArtifactDetail";
 import Profile from "./pages/Profile";
+import GamificationDemo from "./pages/GamificationDemo";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -46,6 +47,7 @@ const App = () => {
                   <Route path="/archives" element={<Archives />} />
                   <Route path="/archives/:id" element={<ArtifactDetail />} />
                   <Route path="/profile" element={<Profile />} />
+                  <Route path="/gamification" element={<GamificationDemo />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </BrowserRouter>
