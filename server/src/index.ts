@@ -4,6 +4,7 @@ import { config } from './config';
 import { ForgeController } from './controllers/ForgeController';
 import { authMiddleware, requireAuth } from './middleware/auth';
 import eventRouter from './routes/event';
+import ogRouter from './routes/og';
 import { shareApiRouter, shareRedirectRouter } from './routes/share';
 import tokenStatsRouter from './routes/tokenStats';
 
@@ -35,6 +36,7 @@ app.post('/api/forge/release', requireAuth, (req, res) => forgeController.releas
 app.use('/api', eventRouter);
 app.use('/api', shareApiRouter);
 app.use('/api', tokenStatsRouter);
+app.use('/', ogRouter);
 app.use('/', shareRedirectRouter);
 
 // Error handling
