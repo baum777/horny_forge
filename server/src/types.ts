@@ -32,6 +32,9 @@ export interface ForgeError {
   error: string;
   code: 'INVALID_INPUT' | 'UNAUTHORIZED' | 'RATE_LIMIT' | 'PROMPT_REJECTED' | 'UNSAFE_PROMPT' | 'GEN_FAIL' | 'STORAGE_FAIL' | 'FORGE_LIMIT' | 'RELEASE_LIMIT' | 'DB_FAIL' | 'NOT_FOUND' | 'OFF_BRAND';
   generation_id?: string;
+  remaining?: number;
+  brand_similarity?: number;
+  base_match_id?: string | null;
 }
 
 export interface ReleaseRequest {

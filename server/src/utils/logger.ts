@@ -10,7 +10,7 @@ export interface LogContext {
   status?: string;
   reason?: string;
   latency?: number;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 class Logger {

@@ -31,7 +31,7 @@ export async function fetchMyStats(): Promise<UserStats> {
 
 export async function performGamificationAction(
   action: ActionType,
-  payload: Record<string, any> = {}
+  payload: Record<string, unknown> = {}
 ): Promise<GamificationResponse> {
   const idempotencyKey =
     payload.idempotencyKey ??

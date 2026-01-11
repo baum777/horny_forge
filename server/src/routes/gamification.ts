@@ -34,10 +34,11 @@ gamificationRouter.get("/me", async (req, res) => {
     metrics.observe("gamification_get_stats_latency_ms", latency);
 
     res.json({ stats });
-  } catch (e: any) {
+  } catch (e: unknown) {
     const latency = Date.now() - startTime;
-    logger.error("get_user_stats_failed", { error: e.message, latency });
-    res.status(500).json({ error: e.message || "Failed to load stats" });
+    const error = e instanceof Error ? e : new Error(String(e));
+    logger.error("get_user_stats_failed", { error: error.message, latency });
+    res.status(500).json({ error: error.message || "Failed to load stats" });
   }
 });
 
@@ -198,12 +199,13 @@ gamificationRouter.post(
             eventId,
             amount: result.deltaHorny,
           });
-        } catch (payoutError: any) {
+        } catch (payoutError: unknown) {
           // Log but don't fail the request
+          const error = payoutError instanceof Error ? payoutError : new Error(String(payoutError));
           logger.error("payout_enqueue_failed", {
             userId,
             eventId,
-            error: payoutError.message,
+            error: error.message,
           });
         }
       }
@@ -225,14 +227,15 @@ gamificationRouter.post(
       metrics.observe("gamification_action_latency_ms", latency, { action });
 
       res.json({ stats: next, result });
-    } catch (e: any) {
+    } catch (e: unknown) {
       const latency = Date.now() - startTime;
+      const error = e instanceof Error ? e : new Error(String(e));
       logger.error("action_failed", {
         userId,
         action,
         idempotencyKey,
-        error: e.message,
-        stack: e.stack,
+        error: error.message,
+        stack: error.stack,
         latency,
       });
 
@@ -242,12 +245,13 @@ gamificationRouter.post(
       try {
         const stats = await store.getOrCreate(userId, nowISO);
         res.status(400).json({
-          error: e?.message ?? "Unknown error",
+          error: error.message ?? "Unknown error",
           stats,
         });
-      } catch (fallbackError: any) {
+      } catch (fallbackError: unknown) {
+        const fallbackErr = fallbackError instanceof Error ? fallbackError : new Error(String(fallbackError));
         res.status(500).json({
-          error: e?.message ?? "Unknown error",
+          error: error.message ?? "Unknown error",
           code: "INTERNAL_ERROR",
         });
       }

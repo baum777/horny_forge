@@ -33,8 +33,13 @@ export function checkUnlockCondition(condition: UnlockCondition, stats: UserStat
       return (stats.counts[condition.action] ?? 0) >= condition.count;
     case "quiz_class":
       return stats.quizClass === condition.classId;
-    case "quiz_score":
-      return ((stats as any)[condition.dimension] ?? 0) >= condition.min;
+    case "quiz_score": {
+      const score = condition.dimension === "degen" ? stats.degen 
+        : condition.dimension === "horny" ? stats.horny 
+        : condition.dimension === "conviction" ? stats.conviction 
+        : undefined;
+      return (score ?? 0) >= condition.min;
+    }
     case "streak":
       return (stats.currentStreak ?? 0) >= condition.days;
     case "milestone":

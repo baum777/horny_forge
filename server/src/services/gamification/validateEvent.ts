@@ -49,11 +49,13 @@ export async function validateEventOrThrow(args: ValidateArgs) {
       artifacts: { author_id: string } | null;
     };
     const voteWithArtifact = vote as VoteWithArtifact;
+    // @ts-expect-error - Supabase table types are not fully generated
     const authorId = voteWithArtifact.artifacts?.author_id;
     if (!authorId || authorId !== actorUserId) {
       throw Object.assign(new Error('vote does not belong to actor'), { status: 403, code: 'vote_mismatch' });
     }
 
+    // @ts-expect-error - Supabase table types are not fully generated
     if (subject_id && String(vote.artifact_id) !== String(subject_id)) {
       throw Object.assign(new Error('subject mismatch'), { status: 403, code: 'subject_mismatch' });
     }

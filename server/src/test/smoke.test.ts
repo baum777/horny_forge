@@ -108,7 +108,7 @@ describe('smoke tests', () => {
     supabaseMock = createMockSupabase();
 
     const eventSeen = new Set<string>();
-    type AwardEventArgs = {
+    const awardEventMock = async (args: {
       event_id: string;
       type: string;
       actorUserId: string;
@@ -116,8 +116,7 @@ describe('smoke tests', () => {
       source?: string;
       metadata?: Record<string, unknown>;
       proof?: Record<string, unknown>;
-    };
-    const awardEventMock = async (args: AwardEventArgs) => {
+    }): Promise<unknown> => {
       if (args.type === 'vote_received' && args.proof && typeof args.proof === 'object' && 'vote_id' in args.proof && args.proof.vote_id !== 'vote-1') {
         throw Object.assign(new Error('invalid_vote'), { status: 403, code: 'invalid_vote' });
       }
@@ -136,11 +135,13 @@ describe('smoke tests', () => {
       next();
     };
 
+    const SupabaseClient = (await import('@supabase/supabase-js')).createClient;
+    type SupabaseClientType = ReturnType<typeof SupabaseClient<Database>>;
     app = await createApp({
       forgeController: new MockForgeController() as unknown as ForgeController,
       authMiddleware,
       awardEvent: awardEventMock,
-      supabaseAdmin: supabaseMock as unknown as ReturnType<typeof import('@supabase/supabase-js')['createClient']<Database>>,
+      supabaseAdmin: supabaseMock as unknown as SupabaseClientType,
     });
 
     const originalFetch = globalThis.fetch;
@@ -253,7 +254,10 @@ describe('smoke tests', () => {
     expect(res1.body.stats).toBeDefined();
     const fetchMock = vi.mocked(globalThis.fetch);
     expect(
-      fetchMock.mock.calls.filter(([input]: [string | URL, RequestInit?]) => String(input).includes('api.dexscreener.com')).length
+      fetchMock.mock.calls.filter((call) => {
+        const [input] = call;
+        return String(input).includes('api.dexscreener.com');
+      }).length
     ).toBe(1);
   });
 

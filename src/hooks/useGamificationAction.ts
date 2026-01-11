@@ -23,7 +23,7 @@ export function useGamificationAction() {
     })();
   }, []);
 
-  const run = useCallback(async (action: ActionType, payload: any = {}) => {
+  const run = useCallback(async (action: ActionType, payload: Record<string, unknown> = {}) => {
     setLoading(true);
     setError(null);
     try {
@@ -31,9 +31,10 @@ export function useGamificationAction() {
       setStats(res.stats);
       setLastResult(res.result);
       return res;
-    } catch (e: any) {
-      setError(e?.message ?? "Unknown error");
-      throw e;
+    } catch (e: unknown) {
+      const error = e instanceof Error ? e : new Error(String(e));
+      setError(error.message ?? "Unknown error");
+      throw error;
     } finally {
       setLoading(false);
     }

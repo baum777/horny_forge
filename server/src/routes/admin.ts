@@ -79,9 +79,10 @@ adminRouter.post("/adjust", async (req, res) => {
     await store.save(userId, updated);
 
     res.json({ success: true, stats: updated });
-  } catch (e: any) {
-    logger.error("admin_adjustment_failed", { error: e.message });
-    res.status(500).json({ error: e.message });
+  } catch (e: unknown) {
+    const error = e instanceof Error ? e : new Error(String(e));
+    logger.error("admin_adjustment_failed", { error: error.message });
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -105,9 +106,10 @@ adminRouter.post("/rebuild-stats", async (req, res) => {
     });
 
     res.json({ success: true, message: "Rebuild not yet implemented" });
-  } catch (e: any) {
-    logger.error("admin_rebuild_failed", { error: e.message });
-    res.status(500).json({ error: e.message });
+  } catch (e: unknown) {
+    const error = e instanceof Error ? e : new Error(String(e));
+    logger.error("admin_rebuild_failed", { error: error.message });
+    res.status(500).json({ error: error.message });
   }
 });
 

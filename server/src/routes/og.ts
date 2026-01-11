@@ -26,9 +26,13 @@ export default function createOgRouter(supabaseAdmin?: SupabaseAdmin) {
         request: req,
         artifact: data
           ? {
+              // @ts-expect-error - Supabase table types are not fully generated
               id: data.id,
+              // @ts-expect-error - Supabase table types are not fully generated
               caption: data.caption,
+              // @ts-expect-error - Supabase table types are not fully generated
               author_handle: data.author_handle,
+              // @ts-expect-error - Supabase table types are not fully generated
               image_url: data.image_url,
             }
           : null,

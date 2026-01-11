@@ -41,8 +41,8 @@ class Metrics {
     };
   }
 
-  getAllMetrics(): Record<string, any> {
-    const result: Record<string, any> = {};
+  getAllMetrics(): Record<string, unknown> {
+    const result: Record<string, unknown> = {};
 
     // Counters
     for (const [key, value] of this.counters.entries()) {
