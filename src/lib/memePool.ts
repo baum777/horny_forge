@@ -3,5 +3,4 @@
 export { ALL_PNG_IMAGES, TRANSPARENT_IMAGES, initializeTransparentImages } from './transparentImages';
 
 // Default export: will be populated with transparent images after initialization
-export let HORNY_MEME_POOL: string[] = [];
-
+export const HORNY_MEME_POOL: string[] = [];

@@ -1,6 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
-import { fetchDexScreenerTokenStats, type TokenStats } from "lib/tokenData/dexscreener";
-import { fetchHoldersCount } from "lib/tokenData/holders";
+import { fetchTokenStats, type TokenStats } from "lib/tokenData/tokenStats";
 
 type TokenStatsContextValue = {
   stats: TokenStats;
@@ -93,23 +92,19 @@ export function TokenStatsProvider({ children }: { children: React.ReactNode }) 
   const inFlight = useRef<Promise<void> | null>(null);
 
   const doFetch = useCallback(async () => {
-    if (!tokenMint) {
-      setPayload((prev) => staleify(prev));
-      setError(true);
-      setLoading(false);
-      return;
-    }
-
     // de-dupe overlapping refresh/poll calls
     if (inFlight.current) return inFlight.current;
 
     inFlight.current = (async () => {
       setLoading(true);
       try {
-        const [stats, holders] = await Promise.all([
-          fetchDexScreenerTokenStats({ tokenMint, fallbackPairUrl }),
-          fetchHoldersCount(),
-        ]);
+        const response = await fetchTokenStats({ mint: tokenMint || undefined });
+        const stats = {
+          ...response.stats,
+          pairUrl: response.stats.pairUrl ?? fallbackPairUrl ?? null,
+          isStale: response.stale || response.stats.isStale,
+        };
+        const holders = response.holders ?? null;
 
         const next: CachedPayload = { stats, holders };
         persistCache(next);
@@ -153,4 +148,3 @@ export function useTokenStats() {
   if (!ctx) throw new Error("useTokenStats must be used within a TokenStatsProvider");
   return ctx;
 }
-

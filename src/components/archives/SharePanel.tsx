@@ -12,7 +12,7 @@ interface SharePanelProps {
 
 export function SharePanel({ artifactId, caption, compact = false }: SharePanelProps) {
   const [copied, setCopied] = useState<'link' | 'text' | null>(null);
-  const artifactUrl = `${window.location.origin}/archives/${artifactId}`;
+  const artifactUrl = `${window.location.origin}/artifact/${artifactId}`;
   const shareText = `My artifact just entered THE HORNY ARCHIVES: ${caption}`;
   const hashtags = 'HORNY,HornyArchives';
 

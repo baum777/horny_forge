@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { awardEvent } from '../services/gamification/awardEvent';
 import { requireAuth, type AuthenticatedRequest } from '../middleware/auth';
 
-const router = Router();
+type AwardEventFn = typeof awardEvent;
 
 const EventSchema = z.object({
   event_id: z.string().uuid(),
@@ -20,28 +20,32 @@ const EventSchema = z.object({
   proof: z.record(z.any()).optional(),
 });
 
-router.post('/event', requireAuth, async (req: AuthenticatedRequest, res) => {
-  const parsed = EventSchema.safeParse(req.body);
-  if (!parsed.success) {
-    return res.status(400).json({ error: 'invalid_body', details: parsed.error.flatten() });
-  }
+export default function createEventRouter(awardEventImpl: AwardEventFn = awardEvent) {
+  const router = Router();
 
-  const actorUserId = req.userId;
-  if (!actorUserId) {
-    return res.status(401).json({ error: 'unauthorized' });
-  }
+  router.post('/event', requireAuth, async (req: AuthenticatedRequest, res) => {
+    const parsed = EventSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({ error: 'invalid_body', details: parsed.error.flatten() });
+    }
 
-  try {
-    const result = await awardEvent({
-      actorUserId,
-      ...parsed.data,
-    });
-    return res.status(200).json(result);
-  } catch (error: any) {
-    const status = error?.status ?? 500;
-    const code = error?.code ?? 'event_failed';
-    return res.status(status).json({ error: code, message: error?.message });
-  }
-});
+    const actorUserId = req.userId;
+    if (!actorUserId) {
+      return res.status(401).json({ error: 'unauthorized' });
+    }
 
-export default router;
+    try {
+      const result = await awardEventImpl({
+        actorUserId,
+        ...parsed.data,
+      });
+      return res.status(200).json(result);
+    } catch (error: any) {
+      const status = error?.status ?? 500;
+      const code = error?.code ?? 'event_failed';
+      return res.status(status).json({ error: code, message: error?.message });
+    }
+  });
+
+  return router;
+}

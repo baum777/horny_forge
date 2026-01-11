@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Dump proxy env
+        run: env | grep -i proxy || true
+
+      - name: Install frontend deps
+        run: |
+          npm config set registry https://registry.npmjs.org/
+          npm config delete @types:registry || true
+          npm config delete //registry.npmjs.org/:_authToken || true
+          npm ci
+
+      - name: Lint frontend
+        run: npm run lint
+
+      - name: Typecheck frontend
+        run: npm run typecheck
+
+      - name: Install server deps
+        run: |
+          npm config set registry https://registry.npmjs.org/
+          npm config delete @types:registry || true
+          npm config delete //registry.npmjs.org/:_authToken || true
+          npm ci
+        working-directory: server
+
+      - name: Typecheck server
+        run: npm run build
+        working-directory: server
+
+      - name: Run server tests
+        run: npm test
+        working-directory: server

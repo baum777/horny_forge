@@ -34,6 +34,7 @@ export const PRESETS: Record<Preset, { guardrailBlock: string }> = {
 export const BRAND_DNA_BLOCK = `STYLE GUARDRAIL: neon-yellow glowing sketch lines on a black background, thick marker doodle outline, simple cartoon shapes, high contrast, meme readability, no realism, no 3D, no painterly textures. Preserve the exact unicorn character identity from the provided base image (same head shape, dot eyes, rainbow horn always visible).`;
 
 export const FORBIDDEN_KEYWORDS = [
+  '3d',
   'photorealistic',
   'realistic',
   'hyperreal',
@@ -65,4 +66,3 @@ export const FORBIDDEN_PERSONS = [
 export const MAX_INPUT_LENGTH = 240;
 export const MAX_WORDS = 40;
 export const DEFAULT_CONCEPT = 'cosmic neon doodle, absurd hype symbols';
-
