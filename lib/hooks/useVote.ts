@@ -15,7 +15,8 @@ function isVoteRpcResponse(value: unknown): value is VoteRpcResponse {
   return (
     typeof v.success === "boolean" &&
     typeof v.votes_count === "number" &&
-    (typeof v.error === "string" || v.error === null)
+    (typeof v.error === "string" || v.error === null) &&
+    (typeof v.vote_id === "string" || v.vote_id === null || typeof v.vote_id === "undefined")
   );
 }
 
@@ -75,8 +76,20 @@ export function useVote({ artifactId, initialVotesCount }: UseVoteOptions) {
       setVotesCount(rpc.data.votes_count);
       if (!wasVoted) {
         toast.success("Desire registered.");
-        void postGamificationEvent({ type: "vote_cast" });
-        void postGamificationEvent({ type: "vote_received", artifact_id: artifactId });
+        const eventId = crypto.randomUUID();
+        void postGamificationEvent({
+          event_id: eventId,
+          type: "vote_cast",
+          subject_id: artifactId,
+        });
+        if (rpc.data.vote_id) {
+          void postGamificationEvent({
+            event_id: crypto.randomUUID(),
+            type: "vote_received",
+            subject_id: artifactId,
+            proof: { vote_id: rpc.data.vote_id },
+          });
+        }
       }
     } catch (err) {
       // revert optimistic state

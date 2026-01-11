@@ -54,16 +54,19 @@ export type Database = {
         Row: {
           artifact_id: string
           created_at: string | null
+          id: string | null
           user_id: string
         }
         Insert: {
           artifact_id: string
           created_at?: string | null
+          id?: string | null
           user_id: string
         }
         Update: {
           artifact_id?: string
           created_at?: string | null
+          id?: string | null
           user_id?: string
         }
         Relationships: [

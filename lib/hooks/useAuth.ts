@@ -81,7 +81,10 @@ export function useAuth() {
     const lastReturn = localStorage.getItem(DAILY_RETURN_KEY);
     if (lastReturn === todayKey) return;
 
-    void postGamificationEvent({ type: "daily_return" }).then(({ error }) => {
+    void postGamificationEvent({
+      event_id: crypto.randomUUID(),
+      type: "daily_return",
+    }).then(({ error }) => {
       if (!error) {
         localStorage.setItem(DAILY_RETURN_KEY, todayKey);
       }

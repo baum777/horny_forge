@@ -11,7 +11,8 @@ import { ForgePreview } from './ForgePreview';
 import { Button } from '@/components/ui/button';
 import { type PredefinedTag } from '@/lib/archives/types';
 import { uploadArtifactImage } from 'lib/supabase/queries';
-import { openXShare, getShareUrl } from '@/lib/share';
+import { openXShare } from '@/lib/share';
+import { getShareRedirectUrl } from '@/lib/api/share';
 import { useGamification } from '@/hooks/useGamification';
 import { postGamificationEvent } from '@/lib/api/event';
 import { isBaseUnlocked, isPresetUnlocked } from 'lib/gamification/eventProcessor';
@@ -74,7 +75,10 @@ export default function MetaForge() {
       setGeneratedResult(result);
       toast.success('Artifact stabilized.');
       if (isAuthenticated) {
-        void postGamificationEvent({ type: 'forge_generate' });
+        void postGamificationEvent({
+          event_id: crypto.randomUUID(),
+          type: 'forge_generate',
+        });
       }
     } catch (error: any) {
       console.error('Forge error:', error);
@@ -129,7 +133,11 @@ export default function MetaForge() {
 
       setReleasedId(artifact.id);
       toast.success('Artifact released to THE ARCHIVES.');
-      void postGamificationEvent({ type: 'artifact_release', artifact_id: artifact.id });
+      void postGamificationEvent({
+        event_id: crypto.randomUUID(),
+        type: 'artifact_release',
+        subject_id: artifact.id,
+      });
       
       // Redirect after a short delay so user can see the share button or the success state
       setTimeout(() => {
@@ -143,14 +151,14 @@ export default function MetaForge() {
     }
   };
 
-  const handleShare = () => {
+  const handleShare = async () => {
     if (!releasedId) return;
-    const url = getShareUrl(`/archives/${releasedId}`);
+    const url =
+      (await getShareRedirectUrl(releasedId)) ?? `${window.location.origin}/archives/${releasedId}`;
     openXShare({
       text: `Just forged a legendary artifact in THE HORNY ARCHIVES! ${caption}`,
       url: url,
     });
-    void postGamificationEvent({ type: 'share_click' });
   };
 
   return (

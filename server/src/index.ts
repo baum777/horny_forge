@@ -2,12 +2,12 @@ import express from 'express';
 import cors from 'cors';
 import { config } from './config';
 import { ForgeController } from './controllers/ForgeController';
-import { EventController } from './controllers/EventController';
 import { authMiddleware, requireAuth } from './middleware/auth';
+import eventRouter from './routes/event';
+import { shareApiRouter, shareRedirectRouter } from './routes/share';
 
 const app = express();
 const forgeController = new ForgeController();
-const eventController = new EventController();
 
 // Middleware
 app.use(cors({
@@ -29,9 +29,11 @@ app.get('/health', (req, res) => {
 });
 
 // API Routes
-app.post('/api/forge', (req, res) => forgeController.forge(req as any, res));
-app.post('/api/forge/release', (req, res) => forgeController.release(req as any, res));
-app.post('/api/event', requireAuth, (req, res) => eventController.handle(req as any, res));
+app.post('/api/forge', requireAuth, (req, res) => forgeController.forge(req as any, res));
+app.post('/api/forge/release', requireAuth, (req, res) => forgeController.release(req as any, res));
+app.use('/api', eventRouter);
+app.use('/api', shareApiRouter);
+app.use('/', shareRedirectRouter);
 
 // Error handling
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {

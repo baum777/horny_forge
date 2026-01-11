@@ -2,9 +2,8 @@ import type { Request, Response } from 'express';
 import { PromptEngine } from '../services/PromptEngine';
 import { ImageGenAdapter } from '../services/ImageGenAdapter';
 import { StorageAdapter } from '../services/StorageAdapter';
-import { RateLimiter } from '../services/RateLimiter';
 import { config } from '../config';
-import type { ForgeRequest, ForgeResponse, ForgeError, ReleaseRequest, ReleaseResponse } from '../types';
+import type { ForgeResponse, ForgeError, ReleaseResponse } from '../types';
 import type { AuthenticatedRequest } from '../middleware/auth';
 import { createClient } from '@supabase/supabase-js';
 import { z } from 'zod';
@@ -27,18 +26,98 @@ const releaseRequestSchema = z.object({
 export class ForgeController {
   private imageGen: ImageGenAdapter;
   private storage: StorageAdapter;
-  private rateLimiter: RateLimiter;
   private supabase;
 
   constructor() {
     this.imageGen = new ImageGenAdapter();
     this.storage = new StorageAdapter();
-    this.rateLimiter = new RateLimiter(
-      config.forge.rateLimit.windowMs,
-      config.forge.rateLimit.anonymous,
-      config.forge.rateLimit.authenticated
-    );
     this.supabase = createClient(config.supabase.url, config.supabase.serviceRoleKey);
+  }
+
+  private getForgeDailyLimit(level: number): number {
+    if (level >= 8) return 25;
+    if (level >= 5) return 15;
+    if (level >= 3) return 10;
+    return 5;
+  }
+
+  private getReleaseDailyLimit(level: number): number {
+    if (level >= 8) return 10;
+    if (level >= 5) return 7;
+    return 5;
+  }
+
+  private async getUserLevel(userId: string): Promise<number> {
+    const { data, error } = await this.supabase
+      .from('user_stats')
+      .select('user_id, level')
+      .eq('user_id', userId)
+      .maybeSingle();
+
+    if (error) {
+      throw new Error('Failed to load user stats');
+    }
+
+    if (!data) {
+      const { error: insertError } = await this.supabase.from('user_stats').insert({
+        user_id: userId,
+        xp_total: 0,
+        level: 1,
+        streak_days: 0,
+        last_active_at: null,
+      });
+      if (insertError) throw new Error('Failed to create user stats');
+      return 1;
+    }
+
+    return data.level ?? 1;
+  }
+
+  private async checkQuota(params: {
+    userId: string;
+    key: string;
+    limit: number;
+  }): Promise<{ allowed: boolean; remaining: number }> {
+    const { data, error } = await this.supabase.rpc('check_and_consume_quota', {
+      p_user_id: params.userId,
+      p_key: params.key,
+      p_limit: params.limit,
+    });
+
+    if (error) {
+      throw new Error('Failed to check quota');
+    }
+
+    return {
+      allowed: !!data?.allowed,
+      remaining: typeof data?.remaining === 'number' ? data.remaining : 0,
+    };
+  }
+
+  private ensureUnlocked(level: number, baseId: string, preset: string) {
+    const baseUnlocks: Record<string, number> = {
+      'base-01': 1,
+      'base-02': 2,
+      'base-03': 3,
+      'base-04': 5,
+    };
+
+    const presetUnlocks: Record<string, number> = {
+      HORNY_CORE_SKETCH: 1,
+      HORNY_META_SCENE: 2,
+      HORNY_CHAOS_VARIATION: 4,
+    };
+
+    const baseRequired = baseUnlocks[baseId] ?? 1;
+    const presetRequired = presetUnlocks[preset] ?? 1;
+
+    if (level < baseRequired || level < presetRequired) {
+      throw Object.assign(new Error('locked'), {
+        status: 403,
+        code: 'LOCKED',
+        required_level: Math.max(baseRequired, presetRequired),
+      });
+    }
   }
 
   /**
@@ -48,15 +127,8 @@ export class ForgeController {
     const startTime = Date.now();
 
     try {
-      // Rate limit check
-      const rateLimitResult = this.rateLimiter.check(req);
-      if (!rateLimitResult.allowed) {
-        res.status(429)
-          .setHeader('Retry-After', String(rateLimitResult.retryAfter || 60))
-          .json({
-            error: 'Rate limit exceeded. Please try again later.',
-            code: 'RATE_LIMIT',
-          });
+      if (!req.userId) {
+        res.status(401).json({ error: 'Authentication required', code: 'UNAUTHORIZED' });
         return;
       }
 
@@ -71,6 +143,23 @@ export class ForgeController {
       }
 
       const { base_id, preset, user_input, size = '1024x1024', debug = false } = validationResult.data;
+
+      const userLevel = await this.getUserLevel(req.userId);
+      this.ensureUnlocked(userLevel, base_id, preset);
+
+      const quota = await this.checkQuota({
+        userId: req.userId,
+        key: 'forge_requests',
+        limit: this.getForgeDailyLimit(userLevel),
+      });
+      if (!quota.allowed) {
+        res.status(429).json({
+          error: 'Daily forge limit reached',
+          code: 'FORGE_LIMIT',
+          remaining: quota.remaining,
+        });
+        return;
+      }
 
       // Process prompt
       const promptResult = PromptEngine.process({
@@ -182,6 +271,21 @@ export class ForgeController {
 
       const { generation_id, caption, tags } = validationResult.data;
 
+      const userLevel = await this.getUserLevel(req.userId);
+      const quota = await this.checkQuota({
+        userId: req.userId,
+        key: 'release_requests',
+        limit: this.getReleaseDailyLimit(userLevel),
+      });
+      if (!quota.allowed) {
+        res.status(429).json({
+          error: 'Daily release limit reached',
+          code: 'RELEASE_LIMIT',
+          remaining: quota.remaining,
+        });
+        return;
+      }
+
       // Validate tags (should be from allowed list, but for MVP we'll just check format)
       // TODO: Add allowed tags validation
 
@@ -254,4 +358,3 @@ export class ForgeController {
     }
   }
 }
-

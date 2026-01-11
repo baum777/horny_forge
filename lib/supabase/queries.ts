@@ -5,6 +5,7 @@ import type { BadgeId } from "lib/gamification/badgeRules";
 export type VoteRpcResponse = {
   success: boolean;
   votes_count: number;
+  vote_id?: string | null;
   error: string | null;
 };
 

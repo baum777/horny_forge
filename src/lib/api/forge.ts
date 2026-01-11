@@ -29,11 +29,23 @@ export interface ForgeError {
   generation_id?: string;
 }
 
+import { supabase } from '@/integrations/supabase/client';
+
 export async function forgeArtifact(data: ForgeRequest): Promise<ForgeResponse> {
+  const { data: sessionData } = await supabase.auth.getSession();
+  const accessToken = sessionData.session?.access_token;
+  if (!accessToken) {
+    throw {
+      error: 'Authentication required',
+      code: 'UNAUTHORIZED',
+    } satisfies ForgeError;
+  }
+
   const response = await fetch('/api/forge', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      Authorization: `Bearer ${accessToken}`,
     },
     body: JSON.stringify({
       ...data,
@@ -51,4 +63,3 @@ export async function forgeArtifact(data: ForgeRequest): Promise<ForgeResponse> 
 
   return response.json();
 }
-

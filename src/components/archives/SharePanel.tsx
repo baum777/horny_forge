@@ -2,8 +2,7 @@ import { useState } from 'react';
 import { Twitter, Link2, Copy, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { useAuth } from '@/hooks/useAuth';
-import { postGamificationEvent } from '@/lib/api/event';
+import { getShareRedirectUrl } from '@/lib/api/share';
 
 interface SharePanelProps {
   artifactId: string;
@@ -13,28 +12,27 @@ interface SharePanelProps {
 
 export function SharePanel({ artifactId, caption, compact = false }: SharePanelProps) {
   const [copied, setCopied] = useState<'link' | 'text' | null>(null);
-  const { isAuthenticated } = useAuth();
-
   const artifactUrl = `${window.location.origin}/archives/${artifactId}`;
   const shareText = `My artifact just entered THE HORNY ARCHIVES: ${caption}`;
   const hashtags = 'HORNY,HornyArchives';
 
-  const shareToX = () => {
-    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(artifactUrl)}&hashtags=${hashtags}`;
+  const resolveShareUrl = async () => {
+    const redirectUrl = await getShareRedirectUrl(artifactId);
+    return redirectUrl ?? artifactUrl;
+  };
+
+  const shareToX = async () => {
+    const resolvedUrl = await resolveShareUrl();
+    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(resolvedUrl)}&hashtags=${hashtags}`;
     window.open(url, '_blank', 'noopener,noreferrer,width=600,height=400');
-    if (isAuthenticated) {
-      void postGamificationEvent({ type: 'share_click' });
-    }
   };
 
   const copyLink = async () => {
     try {
-      await navigator.clipboard.writeText(artifactUrl);
+      const resolvedUrl = await resolveShareUrl();
+      await navigator.clipboard.writeText(resolvedUrl);
       setCopied('link');
       toast.success('Link copied!');
-      if (isAuthenticated) {
-        void postGamificationEvent({ type: 'share_click' });
-      }
       setTimeout(() => setCopied(null), 2000);
     } catch {
       toast.error('Failed to copy');
@@ -43,12 +41,10 @@ export function SharePanel({ artifactId, caption, compact = false }: SharePanelP
 
   const copyText = async () => {
     try {
-      await navigator.clipboard.writeText(`${shareText} ${artifactUrl} #HORNY #HornyArchives`);
+      const resolvedUrl = await resolveShareUrl();
+      await navigator.clipboard.writeText(`${shareText} ${resolvedUrl} #HORNY #HornyArchives`);
       setCopied('text');
       toast.success('Share text copied!');
-      if (isAuthenticated) {
-        void postGamificationEvent({ type: 'share_click' });
-      }
       setTimeout(() => setCopied(null), 2000);
     } catch {
       toast.error('Failed to copy');
