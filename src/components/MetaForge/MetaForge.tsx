@@ -14,6 +14,7 @@ import { getShareRedirectUrl } from '@/lib/api/share';
 import { useGamification } from '@/hooks/useGamification';
 import { postGamificationEvent } from '@/lib/api/event';
 import { isBaseUnlocked, isPresetUnlocked } from 'lib/gamification/eventProcessor';
+import { clientGamificationEnabled } from '@/lib/gamificationFlags';
 
 export default function MetaForge() {
   const { archivesUser, isAuthenticated } = useAuth();
@@ -34,18 +35,21 @@ export default function MetaForge() {
   const [releasedId, setReleasedId] = useState<string | null>(null);
   const [releaseError, setReleaseError] = useState<ReleaseError | null>(null);
   const userLevel = stats?.level ?? 1;
+  const unlockLevel = clientGamificationEnabled ? userLevel : Number.MAX_SAFE_INTEGER;
 
   useEffect(() => {
+    if (!clientGamificationEnabled) return;
     if (selectedBaseId && !isBaseUnlocked(userLevel, selectedBaseId)) {
       setSelectedBaseId(null);
     }
-  }, [selectedBaseId, userLevel]);
+  }, [selectedBaseId, userLevel, clientGamificationEnabled]);
 
   useEffect(() => {
+    if (!clientGamificationEnabled) return;
     if (!isPresetUnlocked(userLevel, selectedPreset)) {
       setSelectedPreset('HORNY_CORE_SKETCH');
     }
-  }, [selectedPreset, userLevel]);
+  }, [selectedPreset, userLevel, clientGamificationEnabled]);
 
   const handleInfuse = async () => {
     if (!selectedBaseId) {
@@ -170,13 +174,13 @@ export default function MetaForge() {
           <BasePicker
             selectedBaseId={selectedBaseId}
             onSelect={setSelectedBaseId}
-            userLevel={userLevel}
+            userLevel={unlockLevel}
           />
 
           <PresetPicker
             selectedPreset={selectedPreset}
             onSelect={setSelectedPreset}
-            userLevel={userLevel}
+            userLevel={unlockLevel}
           />
 
           <ForgeForm

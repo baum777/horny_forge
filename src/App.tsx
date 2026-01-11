@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { TokenStatsProvider } from "lib/hooks/useTokenStats";
 import { FloatingImages } from "@/components/FloatingImages";
 import { initializeTransparentImages, ALL_PNG_IMAGES } from "@/lib/memePool";
+import { gamificationDemoEnabled } from "@/lib/gamificationFlags";
 import {
   Index,
   Interact,
@@ -49,7 +50,9 @@ const App = () => {
                   <Route path="/archives" element={<Archives />} />
                   <Route path="/archives/:id" element={<ArtifactDetail />} />
                   <Route path="/profile" element={<Profile />} />
-                  <Route path="/gamification" element={<GamificationDemo />} />
+                  {gamificationDemoEnabled && (
+                    <Route path="/gamification" element={<GamificationDemo />} />
+                  )}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </BrowserRouter>
