@@ -1,8 +1,9 @@
 import { createClient } from '@supabase/supabase-js';
 import { config } from '../../config';
 import { validateEventOrThrow } from './validateEvent';
+import type { Database } from '../../types/supabase';
 
-const supabaseAdmin = createClient(config.supabase.url, config.supabase.serviceRoleKey);
+const supabaseAdmin = createClient<Database>(config.supabase.url, config.supabase.serviceRoleKey);
 
 type AwardArgs = {
   event_id: string;

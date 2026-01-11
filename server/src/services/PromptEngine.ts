@@ -123,7 +123,7 @@ export class PromptEngine {
     preset: Preset;
     userInput: string;
     baseId: BaseId;
-  }): PromptBuilderOutput & { negativeTerms: string[] } {
+  }): PromptBuilderOutput {
     const sanitizeResult = this.sanitizeInput(params.userInput);
     const promptResult = this.build({
       preset: params.preset,

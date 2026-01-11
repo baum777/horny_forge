@@ -1,22 +1,34 @@
 import { createClient } from '@supabase/supabase-js';
 import { config } from '../../config';
 import { verifySignedShareToken } from '../../utils/signing';
+import type { Database } from '../../types/supabase';
 
-const supabaseAdmin = createClient(config.supabase.url, config.supabase.serviceRoleKey);
+const supabaseAdmin = createClient<Database>(config.supabase.url, config.supabase.serviceRoleKey);
+
+type VoteProof = {
+  vote_id: string;
+};
+
+type ShareProof = {
+  token: string;
+};
+
+type EventProof = VoteProof | ShareProof | Record<string, unknown>;
 
 type ValidateArgs = {
   type: string;
   actorUserId: string;
   subject_id?: string;
-  proof?: Record<string, any>;
+  proof?: EventProof;
 };
 
 export async function validateEventOrThrow(args: ValidateArgs) {
   const { type, actorUserId, proof, subject_id } = args;
 
   if (type === 'vote_received') {
-    const voteId = proof?.vote_id;
-    if (!voteId) {
+    const voteProof = proof as VoteProof | undefined;
+    const voteId = voteProof?.vote_id;
+    if (!voteId || typeof voteId !== 'string') {
       throw Object.assign(new Error('vote_id required'), { status: 400, code: 'missing_proof' });
     }
 
@@ -33,7 +45,11 @@ export async function validateEventOrThrow(args: ValidateArgs) {
       throw Object.assign(new Error('vote not found'), { status: 403, code: 'invalid_vote' });
     }
 
-    const authorId = (vote as any).artifacts?.author_id as string | undefined;
+    type VoteWithArtifact = typeof vote & {
+      artifacts: { author_id: string } | null;
+    };
+    const voteWithArtifact = vote as VoteWithArtifact;
+    const authorId = voteWithArtifact.artifacts?.author_id;
     if (!authorId || authorId !== actorUserId) {
       throw Object.assign(new Error('vote does not belong to actor'), { status: 403, code: 'vote_mismatch' });
     }
@@ -44,8 +60,9 @@ export async function validateEventOrThrow(args: ValidateArgs) {
   }
 
   if (type === 'share_click') {
-    const token = proof?.token;
-    if (!token) {
+    const shareProof = proof as ShareProof | undefined;
+    const token = shareProof?.token;
+    if (!token || typeof token !== 'string') {
       throw Object.assign(new Error('token required'), { status: 400, code: 'missing_proof' });
     }
 

@@ -1,4 +1,5 @@
 import type { Request } from 'express';
+import type { AuthenticatedRequest } from '../middleware/auth';
 
 interface RateLimitEntry {
   count: number;
@@ -25,7 +26,7 @@ export class RateLimiter {
    */
   private getIdentifier(req: Request): string {
     // If authenticated, use user ID
-    const userId = (req as any).userId;
+    const userId = (req as AuthenticatedRequest).userId;
     if (userId) {
       return `user:${userId}`;
     }
@@ -44,7 +45,7 @@ export class RateLimiter {
    */
   check(req: Request): { allowed: boolean; retryAfter?: number } {
     const identifier = this.getIdentifier(req);
-    const isAuthenticated = !!(req as any).userId;
+    const isAuthenticated = !!(req as AuthenticatedRequest).userId;
     const limit = isAuthenticated ? this.authenticatedLimit : this.anonymousLimit;
 
     const now = Date.now();

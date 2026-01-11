@@ -8,6 +8,7 @@ import { config } from '../config';
 import type { ForgeResponse, ForgeError, ReleaseResponse } from '../types';
 import type { AuthenticatedRequest } from '../middleware/auth';
 import { createClient } from '@supabase/supabase-js';
+import type { Database } from '../types/supabase';
 import { z } from 'zod';
 
 const forgeRequestSchema = z.object({
@@ -35,7 +36,7 @@ export class ForgeController {
   constructor() {
     this.imageGen = new ImageGenAdapter();
     this.storage = new StorageAdapter();
-    this.supabase = createClient(config.supabase.url, config.supabase.serviceRoleKey);
+    this.supabase = createClient<Database>(config.supabase.url, config.supabase.serviceRoleKey);
     this.moderation = new ModerationService();
     this.similarity = new SimilarityService();
   }
@@ -203,7 +204,7 @@ export class ForgeController {
         });
         imageBytes = imageResult.imageBytes;
         modelMeta = imageResult.modelMeta;
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error('Image generation failed:', error);
         res.status(500).json({
           error: 'Artifact unstable. Retry.',
@@ -216,7 +217,7 @@ export class ForgeController {
       let previewResult;
       try {
         previewResult = await this.storage.storePreview(imageBytes);
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error('Preview storage failed:', error);
         res.status(500).json({
           error: 'Failed to store preview',
@@ -272,7 +273,7 @@ export class ForgeController {
       console.log(`[FORGE] generation_id=${previewResult.generationId}, preset=${preset}, base_id=${base_id}, latency=${latency}ms`);
 
       res.status(200).json(response);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Forge error:', error);
       res.status(500).json({
         error: 'Artifact unstable. Retry.',
@@ -328,7 +329,7 @@ export class ForgeController {
       let previewBytes: Buffer;
       try {
         previewBytes = await this.storage.getPreviewBytes(generation_id);
-      } catch (error: any) {
+      } catch (error: unknown) {
         res.status(404).json({
           error: 'Generation not found or expired',
           code: 'NOT_FOUND',
@@ -398,7 +399,7 @@ export class ForgeController {
           imageBytes: previewBytes,
           userId: req.userId,
         });
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error('Release storage failed:', error);
         res.status(500).json({
           error: 'Failed to release artifact',
@@ -443,7 +444,7 @@ export class ForgeController {
       };
 
       res.status(200).json(response);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Release error:', error);
       res.status(500).json({
         error: 'Failed to release artifact',

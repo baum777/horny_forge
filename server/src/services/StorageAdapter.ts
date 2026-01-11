@@ -55,8 +55,9 @@ export class StorageAdapter {
         previewUrl: data.publicUrl,
         generationId,
       };
-    } catch (error: any) {
-      throw new Error(`Preview storage failed: ${error.message || 'Unknown error'}`);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      throw new Error(`Preview storage failed: ${message}`);
     }
   }
 
@@ -89,8 +90,9 @@ export class StorageAdapter {
         artifactId,
         imageUrl: data.publicUrl,
       };
-    } catch (error: any) {
-      throw new Error(`Artifact release failed: ${error.message || 'Unknown error'}`);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      throw new Error(`Artifact release failed: ${message}`);
     }
   }
 
@@ -111,8 +113,9 @@ export class StorageAdapter {
 
       const arrayBuffer = await data.arrayBuffer();
       return Buffer.from(arrayBuffer);
-    } catch (error: any) {
-      throw new Error(`Failed to retrieve preview: ${error.message || 'Unknown error'}`);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      throw new Error(`Failed to retrieve preview: ${message}`);
     }
   }
 }

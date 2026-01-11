@@ -75,10 +75,10 @@ export class ImageGenAdapter {
         n: 1,
       });
 
-      const imageUrl = response.data[0]?.url;
-      if (!imageUrl) {
+      if (!response.data || response.data.length === 0 || !response.data[0]?.url) {
         throw new Error('No image URL returned from OpenAI');
       }
+      const imageUrl = response.data[0].url;
 
       // Download the generated image
       const imageResponse = await fetch(imageUrl);
@@ -95,7 +95,7 @@ export class ImageGenAdapter {
           size,
         },
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error instanceof Error) {
         throw new Error(`Image generation failed: ${error.message}`);
       }

@@ -1,8 +1,10 @@
 import crypto from 'crypto';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import request from 'supertest';
-import type { RequestHandler } from 'express';
+import type { RequestHandler, Response } from 'express';
 import type { AuthenticatedRequest } from '../middleware/auth';
+import type { ForgeController } from '../controllers/ForgeController';
+import type { Database } from '../types/supabase';
 
 type SupabaseMock = ReturnType<typeof createMockSupabase>;
 
@@ -51,8 +53,8 @@ function createMockSupabase() {
         },
       };
     },
-    rpc(_fn: string, params: Record<string, any>) {
-      const eventId = params.p_event_id as string;
+    rpc(_fn: string, params: Database['public']['Functions']['award_event']['Args']) {
+      const eventId = params.p_event_id;
       const count = awardedEvents.get(eventId) ?? 0;
       awardedEvents.set(eventId, count + 1);
       return Promise.resolve({ data: { noop: count > 0 }, error: null });
@@ -61,7 +63,7 @@ function createMockSupabase() {
 }
 
 class MockForgeController {
-  async forge(req: AuthenticatedRequest, res: any) {
+  async forge(req: AuthenticatedRequest, res: Response) {
     if (!req.userId) {
       res.status(401).json({ error: 'Authentication required', code: 'UNAUTHORIZED' });
       return;
@@ -77,7 +79,7 @@ class MockForgeController {
     res.status(200).json({ ok: true });
   }
 
-  async release(req: AuthenticatedRequest, res: any) {
+  async release(req: AuthenticatedRequest, res: Response) {
     if (!req.userId) {
       res.status(401).json({ error: 'Authentication required', code: 'UNAUTHORIZED' });
       return;
@@ -106,8 +108,17 @@ describe('smoke tests', () => {
     supabaseMock = createMockSupabase();
 
     const eventSeen = new Set<string>();
-    const awardEventMock = async (args: any) => {
-      if (args.type === 'vote_received' && args.proof?.vote_id !== 'vote-1') {
+    type AwardEventArgs = {
+      event_id: string;
+      type: string;
+      actorUserId: string;
+      subject_id?: string;
+      source?: string;
+      metadata?: Record<string, unknown>;
+      proof?: Record<string, unknown>;
+    };
+    const awardEventMock = async (args: AwardEventArgs) => {
+      if (args.type === 'vote_received' && args.proof && typeof args.proof === 'object' && 'vote_id' in args.proof && args.proof.vote_id !== 'vote-1') {
         throw Object.assign(new Error('invalid_vote'), { status: 403, code: 'invalid_vote' });
       }
       if (eventSeen.has(args.event_id)) {
@@ -126,14 +137,14 @@ describe('smoke tests', () => {
     };
 
     app = await createApp({
-      forgeController: new MockForgeController() as any,
+      forgeController: new MockForgeController() as unknown as ForgeController,
       authMiddleware,
       awardEvent: awardEventMock,
-      supabaseAdmin: supabaseMock as any,
+      supabaseAdmin: supabaseMock as unknown as ReturnType<typeof import('@supabase/supabase-js')['createClient']<Database>>,
     });
 
     const originalFetch = globalThis.fetch;
-    const fetchSpy = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+    const fetchSpy = vi.fn(async (input: string | URL, init?: RequestInit) => {
       const url = String(input);
       if (url.includes('api.dexscreener.com')) {
         return new Response(
@@ -242,7 +253,7 @@ describe('smoke tests', () => {
     expect(res1.body.stats).toBeDefined();
     const fetchMock = vi.mocked(globalThis.fetch);
     expect(
-      fetchMock.mock.calls.filter(([input]) => String(input).includes('api.dexscreener.com')).length
+      fetchMock.mock.calls.filter(([input]: [string | URL, RequestInit?]) => String(input).includes('api.dexscreener.com')).length
     ).toBe(1);
   });
 

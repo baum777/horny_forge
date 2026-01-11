@@ -80,12 +80,14 @@ export default function MetaForge() {
           type: 'forge_generate',
         });
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Forge error:', error);
-      if (error?.code === 'UNSAFE_PROMPT' || error?.error === 'unsafe_prompt') {
+      const errorObj = error && typeof error === 'object' && 'code' in error ? error as { code?: string; error?: string } : null;
+      if (errorObj?.code === 'UNSAFE_PROMPT' || errorObj?.error === 'unsafe_prompt') {
         toast.error('Prompt blocked by safety checks. Try a different idea.');
       } else {
-        toast.error(error.error || 'Artifact unstable. Retry.');
+        const errorMessage = errorObj?.error || (error instanceof Error ? error.message : 'Artifact unstable. Retry.');
+        toast.error(errorMessage);
       }
     } finally {
       setIsGenerating(false);
@@ -124,13 +126,14 @@ export default function MetaForge() {
       setTimeout(() => {
         navigate(releaseResponse.redirect_url);
       }, 2000);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Release error:', error);
-      if (error?.code === 'OFF_BRAND' || error?.error === 'off_brand') {
-        setReleaseError(error);
+      const errorObj = error && typeof error === 'object' && 'code' in error ? error as { code?: string; error?: string } : null;
+      if (errorObj?.code === 'OFF_BRAND' || errorObj?.error === 'off_brand') {
+        setReleaseError(error as ReleaseError);
         toast.error('Off-brand artifact. Try again using the suggested base.');
-      } else if (error?.code === 'UNSAFE_PROMPT' || error?.error === 'unsafe_prompt') {
-        setReleaseError(error);
+      } else if (errorObj?.code === 'UNSAFE_PROMPT' || errorObj?.error === 'unsafe_prompt') {
+        setReleaseError(error as ReleaseError);
         toast.error('Release blocked by safety checks.');
       } else {
         toast.error('Failed to release artifact. Try again.');

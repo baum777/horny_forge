@@ -195,15 +195,15 @@ export function FloatingImages(props: {
             width: `${it.w}px`,
             aspectRatio: `${it.ar}`,
             zIndex: it.z,
-            ["--op" as any]: `${it.op}`,
-            ["--s0" as any]: `${it.s0}`,
-            ["--s1" as any]: `${it.s1}`,
-            ["--s2" as any]: `${it.s2}`,
+            '--op': `${it.op}`,
+            '--s0': `${it.s0}`,
+            '--s1': `${it.s1}`,
+            '--s2': `${it.s2}`,
             opacity: 0,
             transform: `scale(${it.s0})`,
             transformOrigin: "center",
             animation: `horny-breathe ${it.dur}ms cubic-bezier(.2,.8,.2,1) ${it.delay}ms 1 forwards`,
-          }}
+          } as React.CSSProperties & Record<`--${string}`, string>}
         >
           <img
             src={it.src}
