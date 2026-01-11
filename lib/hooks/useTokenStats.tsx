@@ -1,6 +1,7 @@
+"use client";
+
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
-import { fetchDexScreenerTokenStats, type TokenStats } from "lib/tokenData/dexscreener";
-import { fetchHoldersCount } from "lib/tokenData/holders";
+import type { TokenStats } from "../tokenData/dexscreener";
 
 type TokenStatsContextValue = {
   stats: TokenStats;
@@ -21,11 +22,6 @@ type CachedPayload = {
 };
 
 let inMemoryCache: CachedPayload | null = null;
-
-function getEnvString(key: string): string | null {
-  const v = (import.meta.env as Record<string, unknown>)[key];
-  return typeof v === "string" && v.trim().length > 0 ? v : null;
-}
 
 function getInitialCached(): CachedPayload | null {
   if (inMemoryCache) return inMemoryCache;
@@ -64,13 +60,14 @@ function staleify(payload: CachedPayload): CachedPayload {
 }
 
 function emptyStale(): CachedPayload {
+  const fallbackPairUrl = process.env.NEXT_PUBLIC_DEX_LINK ?? "";
   return {
     stats: {
       priceUsd: null,
       fdvUsd: null,
       liquidityUsd: null,
       volume24hUsd: null,
-      pairUrl: getEnvString("NEXT_PUBLIC_DEX_LINK") ?? getEnvString("VITE_DEX_LINK"),
+      pairUrl: fallbackPairUrl,
       updatedAt: new Date().toISOString(),
       isStale: true,
     },
@@ -79,10 +76,8 @@ function emptyStale(): CachedPayload {
 }
 
 export function TokenStatsProvider({ children }: { children: React.ReactNode }) {
-  const tokenMint =
-    getEnvString("NEXT_PUBLIC_TOKEN_MINT") ?? getEnvString("VITE_TOKEN_MINT") ?? "";
-  const fallbackPairUrl =
-    getEnvString("NEXT_PUBLIC_DEX_LINK") ?? getEnvString("VITE_DEX_LINK") ?? "";
+  const tokenMint = process.env.NEXT_PUBLIC_TOKEN_MINT ?? "";
+  const fallbackPairUrl = process.env.NEXT_PUBLIC_DEX_LINK ?? "";
 
   const initial = useMemo(() => getInitialCached() ?? emptyStale(), []);
 
@@ -106,12 +101,14 @@ export function TokenStatsProvider({ children }: { children: React.ReactNode }) 
     inFlight.current = (async () => {
       setLoading(true);
       try {
-        const [stats, holders] = await Promise.all([
-          fetchDexScreenerTokenStats({ tokenMint, fallbackPairUrl }),
-          fetchHoldersCount(),
-        ]);
-
-        const next: CachedPayload = { stats, holders };
+        const res = await fetch("/api/token-stats");
+        if (!res.ok) throw new Error("Failed to fetch token stats");
+        const data = await res.json();
+        
+        const next: CachedPayload = { 
+          stats: data.stats, 
+          holders: data.holders 
+        };
         persistCache(next);
         setPayload(next);
         setError(false);
@@ -153,4 +150,3 @@ export function useTokenStats() {
   if (!ctx) throw new Error("useTokenStats must be used within a TokenStatsProvider");
   return ctx;
 }
-

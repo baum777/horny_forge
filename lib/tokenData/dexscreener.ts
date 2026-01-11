@@ -5,7 +5,6 @@ export type DexPair = {
   marketCap?: number;
   liquidity?: { usd?: number };
   volume?: { h24?: number };
-  // DexScreener often includes this, but we don't rely on it.
   priceChange?: { h24?: number };
 };
 
@@ -38,7 +37,8 @@ export async function fetchDexScreenerTokenStats(params: {
   const res = await fetch(endpoint, { headers: { Accept: "application/json" } });
   if (!res.ok) throw new Error(`DexScreener error: ${res.status}`);
 
-  const pairs = (await res.json()) as DexPair[];
+  const data = await res.json();
+  const pairs = (data?.pairs ?? []) as DexPair[];
   const best =
     pairs?.slice().sort((a, b) => {
       const la = toNumber(a?.liquidity?.usd) ?? 0;
@@ -58,4 +58,3 @@ export async function fetchDexScreenerTokenStats(params: {
     isStale: false,
   };
 }
-

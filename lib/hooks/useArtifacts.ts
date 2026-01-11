@@ -1,6 +1,8 @@
+"use client";
+
 import { useCallback, useEffect, useState } from "react";
 import type { Artifact, SortOption } from "@/lib/archives/types";
-import { fetchArtifactById, fetchArtifacts } from "lib/supabase/queries";
+import { supabase } from "@/lib/supabase/client";
 
 interface UseArtifactsOptions {
   sort?: SortOption;
@@ -24,14 +26,29 @@ export function useArtifacts(options: UseArtifactsOptions = {}) {
       setLoading(true);
       setError(null);
 
-      const { data, error: fetchError } = await fetchArtifacts({
-        sort,
-        tag,
-        search,
-        authorId,
-        limit,
-        page: pageNum,
-      });
+      let query = supabase.from("artifacts").select("*");
+
+      if (authorId) query = query.eq("author_id", authorId);
+      if (tag) query = query.contains("tags", [tag]);
+      if (search) {
+        query = query.or(`caption.ilike.%${search}%,author_handle.ilike.%${search}%`);
+      }
+
+      if (sort === "newest") {
+        query = query.order("created_at", { ascending: false });
+      } else if (sort === "top24h") {
+        const cutoff = new Date();
+        cutoff.setHours(cutoff.getHours() - 24);
+        query = query.gte("created_at", cutoff.toISOString()).order("votes_count", {
+          ascending: false,
+        });
+      } else if (sort === "topAll") {
+        query = query.order("votes_count", { ascending: false });
+      }
+
+      const from = pageNum * limit;
+      const to = from + limit - 1;
+      const { data, error: fetchError } = await query.range(from, to);
 
       if (fetchError) {
         setError(fetchError.message);
@@ -39,8 +56,8 @@ export function useArtifacts(options: UseArtifactsOptions = {}) {
         return;
       }
 
-      setArtifacts((prev) => (append ? [...prev, ...data] : data));
-      setHasMore(data.length === limit);
+      setArtifacts((prev) => (append ? [...prev, ...(data ?? [])] : (data ?? [])));
+      setHasMore((data ?? []).length === limit);
       setPage(pageNum);
       setLoading(false);
     },
@@ -78,13 +95,18 @@ export function useArtifact(id: string | undefined) {
     (async () => {
       setLoading(true);
       setError(null);
-      const { data, error: fetchError } = await fetchArtifactById(id);
+      const { data, error: fetchError } = await supabase
+        .from("artifacts")
+        .select("*")
+        .eq("id", id)
+        .single();
+
       if (cancelled) return;
       if (fetchError) {
         setError(fetchError.message);
         setArtifact(null);
       } else {
-        setArtifact(data);
+        setArtifact(data as Artifact);
       }
       setLoading(false);
     })();
@@ -96,4 +118,3 @@ export function useArtifact(id: string | undefined) {
 
   return { artifact, loading, error };
 }
-

@@ -1,3 +1,5 @@
+"use client";
+
 import { useCallback, useEffect, useState } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "lib/supabase/client";
@@ -68,7 +70,7 @@ export function useAuth() {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signInWithTwitter = useCallback(async () => {
+  const loginWithX = useCallback(async () => {
     const redirectUrl = `${window.location.origin}/archives`;
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "twitter",
@@ -77,7 +79,7 @@ export function useAuth() {
     return { error };
   }, []);
 
-  const signOut = useCallback(async () => {
+  const logout = useCallback(async () => {
     const { error } = await supabase.auth.signOut();
     return { error };
   }, []);
@@ -85,11 +87,10 @@ export function useAuth() {
   return {
     user,
     session,
-    archivesUser,
+    profile: archivesUser,
     loading,
-    signInWithTwitter,
-    signOut,
+    loginWithX,
+    logout,
     isAuthenticated: !!user,
   };
 }
-
