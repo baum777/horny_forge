@@ -15,6 +15,7 @@ import ArtifactDetail from "./pages/ArtifactDetail";
 import Profile from "./pages/Profile";
 import GamificationDemo from "./pages/GamificationDemo";
 import NotFound from "./pages/NotFound";
+import GamificationDemo from "./pages/GamificationDemo";
 
 const queryClient = new QueryClient();
 
