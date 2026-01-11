@@ -31,11 +31,40 @@ export const config = {
   },
 };
 
-// Validate required config
-if (!config.openai.apiKey) {
-  console.warn('⚠️  OPENAI_API_KEY not set');
+type RequiredEnvOptions = {
+  allowMissingOpenAi?: boolean;
+};
+
+function resolveTokenIdentifier() {
+  return (
+    process.env.TOKEN_MINT ||
+    process.env.NEXT_PUBLIC_TOKEN_MINT ||
+    process.env.VITE_TOKEN_MINT ||
+    process.env.TOKEN_PAIR ||
+    process.env.DEX_LINK ||
+    process.env.NEXT_PUBLIC_DEX_LINK ||
+    process.env.VITE_DEX_LINK ||
+    ''
+  );
 }
 
-if (!config.supabase.url || !config.supabase.serviceRoleKey) {
-  console.warn('⚠️  Supabase credentials not set');
+export function validateRequiredEnv(options: RequiredEnvOptions = {}) {
+  const missing: string[] = [];
+
+  if (!process.env.SUPABASE_URL) missing.push('SUPABASE_URL');
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) missing.push('SUPABASE_SERVICE_ROLE_KEY');
+  if (!process.env.SHARE_TOKEN_SECRET) missing.push('SHARE_TOKEN_SECRET');
+  if (!process.env.SITE_URL) missing.push('SITE_URL');
+
+  if (!options.allowMissingOpenAi && !process.env.OPENAI_API_KEY) {
+    missing.push('OPENAI_API_KEY');
+  }
+
+  if (!resolveTokenIdentifier()) {
+    missing.push('TOKEN_MINT or TOKEN_PAIR/DEX_LINK');
+  }
+
+  if (missing.length > 0) {
+    throw new Error(`Missing required environment variables: ${missing.join(', ')}`);
+  }
 }

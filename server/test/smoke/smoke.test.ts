@@ -1,66 +1,22 @@
 import crypto from 'crypto';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import request from 'supertest';
-import type { RequestHandler, Response } from 'express';
-import type { AuthenticatedRequest } from '../middleware/auth';
-import type { ForgeController } from '../controllers/ForgeController';
-import type { Database } from '../types/supabase';
+import type { Response } from 'express';
+import type { AuthenticatedRequest } from '../../src/middleware/auth';
+import type { ForgeController } from '../../src/controllers/ForgeController';
+import type { Database } from '../../src/types/supabase';
+import {
+  createAwardEventMock,
+  createMockSupabase,
+  createTestAuthMiddleware,
+  createTestSession,
+  createTestState,
+  generateShareToken,
+  insertArtifact,
+  insertVote,
+} from '../helpers';
 
 type SupabaseMock = ReturnType<typeof createMockSupabase>;
-
-function createMockSupabase() {
-  const artifacts = new Map([
-    [
-      'artifact-1',
-      {
-        id: 'artifact-1',
-        caption: 'Cosmic Relic',
-        author_handle: 'tester',
-        image_url: 'https://cdn.example.com/artifact-1.png',
-      },
-    ],
-  ]);
-  const awardedEvents = new Map<string, number>();
-
-  return {
-    awardedEvents,
-    from(table: string) {
-      if (table !== 'artifacts') {
-        return {
-          select() {
-            return this;
-          },
-          eq() {
-            return this;
-          },
-          maybeSingle() {
-            return Promise.resolve({ data: null, error: null });
-          },
-        };
-      }
-
-      let id: string | null = null;
-      return {
-        select() {
-          return this;
-        },
-        eq(_column: string, value: string) {
-          id = value;
-          return this;
-        },
-        maybeSingle() {
-          return Promise.resolve({ data: id ? artifacts.get(id) ?? null : null, error: null });
-        },
-      };
-    },
-    rpc(_fn: string, params: Database['public']['Functions']['award_event']['Args']) {
-      const eventId = params.p_event_id;
-      const count = awardedEvents.get(eventId) ?? 0;
-      awardedEvents.set(eventId, count + 1);
-      return Promise.resolve({ data: { noop: count > 0 }, error: null });
-    },
-  };
-}
 
 class MockForgeController {
   async forge(req: AuthenticatedRequest, res: Response) {
@@ -97,43 +53,32 @@ class MockForgeController {
 }
 
 describe('smoke tests', () => {
-  let app: Awaited<ReturnType<typeof import('../app')['createApp']>>;
+  let app: Awaited<ReturnType<typeof import('../../src/app')['createApp']>>;
   let supabaseMock: SupabaseMock;
 
   beforeAll(async () => {
     process.env.SHARE_TOKEN_SECRET = 'test-share-secret';
     process.env.TOKEN_STATS_TTL_MS = '60000';
 
-    const { createApp } = await import('../app');
-    supabaseMock = createMockSupabase();
+    const { createApp } = await import('../../src/app');
+    const state = createTestState();
+    supabaseMock = createMockSupabase(state);
 
-    const eventSeen = new Set<string>();
-    const awardEventMock = async (args: {
-      event_id: string;
-      type: string;
-      actorUserId: string;
-      subject_id?: string;
-      source?: string;
-      metadata?: Record<string, unknown>;
-      proof?: Record<string, unknown>;
-    }): Promise<unknown> => {
-      if (args.type === 'vote_received' && args.proof && typeof args.proof === 'object' && 'vote_id' in args.proof && args.proof.vote_id !== 'vote-1') {
-        throw Object.assign(new Error('invalid_vote'), { status: 403, code: 'invalid_vote' });
-      }
-      if (eventSeen.has(args.event_id)) {
-        return { noop: true };
-      }
-      eventSeen.add(args.event_id);
-      return { noop: false };
-    };
+    insertArtifact(state, {
+      id: 'artifact-1',
+      caption: 'Cosmic Relic',
+      author_handle: 'tester',
+      image_url: 'https://cdn.example.com/artifact-1.png',
+    });
 
-    const authMiddleware: RequestHandler = (req, _res, next) => {
-      const userId = req.headers['x-test-user'];
-      if (typeof userId === 'string' && userId.length > 0) {
-        (req as AuthenticatedRequest).userId = userId;
-      }
-      next();
-    };
+    insertVote(state, {
+      id: 'vote-1',
+      artifact_id: 'artifact-1',
+      voter_id: 'user-2',
+    });
+
+    const authMiddleware = createTestAuthMiddleware();
+    const awardEventMock = createAwardEventMock(state);
 
     const SupabaseClient = (await import('@supabase/supabase-js')).createClient;
     type SupabaseClientType = ReturnType<typeof SupabaseClient<Database>>;
@@ -176,61 +121,66 @@ describe('smoke tests', () => {
   });
 
   it('forge locked preset/base returns 403', async () => {
+    const session = createTestSession('user-1');
     const res = await request(app)
       .post('/api/forge')
-      .set('x-test-user', 'user-1')
+      .set(session.headers)
       .send({ base_id: 'base-04', preset: 'HORNY_CHAOS_VARIATION', user_input: 'test' });
     expect(res.status).toBe(403);
     expect(res.body.error).toBe('locked');
   });
 
   it('forge quota exceeded returns 429', async () => {
+    const session = createTestSession('user-1');
     const res = await request(app)
       .post('/api/forge')
-      .set('x-test-user', 'user-1')
+      .set(session.headers)
       .set('x-test-quota', 'exceeded')
       .send({ base_id: 'base-01', preset: 'HORNY_CORE_SKETCH', user_input: 'test' });
     expect(res.status).toBe(429);
   });
 
   it('release blocked when moderation fails', async () => {
+    const session = createTestSession('user-1');
     const res = await request(app)
       .post('/api/forge/release')
-      .set('x-test-user', 'user-1')
+      .set(session.headers)
       .set('x-test-moderation', 'fail')
       .send({ generation_id: 'gen-1', tags: ['test'] });
     expect(res.status).toBe(403);
   });
 
   it('release blocked when brand similarity is low', async () => {
+    const session = createTestSession('user-1');
     const res = await request(app)
       .post('/api/forge/release')
-      .set('x-test-user', 'user-1')
+      .set(session.headers)
       .set('x-test-similarity', 'low')
       .send({ generation_id: 'gen-1', tags: ['test'] });
     expect(res.status).toBe(403);
   });
 
   it('duplicate event_id returns noop', async () => {
+    const session = createTestSession('user-1');
     const eventId = crypto.randomUUID();
     const payload = { event_id: eventId, type: 'forge_generate' };
-    await request(app).post('/api/event').set('x-test-user', 'user-1').send(payload);
-    const res = await request(app).post('/api/event').set('x-test-user', 'user-1').send(payload);
+    await request(app).post('/api/event').set(session.headers).send(payload);
+    const res = await request(app).post('/api/event').set(session.headers).send(payload);
     expect(res.status).toBe(200);
     expect(res.body.noop).toBe(true);
   });
 
   it('vote_received without valid vote_id returns 403', async () => {
+    const session = createTestSession('user-1');
     const res = await request(app)
       .post('/api/event')
-      .set('x-test-user', 'user-1')
+      .set(session.headers)
       .send({ event_id: crypto.randomUUID(), type: 'vote_received', proof: { vote_id: 'missing' } });
     expect(res.status).toBe(403);
   });
 
   it('share redirect awards once for valid token', async () => {
-    const { signShareToken } = await import('../utils/signing');
-    const token = signShareToken({ actor_user_id: 'user-1', subject_id: 'artifact-1' });
+    const token = await generateShareToken({ actor_user_id: 'user-1', subject_id: 'artifact-1' });
     await request(app).get(`/s/artifact-1?t=${token}`);
     await request(app).get(`/s/artifact-1?t=${token}`);
     expect(supabaseMock.awardedEvents.size).toBe(1);

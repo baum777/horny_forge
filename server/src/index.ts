@@ -1,5 +1,7 @@
-import { config } from './config';
+import { config, validateRequiredEnv } from './config';
 import { createApp } from './app';
+
+validateRequiredEnv({ allowMissingOpenAi: config.nodeEnv === 'test' });
 
 const app = await createApp();
 
