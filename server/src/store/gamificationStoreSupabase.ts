@@ -36,7 +36,7 @@ export function defaultUserStats(userId: string): UserStats {
 
 interface DbUserStatsRow {
   user_id: string;
-  counts?: Record<string, unknown>;
+  counts?: Record<string, number | string>;
   total_votes_received?: number;
   total_time_seconds?: number;
   quiz_class?: string;
@@ -54,9 +54,17 @@ interface DbUserStatsRow {
 }
 
 function dbToUserStats(row: DbUserStatsRow): UserStats {
+  const counts: Record<string, number> = {};
+  if (row.counts) {
+    for (const [key, value] of Object.entries(row.counts)) {
+      if (typeof value === 'number') {
+        counts[key] = value;
+      }
+    }
+  }
   return {
     userId: row.user_id,
-    counts: row.counts || {},
+    counts,
     totalVotesReceived: row.total_votes_received || 0,
     totalTimeSeconds: row.total_time_seconds || 0,
     quizClass: row.quiz_class,
@@ -106,7 +114,7 @@ function userStatsToDb(stats: UserStats): DbUserStatsInsert {
     degen: stats.degen,
     horny: stats.horny,
     conviction: stats.conviction,
-    counts: stats.counts,
+    counts: stats.counts as Record<string, unknown>,
     total_votes_received: stats.totalVotesReceived,
     total_time_seconds: stats.totalTimeSeconds,
     unlocked_badges: stats.unlockedBadges,

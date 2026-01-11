@@ -58,6 +58,7 @@ export function createShareRouters(supabaseAdmin?: SupabaseAdmin) {
       const payload = verifySignedShareToken(token);
       if (payload && payload.subject_id === artifactId) {
         const eventId = createShareEventId(token, artifactId);
+        // @ts-expect-error - Supabase RPC types are not fully generated
         await client.rpc('award_event', {
           p_event_id: eventId,
           p_actor_user_id: payload.actor_user_id,

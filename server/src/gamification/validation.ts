@@ -87,7 +87,9 @@ export function validateAction(
       const quizCount = userStats.counts['quiz_complete'] || 0;
       if (quizCount >= 1) {
         // Check if last quiz was this week
-        const lastQuizISO = userStats.counts['quiz_last_completed'] as string | undefined;
+        const lastQuizISO = typeof userStats.counts['quiz_last_completed'] === 'string' 
+          ? userStats.counts['quiz_last_completed'] 
+          : undefined;
         if (lastQuizISO) {
           const lastQuiz = new Date(lastQuizISO);
           const now = new Date(nowISO);
