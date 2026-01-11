@@ -3,13 +3,14 @@ import cors from 'cors';
 import { config } from './config';
 import { ForgeController } from './controllers/ForgeController';
 import { authMiddleware } from './middleware/auth';
+import { gamificationRouter } from './routes/gamification';
 
 const app = express();
 const forgeController = new ForgeController();
 
 // Middleware
 app.use(cors({
-  origin: process.env.FRONTEND_URL || '*',
+  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
   credentials: true,
 }));
 app.use(express.json({ limit: '10mb' }));
@@ -29,6 +30,8 @@ app.get('/health', (req, res) => {
 // API Routes
 app.post('/api/forge', (req, res) => forgeController.forge(req as any, res));
 app.post('/api/forge/release', (req, res) => forgeController.release(req as any, res));
+
+app.use('/api/gamification', gamificationRouter);
 
 // Error handling
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
