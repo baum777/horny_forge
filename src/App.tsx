@@ -7,14 +7,16 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { TokenStatsProvider } from "lib/hooks/useTokenStats";
 import { FloatingImages } from "@/components/FloatingImages";
 import { initializeTransparentImages, ALL_PNG_IMAGES } from "@/lib/memePool";
-import Index from "./pages/Index";
-import Interact from "./pages/Interact";
-import Legal from "./pages/Legal";
-import Archives from "./pages/Archives";
-import ArtifactDetail from "./pages/ArtifactDetail";
-import Profile from "./pages/Profile";
-import GamificationDemo from "./pages/GamificationDemo";
-import NotFound from "./pages/NotFound";
+import {
+  Index,
+  Interact,
+  Legal,
+  Archives,
+  ArtifactDetail,
+  Profile,
+  GamificationDemo,
+  NotFound,
+} from "./pages";
 
 const queryClient = new QueryClient();
 
