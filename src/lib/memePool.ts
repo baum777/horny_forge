@@ -5,5 +5,5 @@ const normalizeBase = (base: string): string => {
 
 export const buildMemePoolUrl = (fileName: string): string => {
   const base = normalizeBase(import.meta.env.BASE_URL ?? '/');
-  return `${base}horny-meme-pool/${fileName}`;
+  return `${base}horny_base/${fileName}`;
 };

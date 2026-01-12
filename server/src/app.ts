@@ -41,10 +41,9 @@ export async function createApp(deps: AppDependencies = {}) {
     origin: process.env.FRONTEND_URL || '*',
     credentials: true,
   }));
-  app.use(express.static(path.join(process.cwd(), 'public')));
+  app.use(express.static(path.join(process.cwd(), 'server', 'public')));
   app.use(express.json({ limit: '10mb' }));
   app.use(express.urlencoded({ extended: true }));
-  app.use('/horny_base', express.static(path.join(process.cwd(), 'public', 'horny_base')));
 
   // Trust proxy for accurate IP addresses
   app.set('trust proxy', true);

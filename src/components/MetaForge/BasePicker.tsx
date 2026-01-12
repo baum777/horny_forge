@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { BASE_IMAGE_UNLOCKS, isBaseUnlocked } from 'lib/gamification/eventProcessor';
-import { buildMemePoolUrl } from '@/lib/memePool';
 
 export type BaseSelection = {
   id: string;
@@ -43,7 +42,7 @@ export const BasePicker: React.FC<BasePickerProps> = ({ selectedBase, onSelect, 
           const id = baseIdFromPath(file);
           const unlockLevel = BASE_IMAGE_UNLOCKS[id];
           const locked = !isBaseUnlocked(userLevel, id);
-          const image = buildMemePoolUrl(file);
+          const image = file;
           return {
             id,
             image,

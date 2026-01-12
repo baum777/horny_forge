@@ -11,7 +11,7 @@ import { createClient } from '@supabase/supabase-js';
 import type { Database } from '../types/supabase';
 import { z } from 'zod';
 
-const baseImagePattern = /\/horny-meme-pool\/base-.*\.(png|jpe?g|webp|gif)$/i;
+const baseImagePattern = /\/horny_base\/base-.*\.(png|jpe?g|webp|gif)$/i;
 
 const forgeRequestSchema = z.object({
   base_id: z.string().optional(),
@@ -33,7 +33,7 @@ const forgeRequestSchema = z.object({
   if (data.base_image && !baseImagePattern.test(data.base_image)) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
-      message: 'base_image must be a horny-meme-pool/base-* asset',
+      message: 'base_image must be a horny_base/base-* asset',
       path: ['base_image'],
     });
   }

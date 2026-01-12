@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { FloatingImages } from "./FloatingImages";
-import { buildMemePoolUrl } from "@/lib/memePool";
 
 export default function MemeBackground({
   count = 9,
@@ -19,7 +18,7 @@ export default function MemeBackground({
       .then((data) => {
         if (!active) return;
         const files = Array.isArray(data?.files) ? data.files : [];
-        setImages(files.map((file: string) => buildMemePoolUrl(file)));
+        setImages(files);
       })
       .catch(() => {
         if (!active) return;
