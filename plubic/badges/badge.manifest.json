@@ -1,0 +1,219 @@
+[
+  {
+    "id": "HORN_AWAKENING",
+    "family": "SIGIL",
+    "meaning": "Erstes AI-generiertes Badge erhalten",
+    "visual": "Unicorn-Horn mit Spiral-Glow",
+    "file": "badge_HORN_AWAKENING.png"
+  },
+  {
+    "id": "FIRST_PUMP",
+    "family": "SIGIL",
+    "meaning": "Erstes Artifact veröffentlicht",
+    "visual": "Aufsteigende Chart-Line mit Pfeil",
+    "file": "badge_FIRST_PUMP.png"
+  },
+  {
+    "id": "HORN_SPARK",
+    "family": "SIGIL",
+    "meaning": "Erstes Vote gegeben",
+    "visual": "Kleiner Blitz / Lightning Strike",
+    "file": "badge_HORN_SPARK.png"
+  },
+  {
+    "id": "FIRST_COMMENT",
+    "family": "SIGIL",
+    "meaning": "Erster Kommentar verfasst",
+    "visual": "Sprechblase mit Stern",
+    "file": "badge_FIRST_COMMENT.png"
+  },
+  {
+    "id": "CONNECTOR_HORN",
+    "family": "SIGIL",
+    "meaning": "5 User gefolgt",
+    "visual": "Zwei verbundene Kreise",
+    "file": "badge_CONNECTOR_HORN.png"
+  },
+  {
+    "id": "SHARE_SPARK",
+    "family": "SIGIL",
+    "meaning": "Ersten Share gemacht",
+    "visual": "Pfeil mit Splitting-Lines",
+    "file": "badge_SHARE_SPARK.png"
+  },
+  {
+    "id": "HORNY_HEART",
+    "family": "SIGIL",
+    "meaning": "Valentine's / Love-Themed Content",
+    "visual": "Herz mit Horn durchbohrt",
+    "file": "badge_HORNY_HEART.png"
+  },
+  {
+    "id": "TRENDING_UNICORN",
+    "family": "STAMP",
+    "meaning": "Artifact erreicht 10 Votes",
+    "visual": "Unicorn-Kopf Profil (minimal)",
+    "file": "badge_TRENDING_UNICORN.png"
+  },
+  {
+    "id": "FEED_DOMINATOR",
+    "family": "STAMP",
+    "meaning": "50 Votes – Feed Takeover",
+    "visual": "Dicker Kreis-Stempel mit Inner Glow",
+    "file": "badge_FEED_DOMINATOR.png"
+  },
+  {
+    "id": "VIRAL_HORN",
+    "family": "STAMP",
+    "meaning": "100 Votes – Viral Status",
+    "visual": "Explosions-Stern + Horn",
+    "file": "badge_VIRAL_HORN.png"
+  },
+  {
+    "id": "WHALE_HORN",
+    "family": "STAMP",
+    "meaning": "Top 100 Holder",
+    "visual": "Wal-Silhouette + Horn",
+    "file": "badge_WHALE_HORN.png"
+  },
+  {
+    "id": "NIGHT_RIDER",
+    "family": "STAMP",
+    "meaning": "Post um 3 AM (Degen Hours)",
+    "visual": "Mond + Unicorn-Silhouette",
+    "file": "badge_NIGHT_RIDER.png"
+  },
+  {
+    "id": "HUNDRED_PUMP",
+    "family": "STAMP",
+    "meaning": "100 Artifacts erstellt",
+    "visual": "Drei gestapelte Chart-Lines",
+    "file": "badge_HUNDRED_PUMP.png"
+  },
+  {
+    "id": "LEGENDARY_HORN",
+    "family": "STAMP",
+    "meaning": "1.000 Votes erhalten (Lifetime)",
+    "visual": "Großes Horn mit Triple-Glow",
+    "file": "badge_LEGENDARY_HORN.png"
+  },
+  {
+    "id": "GENESIS_UNICORN",
+    "family": "STAMP",
+    "meaning": "Early Adopter (First 1000 Users)",
+    "visual": "Unicorn in Kreis-Seal",
+    "file": "badge_GENESIS_UNICORN.png"
+  },
+  {
+    "id": "DEGEN_CROWN",
+    "family": "STAMP",
+    "meaning": "Ultimate Degen Status (Custom Unlock)",
+    "visual": "Krone aus Horns",
+    "file": "badge_DEGEN_CROWN.png"
+  },
+  {
+    "id": "RETURN_SPARK",
+    "family": "FRAGMENT",
+    "meaning": "2 Tage aktiv zurückgekehrt",
+    "visual": "1 Fragment (halbe Horn-Outline)",
+    "file": "badge_RETURN_SPARK.png"
+  },
+  {
+    "id": "HORN_COLLECTOR",
+    "family": "FRAGMENT",
+    "meaning": "7 Tage Streak",
+    "visual": "2–3 schwebende Horn-Fragmente",
+    "file": "badge_HORN_COLLECTOR.png"
+  },
+  {
+    "id": "FULL_HORN",
+    "family": "FRAGMENT",
+    "meaning": "30 Tage Streak – Horn Complete",
+    "visual": "Vollständiges Horn (reconnected)",
+    "file": "badge_FULL_HORN.png"
+  },
+  {
+    "id": "CHAOS_SPARK",
+    "family": "FRAGMENT",
+    "meaning": "Random Drop / Easter Egg",
+    "visual": "Chaotische Blitz-Fragmente",
+    "file": "badge_CHAOS_SPARK.png"
+  },
+  {
+    "id": "GLITCH_HORN",
+    "family": "FRAGMENT",
+    "meaning": "Found Secret / Bug Report",
+    "visual": "Zerstückeltes Horn mit Offset",
+    "file": "badge_GLITCH_HORN.png"
+  },
+  {
+    "id": "MOON_RIDER",
+    "family": "OBJECT",
+    "meaning": "25 Votes – To The Moon",
+    "visual": "Unicorn auf Rakete",
+    "file": "badge_MOON_RIDER.png"
+  },
+  {
+    "id": "MONEY_BAG",
+    "family": "OBJECT",
+    "meaning": "Erste Token-Transaktion",
+    "visual": "Geldsack mit $-Symbol",
+    "file": "badge_MONEY_BAG.png"
+  },
+  {
+    "id": "DIAMOND_HOOVES",
+    "family": "OBJECT",
+    "meaning": "10.000 $HORNY gehalten (Diamond Hands)",
+    "visual": "Diamant + Huf-Print",
+    "file": "badge_DIAMOND_HOOVES.png"
+  },
+  {
+    "id": "BLING_UNICORN",
+    "family": "OBJECT",
+    "meaning": "Wallet über 100k $HORNY",
+    "visual": "Unicorn mit Diamant-Kette",
+    "file": "badge_BLING_UNICORN.png"
+  },
+  {
+    "id": "PARTY_UNICORN",
+    "family": "OBJECT",
+    "meaning": "An 5 Live-Events teilgenommen",
+    "visual": "Unicorn mit Party-Hut",
+    "file": "badge_PARTY_UNICORN.png"
+  },
+  {
+    "id": "CROIS_$HORNY",
+    "family": "OBJECT",
+    "meaning": "#Crois$HORNY Content erstellt",
+    "visual": "Croissant-Outline mit Horn",
+    "file": "badge_CROIS_$HORNY.png"
+  },
+  {
+    "id": "EICH_$HORNY",
+    "family": "OBJECT",
+    "meaning": "#Eich$HORNY – Acorn/Oak Theme",
+    "visual": "Eichel (Acorn) mit Horn",
+    "file": "badge_EICH_$HORNY.png"
+  },
+  {
+    "id": "BRAIN_$HORNY",
+    "family": "OBJECT",
+    "meaning": "Brain$HORNY – Deep Thought Content",
+    "visual": "Gehirn-Knoten mit Horn",
+    "file": "badge_BRAIN_$HORNY.png"
+  },
+  {
+    "id": "RAINBOW_RIDER",
+    "family": "OBJECT",
+    "meaning": "Pride Month Participation / Rainbow Content",
+    "visual": "Unicorn auf Regenbogen-Arc",
+    "file": "badge_RAINBOW_RIDER.png"
+  },
+  {
+    "id": "PUMPKIN_HORN",
+    "family": "OBJECT",
+    "meaning": "Halloween Special",
+    "visual": "Kürbis mit Horn",
+    "file": "badge_PUMPKIN_HORN.png"
+  }
+]
