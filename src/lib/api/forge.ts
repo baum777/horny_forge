@@ -1,5 +1,6 @@
 export interface ForgeRequest {
-  base_id: 'base-01' | 'base-02' | 'base-03' | 'base-04';
+  base_id: string;
+  base_image?: string;
   preset: 'HORNY_CORE_SKETCH' | 'HORNY_META_SCENE' | 'HORNY_CHAOS_VARIATION';
   user_input: string;
   seed?: string;

@@ -27,7 +27,7 @@ export const config = {
   },
   
   baseImages: {
-    path: process.env.BASE_IMAGES_PATH || './public/bases',
+    path: process.env.BASE_IMAGES_PATH || './public/horny-meme-pool',
   },
 };
 
