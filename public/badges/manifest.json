@@ -1,0 +1,27 @@
+{
+  "version": "v1",
+  "basePath": "/badges/v1",
+  "badges": {
+    "horn_spark": {
+      "rarity": "common",
+      "file": "common/horn_spark.webp"
+    },
+    "first_pump": {
+      "rarity": "common",
+      "file": "common/first_pump.webp"
+    },
+    "first_comment": {
+      "rarity": "common",
+      "file": "common/first_comment.webp"
+    },
+    "share_spark": {
+      "rarity": "uncommon",
+      "file": "uncommon/share_spark.webp"
+    },
+    "quiz_complete": {
+      "rarity": "uncommon",
+      "file": "uncommon/quiz_complete.webp"
+    }
+  }
+}
+

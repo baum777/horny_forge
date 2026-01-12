@@ -1,8 +1,9 @@
 import { createClient } from '@supabase/supabase-js';
 import { config } from '../../config';
 import { validateEventOrThrow } from './validateEvent';
+import type { Database } from '../../types/supabase';
 
-const supabaseAdmin = createClient(config.supabase.url, config.supabase.serviceRoleKey);
+const supabaseAdmin = createClient<Database>(config.supabase.url, config.supabase.serviceRoleKey);
 
 type AwardArgs = {
   event_id: string;
@@ -14,7 +15,7 @@ type AwardArgs = {
   proof?: Record<string, unknown>;
 };
 
-export async function awardEvent(args: AwardArgs) {
+export async function awardEvent(args: AwardArgs): Promise<unknown> {
   await validateEventOrThrow({
     type: args.type,
     actorUserId: args.actorUserId,
@@ -22,6 +23,7 @@ export async function awardEvent(args: AwardArgs) {
     proof: args.proof,
   });
 
+  // @ts-expect-error - Supabase RPC types are not fully generated
   const { data, error } = await supabaseAdmin.rpc('award_event', {
     p_event_id: args.event_id,
     p_actor_user_id: args.actorUserId,

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { forgeArtifact, releaseArtifact, type ForgeResponse, type ReleaseError } from '@/lib/api/forge';
-import { BasePicker, type BaseId } from './BasePicker';
+import { BasePicker, type BaseSelection } from './BasePicker';
 import { PresetPicker, type PresetId } from './PresetPicker';
 import { ForgeForm } from './ForgeForm';
 import { ForgePreview } from './ForgePreview';
@@ -14,6 +14,7 @@ import { getShareRedirectUrl } from '@/lib/api/share';
 import { useGamification } from '@/hooks/useGamification';
 import { postGamificationEvent } from '@/lib/api/event';
 import { isBaseUnlocked, isPresetUnlocked } from 'lib/gamification/eventProcessor';
+import { clientGamificationEnabled } from '@/lib/gamificationFlags';
 
 export default function MetaForge() {
   const { archivesUser, isAuthenticated } = useAuth();
@@ -21,7 +22,7 @@ export default function MetaForge() {
   const { stats } = useGamification(archivesUser?.id);
 
   // Form State
-  const [selectedBaseId, setSelectedBaseId] = useState<BaseId | null>(null);
+  const [selectedBase, setSelectedBase] = useState<BaseSelection | null>(null);
   const [selectedPreset, setSelectedPreset] = useState<PresetId>('HORNY_CORE_SKETCH');
   const [userInput, setUserInput] = useState('');
   const [caption, setCaption] = useState('');
@@ -34,21 +35,24 @@ export default function MetaForge() {
   const [releasedId, setReleasedId] = useState<string | null>(null);
   const [releaseError, setReleaseError] = useState<ReleaseError | null>(null);
   const userLevel = stats?.level ?? 1;
+  const unlockLevel = clientGamificationEnabled ? userLevel : Number.MAX_SAFE_INTEGER;
 
   useEffect(() => {
-    if (selectedBaseId && !isBaseUnlocked(userLevel, selectedBaseId)) {
-      setSelectedBaseId(null);
+    if (!clientGamificationEnabled) return;
+    if (selectedBase && !isBaseUnlocked(userLevel, selectedBase.id)) {
+      setSelectedBase(null);
     }
-  }, [selectedBaseId, userLevel]);
+  }, [selectedBase, userLevel, clientGamificationEnabled]);
 
   useEffect(() => {
+    if (!clientGamificationEnabled) return;
     if (!isPresetUnlocked(userLevel, selectedPreset)) {
       setSelectedPreset('HORNY_CORE_SKETCH');
     }
-  }, [selectedPreset, userLevel]);
+  }, [selectedPreset, userLevel, clientGamificationEnabled]);
 
   const handleInfuse = async () => {
-    if (!selectedBaseId) {
+    if (!selectedBase) {
       toast.error('Select a base image first.');
       return;
     }
@@ -68,7 +72,8 @@ export default function MetaForge() {
 
     try {
       const result = await forgeArtifact({
-        base_id: selectedBaseId,
+        base_id: selectedBase.id,
+        base_image: selectedBase.image,
         preset: selectedPreset,
         user_input: userInput,
       });
@@ -80,12 +85,14 @@ export default function MetaForge() {
           type: 'forge_generate',
         });
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Forge error:', error);
-      if (error?.code === 'UNSAFE_PROMPT' || error?.error === 'unsafe_prompt') {
+      const errorObj = error && typeof error === 'object' && 'code' in error ? error as { code?: string; error?: string } : null;
+      if (errorObj?.code === 'UNSAFE_PROMPT' || errorObj?.error === 'unsafe_prompt') {
         toast.error('Prompt blocked by safety checks. Try a different idea.');
       } else {
-        toast.error(error.error || 'Artifact unstable. Retry.');
+        const errorMessage = errorObj?.error || (error instanceof Error ? error.message : 'Artifact unstable. Retry.');
+        toast.error(errorMessage);
       }
     } finally {
       setIsGenerating(false);
@@ -124,13 +131,14 @@ export default function MetaForge() {
       setTimeout(() => {
         navigate(releaseResponse.redirect_url);
       }, 2000);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Release error:', error);
-      if (error?.code === 'OFF_BRAND' || error?.error === 'off_brand') {
-        setReleaseError(error);
+      const errorObj = error && typeof error === 'object' && 'code' in error ? error as { code?: string; error?: string } : null;
+      if (errorObj?.code === 'OFF_BRAND' || errorObj?.error === 'off_brand') {
+        setReleaseError(error as ReleaseError);
         toast.error('Off-brand artifact. Try again using the suggested base.');
-      } else if (error?.code === 'UNSAFE_PROMPT' || error?.error === 'unsafe_prompt') {
-        setReleaseError(error);
+      } else if (errorObj?.code === 'UNSAFE_PROMPT' || errorObj?.error === 'unsafe_prompt') {
+        setReleaseError(error as ReleaseError);
         toast.error('Release blocked by safety checks.');
       } else {
         toast.error('Failed to release artifact. Try again.');
@@ -165,15 +173,15 @@ export default function MetaForge() {
         {/* Left Column: Controls */}
         <div className="space-y-10">
           <BasePicker
-            selectedBaseId={selectedBaseId}
-            onSelect={setSelectedBaseId}
-            userLevel={userLevel}
+            selectedBase={selectedBase}
+            onSelect={setSelectedBase}
+            userLevel={unlockLevel}
           />
 
           <PresetPicker
             selectedPreset={selectedPreset}
             onSelect={setSelectedPreset}
-            userLevel={userLevel}
+            userLevel={unlockLevel}
           />
 
           <ForgeForm

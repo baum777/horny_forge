@@ -1,93 +1,120 @@
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { BASE_IMAGE_UNLOCKS, isBaseUnlocked } from 'lib/gamification/eventProcessor';
 
-export const BASES = [
-  {
-    id: 'base-01',
-    title: 'Core Head (Tight Brand)',
-    description: 'Simple unicorn head neon sketch',
-    image: '/bases/base-01-unicorn-head.png',
-    unlockLevel: 1,
-  },
-  {
-    id: 'base-02',
-    title: 'Landscape (Lore Scene)',
-    description: 'Unicorn landscape doodle',
-    image: '/bases/base-02-landscape.png',
-    unlockLevel: 2,
-  },
-  {
-    id: 'base-03',
-    title: 'Holy Ascension (Epic Meme)',
-    description: 'Epic/meme scene example',
-    image: '/bases/base-03-jesus-meme.png',
-    unlockLevel: 3,
-  },
-  {
-    id: 'base-04',
-    title: 'Rocket (Meta Launch)',
-    description: 'Rocket meme example',
-    image: '/bases/base-04-rocket.png',
-    unlockLevel: 5,
-  },
-] as const;
-
-export type BaseId = typeof BASES[number]['id'];
+export type BaseSelection = {
+  id: string;
+  image: string;
+  label: string;
+  locked: boolean;
+  unlockLevel?: number;
+};
 
 interface BasePickerProps {
-  selectedBaseId: BaseId | null;
-  onSelect: (id: BaseId) => void;
+  selectedBase: BaseSelection | null;
+  onSelect: (base: BaseSelection) => void;
   userLevel: number;
 }
 
-export const BasePicker: React.FC<BasePickerProps> = ({ selectedBaseId, onSelect, userLevel }) => {
+const baseIdFromPath = (value: string): string => {
+  const file = value.split('/').pop() ?? value;
+  return file.replace(/\.[^.]+$/, '');
+};
+
+const labelFromPath = (value: string): string => {
+  const file = value.split('/').pop() ?? value;
+  return file;
+};
+
+export const BasePicker: React.FC<BasePickerProps> = ({ selectedBase, onSelect, userLevel }) => {
+  const [options, setOptions] = useState<BaseSelection[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+    setLoading(true);
+
+    fetch('/api/meme-pool')
+      .then((res) => res.json())
+      .then((data) => {
+        if (!active) return;
+        const files = Array.isArray(data?.files) ? data.files : [];
+        const mapped = files.map((file: string) => {
+          const id = baseIdFromPath(file);
+          const unlockLevel = BASE_IMAGE_UNLOCKS[id];
+          const locked = !isBaseUnlocked(userLevel, id);
+          const image = file;
+          return {
+            id,
+            image,
+            label: labelFromPath(file),
+            locked,
+            unlockLevel,
+          } satisfies BaseSelection;
+        });
+
+        setOptions(mapped);
+      })
+      .catch(() => {
+        if (!active) return;
+        setOptions([]);
+      })
+      .finally(() => {
+        if (!active) return;
+        setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [userLevel]);
+
+  const unlockedOptions = useMemo(() => options.filter((option) => !option.locked), [options]);
+
+  useEffect(() => {
+    if (!selectedBase && unlockedOptions.length > 0) {
+      onSelect(unlockedOptions[0]);
+    }
+  }, [selectedBase, unlockedOptions, onSelect]);
+
+  const currentValue = selectedBase?.image ?? '';
+
   return (
     <div className="space-y-3">
       <label className="text-sm font-semibold block">Choose Base</label>
-      <div className="grid grid-cols-2 gap-3">
-        {BASES.map((base) => {
-          const isLocked = userLevel < base.unlockLevel;
-          return (
-            <button
-              key={base.id}
-              onClick={() => {
-                if (!isLocked) onSelect(base.id);
-              }}
-              disabled={isLocked}
-              title={isLocked ? `Unlock at Level ${base.unlockLevel}` : base.title}
-              className={`relative p-2 rounded-lg text-left transition-all border-2 overflow-hidden group ${
-                selectedBaseId === base.id && !isLocked
-                  ? 'border-transparent'
-                  : 'border-transparent bg-muted/50 hover:bg-muted'
-              } ${isLocked ? 'opacity-60 cursor-not-allowed' : ''}`}
-            >
-              {selectedBaseId === base.id && !isLocked && (
-                <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 via-orange-500 to-yellow-400 animate-gradient-x -z-10" />
-              )}
-              <div className={`p-2 rounded-md h-full bg-background/90 ${selectedBaseId === base.id && !isLocked ? 'backdrop-blur-sm' : ''}`}>
-                <div className="aspect-square rounded-md mb-2 overflow-hidden bg-black border border-white/10 relative">
-                  <img
-                    src={base.image}
-                    alt={base.title}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = 'https://placehold.co/400x400/000000/FFFFFF?text=' + base.id;
-                    }}
-                  />
-                  {isLocked && (
-                    <div className="absolute inset-0 bg-black/70 flex items-center justify-center text-[10px] uppercase tracking-widest text-primary">
-                      Unlock at Level {base.unlockLevel}
-                    </div>
-                  )}
-                </div>
-                <h4 className="text-xs font-bold leading-tight truncate">{base.title}</h4>
-                <p className="text-[10px] text-muted-foreground leading-tight line-clamp-1">
-                  {base.description}
-                </p>
-              </div>
-            </button>
-          );
-        })}
-      </div>
+      <select
+        className="w-full rounded-lg border border-white/10 bg-muted/40 px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400/70"
+        disabled={loading || options.length === 0}
+        value={currentValue}
+        onChange={(event) => {
+          const next = options.find((option) => option.image === event.target.value);
+          if (next && !next.locked) {
+            onSelect(next);
+          }
+        }}
+      >
+        {loading && <option>Loading...</option>}
+        {!loading && options.length === 0 && <option>No base images found</option>}
+        {options.map((option) => (
+          <option key={option.image} value={option.image} disabled={option.locked}>
+            {option.label}
+            {option.locked && option.unlockLevel ? ` (unlock at lvl ${option.unlockLevel})` : option.locked ? ' (locked)' : ''}
+          </option>
+        ))}
+      </select>
+
+      {selectedBase && (
+        <div className="flex items-center gap-4 rounded-lg border border-white/10 bg-muted/30 p-3">
+          <img
+            src={selectedBase.image}
+            alt={selectedBase.label}
+            className="h-20 w-20 rounded-lg object-cover"
+          />
+          <div>
+            <div className="text-xs font-semibold">{selectedBase.label}</div>
+            <div className="text-[10px] text-muted-foreground break-all">{selectedBase.image}</div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

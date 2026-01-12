@@ -10,6 +10,27 @@ import {
   BASE_IMAGES,
 } from '../constants';
 
+const STYLE_DISALLOWED_TERMS = [
+  'photorealism',
+  'photorealistic',
+  'photo-realistic',
+  'hyperrealistic',
+  'hyper-realistic',
+];
+
+const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+const normalizeStyleHints = (input: string): string => {
+  let output = input;
+
+  for (const term of STYLE_DISALLOWED_TERMS) {
+    const regex = new RegExp(escapeRegExp(term), 'gi');
+    output = output.replace(regex, 'illustrated');
+  }
+
+  return output;
+};
+
 export class PromptEngine {
   /**
    * Sanitizes user input: normalizes whitespace, blocks forbidden content, truncates if needed.
@@ -29,6 +50,9 @@ export class PromptEngine {
 
     // Normalize whitespace
     sanitized = sanitized.replace(/\s+/g, ' ');
+    const beforeStyleNormalization = sanitized;
+    sanitized = normalizeStyleHints(sanitized);
+    const styleSanitized = sanitized !== beforeStyleNormalization;
 
     // Check length
     if (sanitized.length > MAX_INPUT_LENGTH) {
@@ -72,14 +96,14 @@ export class PromptEngine {
       return {
         sanitized: DEFAULT_CONCEPT,
         negativeTerms: foundForbidden,
-        status: foundForbidden.length > 0 ? 'rejected' : 'ok',
+        status: foundForbidden.length > 0 ? 'rejected' : styleSanitized ? 'sanitized' : 'ok',
       };
     }
 
     return {
       sanitized,
       negativeTerms: foundForbidden,
-      status: foundForbidden.length > 0 ? 'sanitized' : 'ok',
+      status: foundForbidden.length > 0 ? 'sanitized' : styleSanitized ? 'sanitized' : 'ok',
     };
   }
 
@@ -94,10 +118,10 @@ export class PromptEngine {
     const { preset, sanitizedInput, baseId } = params;
 
     const presetBlock = PRESETS[preset].guardrailBlock;
-    const baseDescription = BASE_IMAGES[baseId].description;
+    const baseDescription = BASE_IMAGES[baseId]?.description ?? 'Selected base image from the meme pool.';
 
     // Build concept summary
-    const conceptSummary = `Surreal horny-meta meme scene: ${sanitizedInput}. Unicorn character infused with the concept, drawn in neon-yellow sketch doodle style on black background.`;
+    const conceptSummary = `Surreal horny-meta meme scene: ${sanitizedInput}. ${baseDescription}`;
 
     // Build final prompt
     const finalPrompt = `${BRAND_DNA_BLOCK} ${presetBlock} Create a surreal horny-meta meme scene: ${sanitizedInput}. The unicorn character from the base image should be infused with this concept, maintaining the exact same character identity (head shape, dot eyes, rainbow horn always visible). Everything must be drawn in the same neon-yellow glowing sketch doodle style on a black background. High contrast, meme readability, clean silhouette, square composition.`;
@@ -123,7 +147,7 @@ export class PromptEngine {
     preset: Preset;
     userInput: string;
     baseId: BaseId;
-  }): PromptBuilderOutput & { negativeTerms: string[] } {
+  }): PromptBuilderOutput {
     const sanitizeResult = this.sanitizeInput(params.userInput);
     const promptResult = this.build({
       preset: params.preset,
@@ -143,4 +167,3 @@ export class PromptEngine {
     };
   }
 }
-

@@ -1,4 +1,5 @@
 // localStorage helpers with type safety
+import { clientGamificationEnabled } from '@/lib/gamificationFlags';
 
 const STORAGE_KEYS = {
   USER: 'horny_user',
@@ -86,9 +87,14 @@ export const getQuizResult = () => getItem<QuizResult>(STORAGE_KEYS.QUIZ_RESULT)
 export const setQuizResult = (result: QuizResult) => setItem(STORAGE_KEYS.QUIZ_RESULT, result);
 
 // Badges
-export const getBadges = () => getItem<Record<string, Badge>>(STORAGE_KEYS.BADGES) || {};
-export const setBadges = (badges: Record<string, Badge>) => setItem(STORAGE_KEYS.BADGES, badges);
+export const getBadges = () =>
+  clientGamificationEnabled ? getItem<Record<string, Badge>>(STORAGE_KEYS.BADGES) || {} : {};
+export const setBadges = (badges: Record<string, Badge>) => {
+  if (!clientGamificationEnabled) return;
+  setItem(STORAGE_KEYS.BADGES, badges);
+};
 export const unlockBadge = (id: string) => {
+  if (!clientGamificationEnabled) return false;
   const badges = getBadges();
   if (!badges[id]?.unlockedAt) {
     badges[id] = { id, unlockedAt: new Date().toISOString() };
@@ -113,9 +119,14 @@ export const setFOMOAlert = (alert: FOMOAlert) => setItem(STORAGE_KEYS.FOMO_ALER
 export const clearFOMOAlert = () => removeItem(STORAGE_KEYS.FOMO_ALERT);
 
 // Horny Meter
-export const getHornyMeter = () => getItem<number>(STORAGE_KEYS.HORNY_METER) || 0;
-export const setHornyMeter = (value: number) => setItem(STORAGE_KEYS.HORNY_METER, Math.min(100, Math.max(0, value)));
+export const getHornyMeter = () =>
+  clientGamificationEnabled ? getItem<number>(STORAGE_KEYS.HORNY_METER) || 0 : 0;
+export const setHornyMeter = (value: number) => {
+  if (!clientGamificationEnabled) return;
+  setItem(STORAGE_KEYS.HORNY_METER, Math.min(100, Math.max(0, value)));
+};
 export const addToHornyMeter = (amount: number) => {
+  if (!clientGamificationEnabled) return 0;
   const current = getHornyMeter();
   setHornyMeter(current + amount);
   return Math.min(100, current + amount);

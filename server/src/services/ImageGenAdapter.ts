@@ -7,6 +7,7 @@ import type { BaseId } from '../types';
 
 export interface ImageGenParams {
   baseId: BaseId;
+  baseImagePath?: string;
   finalPrompt: string;
   size?: '1024x1024';
 }
@@ -32,9 +33,15 @@ export class ImageGenAdapter {
   /**
    * Loads base image from filesystem.
    */
-  private async loadBaseImage(baseId: BaseId): Promise<Buffer> {
+  private async loadBaseImage(baseId: BaseId, baseImagePath?: string): Promise<Buffer> {
+    if (baseImagePath) {
+      const fileName = path.basename(baseImagePath);
+      const basePath = path.join(config.baseImages.path, fileName);
+      return fs.readFile(basePath);
+    }
+
     const baseInfo = BASE_IMAGES[baseId];
-    const basePath = path.join(config.baseImages.path, baseInfo.file);
+    const basePath = baseInfo ? path.join(config.baseImages.path, baseInfo.file) : path.join(config.baseImages.path, `${baseId}.png`);
 
     try {
       const imageBytes = await fs.readFile(basePath);
@@ -49,11 +56,11 @@ export class ImageGenAdapter {
    * Uses image edit/variation API with the base image.
    */
   async generate(params: ImageGenParams): Promise<ImageGenResult> {
-    const { baseId, finalPrompt, size = '1024x1024' } = params;
+    const { baseId, baseImagePath, finalPrompt, size = '1024x1024' } = params;
 
     try {
       // Load base image
-      const baseImageBytes = await this.loadBaseImage(baseId);
+      const baseImageBytes = await this.loadBaseImage(baseId, baseImagePath);
 
       // Create a temporary mask (transparent or same as base for variation)
       // For DALL·E image edit, we need base image + optional mask
@@ -75,10 +82,10 @@ export class ImageGenAdapter {
         n: 1,
       });
 
-      const imageUrl = response.data[0]?.url;
-      if (!imageUrl) {
+      if (!response.data || response.data.length === 0 || !response.data[0]?.url) {
         throw new Error('No image URL returned from OpenAI');
       }
+      const imageUrl = response.data[0].url;
 
       // Download the generated image
       const imageResponse = await fetch(imageUrl);
@@ -95,7 +102,7 @@ export class ImageGenAdapter {
           size,
         },
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error instanceof Error) {
         throw new Error(`Image generation failed: ${error.message}`);
       }
@@ -103,4 +110,3 @@ export class ImageGenAdapter {
     }
   }
 }
-

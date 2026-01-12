@@ -8,15 +8,35 @@ import { config } from '../config';
 import type { ForgeResponse, ForgeError, ReleaseResponse } from '../types';
 import type { AuthenticatedRequest } from '../middleware/auth';
 import { createClient } from '@supabase/supabase-js';
+import type { Database } from '../types/supabase';
 import { z } from 'zod';
 
+const baseImagePattern = /\/horny_base\/base-.*\.(png|jpe?g|webp|gif)$/i;
+
 const forgeRequestSchema = z.object({
-  base_id: z.enum(['base-01', 'base-02', 'base-03', 'base-04']),
+  base_id: z.string().optional(),
+  base_image: z.string().optional(),
   preset: z.enum(['HORNY_CORE_SKETCH', 'HORNY_META_SCENE', 'HORNY_CHAOS_VARIATION']),
   user_input: z.string().min(1).max(240),
   size: z.enum(['1024x1024']).optional(),
   seed: z.string().optional(),
   debug: z.boolean().optional(),
+}).superRefine((data, ctx) => {
+  if (!data.base_id && !data.base_image) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'base_id or base_image is required',
+      path: ['base_id'],
+    });
+  }
+
+  if (data.base_image && !baseImagePattern.test(data.base_image)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'base_image must be a horny_base/base-* asset',
+      path: ['base_image'],
+    });
+  }
 });
 
 const releaseRequestSchema = z.object({
@@ -35,7 +55,7 @@ export class ForgeController {
   constructor() {
     this.imageGen = new ImageGenAdapter();
     this.storage = new StorageAdapter();
-    this.supabase = createClient(config.supabase.url, config.supabase.serviceRoleKey);
+    this.supabase = createClient<Database>(config.supabase.url, config.supabase.serviceRoleKey);
     this.moderation = new ModerationService();
     this.similarity = new SimilarityService();
   }
@@ -65,6 +85,7 @@ export class ForgeController {
     }
 
     if (!data) {
+      // @ts-expect-error - Supabase table types are not fully generated
       const { error: insertError } = await this.supabase.from('user_stats').insert({
         user_id: userId,
         xp_total: 0,
@@ -76,6 +97,7 @@ export class ForgeController {
       return 1;
     }
 
+    // @ts-expect-error - Supabase table types are not fully generated
     return data.level ?? 1;
   }
 
@@ -84,6 +106,7 @@ export class ForgeController {
     key: string;
     limit: number;
   }): Promise<{ allowed: boolean; remaining: number }> {
+    // @ts-expect-error - Supabase RPC types are not fully generated
     const { data, error } = await this.supabase.rpc('check_and_consume_quota', {
       p_user_id: params.userId,
       p_key: params.key,
@@ -95,7 +118,9 @@ export class ForgeController {
     }
 
     return {
+      // @ts-expect-error - Supabase RPC types are not fully generated
       allowed: !!data?.allowed,
+      // @ts-expect-error - Supabase RPC types are not fully generated
       remaining: typeof data?.remaining === 'number' ? data.remaining : 0,
     };
   }
@@ -148,10 +173,26 @@ export class ForgeController {
         return;
       }
 
-      const { base_id, preset, user_input, size = '1024x1024', debug = false } = validationResult.data;
+      const { base_id, base_image, preset, user_input, size = '1024x1024', debug = false } = validationResult.data;
+
+      let resolvedBaseId = base_id;
+      const resolvedBaseImage = base_image;
+
+      if (resolvedBaseImage) {
+        const fileName = resolvedBaseImage.split('/').pop();
+        resolvedBaseId = fileName ? fileName.replace(/\.[^.]+$/, '') : resolvedBaseId;
+      }
+
+      if (!resolvedBaseId) {
+        res.status(400).json({
+          error: 'Invalid input',
+          code: 'INVALID_INPUT',
+        });
+        return;
+      }
 
       const userLevel = await this.getUserLevel(req.userId);
-      this.ensureUnlocked(userLevel, base_id, preset);
+      this.ensureUnlocked(userLevel, resolvedBaseId, preset);
 
       const quota = await this.checkQuota({
         userId: req.userId,
@@ -171,7 +212,7 @@ export class ForgeController {
       const promptResult = PromptEngine.process({
         preset,
         userInput: user_input,
-        baseId: base_id,
+        baseId: resolvedBaseId,
       });
 
       // Check if prompt was rejected
@@ -197,13 +238,14 @@ export class ForgeController {
       let modelMeta: { model: string; size: string };
       try {
         const imageResult = await this.imageGen.generate({
-          baseId: base_id,
+          baseId: resolvedBaseId,
+          baseImagePath: resolvedBaseImage,
           finalPrompt: promptResult.final_prompt,
           size,
         });
         imageBytes = imageResult.imageBytes;
         modelMeta = imageResult.modelMeta;
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error('Image generation failed:', error);
         res.status(500).json({
           error: 'Artifact unstable. Retry.',
@@ -216,7 +258,7 @@ export class ForgeController {
       let previewResult;
       try {
         previewResult = await this.storage.storePreview(imageBytes);
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error('Preview storage failed:', error);
         res.status(500).json({
           error: 'Failed to store preview',
@@ -226,10 +268,11 @@ export class ForgeController {
       }
 
       const safetyCheckedAt = new Date().toISOString();
+      // @ts-expect-error - Supabase table types are not fully generated
       const { error: previewDbError } = await this.supabase.from('forge_previews').insert({
         generation_id: previewResult.generationId,
         user_id: req.userId,
-        base_id,
+        base_id: resolvedBaseId,
         preset,
         moderation_status: moderationResult.status,
         moderation_reasons: moderationResult.reasons,
@@ -248,7 +291,7 @@ export class ForgeController {
       // Build response
       const response: ForgeResponse = {
         generation_id: previewResult.generationId,
-        base_id,
+        base_id: resolvedBaseId,
         preset,
         sanitized_input: promptResult.sanitized_input,
         image_url: previewResult.previewUrl,
@@ -269,10 +312,10 @@ export class ForgeController {
 
       // Log telemetry
       const latency = Date.now() - startTime;
-      console.log(`[FORGE] generation_id=${previewResult.generationId}, preset=${preset}, base_id=${base_id}, latency=${latency}ms`);
+      console.log(`[FORGE] generation_id=${previewResult.generationId}, preset=${preset}, base_id=${resolvedBaseId}, latency=${latency}ms`);
 
       res.status(200).json(response);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Forge error:', error);
       res.status(500).json({
         error: 'Artifact unstable. Retry.',
@@ -328,7 +371,7 @@ export class ForgeController {
       let previewBytes: Buffer;
       try {
         previewBytes = await this.storage.getPreviewBytes(generation_id);
-      } catch (error: any) {
+      } catch (error: unknown) {
         res.status(404).json({
           error: 'Generation not found or expired',
           code: 'NOT_FOUND',
@@ -351,6 +394,7 @@ export class ForgeController {
         return;
       }
 
+      // @ts-expect-error - Supabase table types are not fully generated
       if (!previewRecord || previewRecord.moderation_status !== 'pass') {
         res.status(403).json({
           error: 'unsafe_prompt',
@@ -364,6 +408,7 @@ export class ForgeController {
 
       const { error: previewUpdateError } = await this.supabase
         .from('forge_previews')
+        // @ts-expect-error - Supabase table types are not fully generated
         .update({
           brand_similarity: similarityResult.similarity,
           base_match_id: similarityResult.baseMatchId,
@@ -398,7 +443,7 @@ export class ForgeController {
           imageBytes: previewBytes,
           userId: req.userId,
         });
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error('Release storage failed:', error);
         res.status(500).json({
           error: 'Failed to release artifact',
@@ -410,6 +455,7 @@ export class ForgeController {
       // Insert artifact into database
       const { data: artifact, error: dbError } = await this.supabase
         .from('artifacts')
+        // @ts-expect-error - Supabase table types are not fully generated
         .insert({
           id: releaseResult.artifactId,
           image_url: releaseResult.imageUrl,
@@ -418,7 +464,9 @@ export class ForgeController {
           author_id: req.userId,
           author_handle: req.userHandle || null,
           author_avatar: req.userAvatar || null,
+          // @ts-expect-error - Supabase table types are not fully generated
           moderation_status: previewRecord.moderation_status,
+          // @ts-expect-error - Supabase table types are not fully generated
           moderation_reasons: previewRecord.moderation_reasons,
           brand_similarity: similarityResult.similarity,
           base_match_id: similarityResult.baseMatchId,
@@ -437,13 +485,15 @@ export class ForgeController {
       }
 
       const response: ReleaseResponse = {
+        // @ts-expect-error - Supabase table types are not fully generated
         artifact_id: artifact.id,
         image_url: releaseResult.imageUrl,
+        // @ts-expect-error - Supabase table types are not fully generated
         redirect_url: `/archives/${artifact.id}`,
       };
 
       res.status(200).json(response);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Release error:', error);
       res.status(500).json({
         error: 'Failed to release artifact',

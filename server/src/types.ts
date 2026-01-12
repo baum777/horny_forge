@@ -1,9 +1,10 @@
-export type BaseId = 'base-01' | 'base-02' | 'base-03' | 'base-04';
+export type BaseId = string;
 
 export type Preset = 'HORNY_CORE_SKETCH' | 'HORNY_META_SCENE' | 'HORNY_CHAOS_VARIATION';
 
 export interface ForgeRequest {
-  base_id: BaseId;
+  base_id?: BaseId;
+  base_image?: string;
   preset: Preset;
   user_input: string;
   size?: '1024x1024';
@@ -30,8 +31,11 @@ export interface ForgeResponse {
 
 export interface ForgeError {
   error: string;
-  code: 'INVALID_INPUT' | 'UNAUTHORIZED' | 'RATE_LIMIT' | 'PROMPT_REJECTED' | 'UNSAFE_PROMPT' | 'GEN_FAIL' | 'STORAGE_FAIL';
+  code: 'INVALID_INPUT' | 'UNAUTHORIZED' | 'RATE_LIMIT' | 'PROMPT_REJECTED' | 'UNSAFE_PROMPT' | 'GEN_FAIL' | 'STORAGE_FAIL' | 'FORGE_LIMIT' | 'RELEASE_LIMIT' | 'DB_FAIL' | 'NOT_FOUND' | 'OFF_BRAND';
   generation_id?: string;
+  remaining?: number;
+  brand_similarity?: number;
+  base_match_id?: string | null;
 }
 
 export interface ReleaseRequest {

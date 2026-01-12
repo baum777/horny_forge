@@ -40,10 +40,12 @@ export default function createEventRouter(awardEventImpl: AwardEventFn = awardEv
         ...parsed.data,
       });
       return res.status(200).json(result);
-    } catch (error: any) {
-      const status = error?.status ?? 500;
-      const code = error?.code ?? 'event_failed';
-      return res.status(status).json({ error: code, message: error?.message });
+    } catch (error: unknown) {
+      const errorObj = error && typeof error === 'object' && 'status' in error ? error as { status?: number; code?: string; message?: string } : null;
+      const status = errorObj?.status ?? 500;
+      const code = errorObj?.code ?? 'event_failed';
+      const message = errorObj?.message ?? (error instanceof Error ? error.message : 'Unknown error');
+      return res.status(status).json({ error: code, message });
     }
   });
 

@@ -2,13 +2,14 @@ import { Router } from "express";
 import { createClient } from "@supabase/supabase-js";
 import { config } from "../config";
 import { renderArtifactHtml } from "../utils/og";
+import type { Database } from "../types/supabase";
 
-type SupabaseAdmin = ReturnType<typeof createClient>;
+type SupabaseAdmin = ReturnType<typeof createClient<Database>>;
 
 export default function createOgRouter(supabaseAdmin?: SupabaseAdmin) {
   const router = Router();
   const client =
-    supabaseAdmin ?? createClient(config.supabase.url, config.supabase.serviceRoleKey);
+    supabaseAdmin ?? createClient<Database>(config.supabase.url, config.supabase.serviceRoleKey);
 
   router.get("/artifact/:artifactId", async (req, res) => {
     const { artifactId } = req.params;
@@ -25,9 +26,13 @@ export default function createOgRouter(supabaseAdmin?: SupabaseAdmin) {
         request: req,
         artifact: data
           ? {
+              // @ts-expect-error - Supabase table types are not fully generated
               id: data.id,
+              // @ts-expect-error - Supabase table types are not fully generated
               caption: data.caption,
+              // @ts-expect-error - Supabase table types are not fully generated
               author_handle: data.author_handle,
+              // @ts-expect-error - Supabase table types are not fully generated
               image_url: data.image_url,
             }
           : null,

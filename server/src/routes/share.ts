@@ -5,8 +5,9 @@ import { config } from '../config';
 import { requireAuth, type AuthenticatedRequest } from '../middleware/auth';
 import { signShareToken, verifySignedShareToken } from '../utils/signing';
 import crypto from 'crypto';
+import type { Database } from '../types/supabase';
 
-type SupabaseAdmin = ReturnType<typeof createClient>;
+type SupabaseAdmin = ReturnType<typeof createClient<Database>>;
 
 const ShareTokenSchema = z.object({
   subject_id: z.string(),
@@ -24,7 +25,7 @@ export function createShareRouters(supabaseAdmin?: SupabaseAdmin) {
   const shareApiRouter = Router();
   const shareRedirectRouter = Router();
   const client =
-    supabaseAdmin ?? createClient(config.supabase.url, config.supabase.serviceRoleKey);
+    supabaseAdmin ?? createClient<Database>(config.supabase.url, config.supabase.serviceRoleKey);
 
   shareApiRouter.post('/share-token', requireAuth, async (req: AuthenticatedRequest, res) => {
     const parsed = ShareTokenSchema.safeParse(req.body);
@@ -43,8 +44,9 @@ export function createShareRouters(supabaseAdmin?: SupabaseAdmin) {
         subject_id: parsed.data.subject_id,
       });
       return res.status(200).json({ token });
-    } catch (error: any) {
-      return res.status(500).json({ error: 'token_failed', message: error?.message });
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      return res.status(500).json({ error: 'token_failed', message });
     }
   });
 
@@ -56,6 +58,7 @@ export function createShareRouters(supabaseAdmin?: SupabaseAdmin) {
       const payload = verifySignedShareToken(token);
       if (payload && payload.subject_id === artifactId) {
         const eventId = createShareEventId(token, artifactId);
+        // @ts-expect-error - Supabase RPC types are not fully generated
         await client.rpc('award_event', {
           p_event_id: eventId,
           p_actor_user_id: payload.actor_user_id,

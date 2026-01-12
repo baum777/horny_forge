@@ -1,5 +1,0 @@
-<svg viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
-  <rect width="256" height="256" fill="#000"/>
-  <path d="M64 144 C96 80, 160 80, 192 144" stroke="#FFE44D" stroke-width="8" fill="none"/>
-  <path d="M64 144 C96 200, 160 200, 192 144" stroke="#FFE44D" stroke-width="8" fill="none"/>
-</svg>

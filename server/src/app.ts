@@ -1,9 +1,10 @@
 import express, { type RequestHandler } from 'express';
+import path from 'node:path';
 import cors from 'cors';
 import path from 'path';
 import { config } from './config';
 import type { ForgeController } from './controllers/ForgeController';
-import { authMiddleware as defaultAuthMiddleware, requireAuth as defaultRequireAuth } from './middleware/auth';
+import { authMiddleware as defaultAuthMiddleware, requireAuth as defaultRequireAuth, type AuthenticatedRequest } from './middleware/auth';
 import createEventRouter from './routes/event';
 import createOgRouter from './routes/og';
 import { createShareRouters } from './routes/share';
@@ -34,6 +35,7 @@ export async function createApp(deps: AppDependencies = {}) {
     origin: process.env.FRONTEND_URL || '*',
     credentials: true,
   }));
+  app.use(express.static(path.join(process.cwd(), 'server', 'public')));
   app.use(express.json({ limit: '10mb' }));
   app.use(express.urlencoded({ extended: true }));
 
@@ -52,8 +54,9 @@ export async function createApp(deps: AppDependencies = {}) {
   });
 
   // API Routes
-  app.post('/api/forge', requireAuth, (req, res) => forgeController.forge(req as any, res));
-  app.post('/api/forge/release', requireAuth, (req, res) => forgeController.release(req as any, res));
+  app.post('/api/forge', requireAuth, (req, res) => forgeController.forge(req as AuthenticatedRequest, res));
+  app.post('/api/forge/release', requireAuth, (req, res) => forgeController.release(req as AuthenticatedRequest, res));
+  app.use('/api', memePoolRouter);
   app.use('/api', eventRouter);
   app.use('/api', shareRouters.shareApiRouter);
   app.use('/api', tokenStatsRouter);
@@ -62,7 +65,7 @@ export async function createApp(deps: AppDependencies = {}) {
   app.use('/', shareRouters.shareRedirectRouter);
 
   // Error handling
-  app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  app.use((err: unknown, req: express.Request, res: express.Response, next: express.NextFunction) => {
     console.error('Unhandled error:', err);
     res.status(500).json({
       error: 'Internal server error',

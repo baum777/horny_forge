@@ -8,8 +8,11 @@
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
+    "test": "npm --prefix server test",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "badges:dry": "node scripts/organize-badges.mjs --src public --dest public/badges --version v1 --dry --manifest",
+    "badges:apply": "node scripts/organize-badges.mjs --src public --dest public/badges --version v1 --apply --manifest"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
