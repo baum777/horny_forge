@@ -9,10 +9,7 @@ memePoolRouter.get('/meme-pool', (_req, res) => {
 
   let files: string[] = [];
   try {
-    files = fs
-      .readdirSync(dir)
-      .filter((file) => /^base-.*\.(png|jpe?g|webp|gif)$/i.test(file))
-      .map((file) => `/horny-meme-pool/${file}`);
+    files = fs.readdirSync(dir).filter((file) => /^base-.*\.(png|jpe?g|webp|gif)$/i.test(file));
   } catch {
     files = [];
   }

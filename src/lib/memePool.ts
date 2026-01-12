@@ -1,7 +1,9 @@
-// Auto-generated or placeholder file to fix import errors
-// You should update this file with actual content from ALL_PNG_IMAGES source
+const normalizeBase = (base: string): string => {
+  if (!base) return '/';
+  return base.endsWith('/') ? base : `${base}/`;
+};
 
-export const ALL_PNG_IMAGES = [
-  "/horney-meme-pool/download.png",
-  "/horney-meme-pool/download (9).png",
-];
+export const buildMemePoolUrl = (fileName: string): string => {
+  const base = normalizeBase(import.meta.env.BASE_URL ?? '/');
+  return `${base}horny-meme-pool/${fileName}`;
+};
