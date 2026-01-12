@@ -33,7 +33,7 @@ function notice(id: string, severity: "info" | "warn" | "error", text: string) {
   return { id, severity, text };
 }
 
-async function timed<T>(fn: () => Promise<T>): Promise<{ ok: boolean; ms: number; value?: T; error?: any }> {
+async function timed<T>(fn: () => Promise<T>): Promise<{ ok: boolean; ms: number; value?: T; error?: unknown }> {
   const t0 = Date.now();
   try {
     const value = await fn();
@@ -110,7 +110,8 @@ statusRouter.get("/status", async (req, res) => {
     status: classify(health.ok, health.ms),
     latencyMs: health.ms,
     lastOkAt: health.ok ? checkedAt : undefined,
-    message: health.ok ? "OK" : `Failed (${String(health.error?.message ?? "error")})`,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    message: health.ok ? "OK" : `Failed (${String((health.error as any)?.message ?? "error")})`,
   });
 
   // 2) Gamification router
@@ -121,7 +122,8 @@ statusRouter.get("/status", async (req, res) => {
     status: classify(gamification.ok, gamification.ms),
     latencyMs: gamification.ms,
     lastOkAt: gamification.ok ? checkedAt : undefined,
-    message: gamification.ok ? "OK" : `Failed (${String(gamification.error?.message ?? "error")})`,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    message: gamification.ok ? "OK" : `Failed (${String((gamification.error as any)?.message ?? "error")})`,
   });
 
   // 3) Token stats
@@ -132,7 +134,8 @@ statusRouter.get("/status", async (req, res) => {
     status: classify(tokenStats.ok, tokenStats.ms),
     latencyMs: tokenStats.ms,
     lastOkAt: tokenStats.ok ? checkedAt : undefined,
-    message: tokenStats.ok ? "OK" : `Failed (${String(tokenStats.error?.message ?? "error")})`,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    message: tokenStats.ok ? "OK" : `Failed (${String((tokenStats.error as any)?.message ?? "error")})`,
   });
 
   // 4) Supabase config

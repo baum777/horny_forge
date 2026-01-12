@@ -173,7 +173,7 @@ export default function BadgesPage() {
           </Card>
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 12 }}>
-            {filtered.map((b: any) => (
+            {filtered.map((b: BadgesDTO['earned'][number] | BadgesDTO['locked'][number]) => (
               <BadgeCard key={b.id} badge={b} locked={tab === "locked"} />
             ))}
           </div>
@@ -191,7 +191,7 @@ export default function BadgesPage() {
   );
 }
 
-function BadgeCard({ badge, locked }: { badge: any; locked: boolean }) {
+function BadgeCard({ badge, locked }: { badge: BadgesDTO['earned'][number] | BadgesDTO['locked'][number]; locked: boolean }) {
   const progress = badge.progress as { current: number; target: number } | undefined;
   const pct = progress ? Math.max(0, Math.min(1, progress.current / Math.max(1, progress.target))) : 0;
 

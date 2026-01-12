@@ -59,6 +59,7 @@ async function fetchPendingQueue(): Promise<
 > {
   try {
     // Access supabase client from store
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
     const supabase = (store as any).supabase;
     if (!supabase) {
       console.error("Supabase client not available");
@@ -77,6 +78,7 @@ async function fetchPendingQueue(): Promise<
       return [];
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return (data ?? []).map((row: any) => ({
       id: row.id,
       createdAt: row.created_at ?? new Date().toISOString(),
@@ -96,6 +98,7 @@ async function fetchRecentPayouts(): Promise<
 > {
   try {
     // Access supabase client from store
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
     const supabase = (store as any).supabase;
     if (!supabase) {
       console.error("Supabase client not available");
@@ -114,6 +117,7 @@ async function fetchRecentPayouts(): Promise<
       return [];
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return (data ?? []).map((row: any) => ({
       id: row.id,
       createdAt: row.created_at ?? new Date().toISOString(),
@@ -199,6 +203,7 @@ rewardsRouter.get("/rewards", async (req, res) => {
     };
 
     res.json(dto);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (e: any) {
     res.status(500).json({
       error: "rewards_readmodel_failed",

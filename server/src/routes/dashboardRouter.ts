@@ -66,6 +66,7 @@ export type DashboardDTO = {
 
 // --- helpers (keep pure) ---
 const nowIso = () => new Date().toISOString();
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const safeNumber = (v: any): number | undefined => {
   const n = typeof v === "string" ? Number(v) : v;
   return Number.isFinite(n) ? n : undefined;
@@ -402,6 +403,7 @@ dashboardRouter.get("/dashboard", async (req, res) => {
     // Optional: lightweight performance hint for debugging (strip in prod if you want)
     res.setHeader("x-dashboard-ms", String(Date.now() - t0));
     res.json(dto);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (e: any) {
     res.status(500).json({
       error: "dashboard_readmodel_failed",
