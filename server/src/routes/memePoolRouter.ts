@@ -11,8 +11,7 @@ memePoolRouter.get("/meme-pool", (_req, res) => {
     const files = fs
       .readdirSync(dir)
       .filter((file) => /^base-.*\.(png|jpe?g|webp|gif)$/i.test(file))
-      .sort((a, b) => a.localeCompare(b))
-      .map((file) => `/horny-meme-pool/${file}`);
+      .sort((a, b) => a.localeCompare(b));
 
     return res.json({ files });
   } catch (error) {
