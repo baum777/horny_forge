@@ -11,13 +11,32 @@ import { createClient } from '@supabase/supabase-js';
 import type { Database } from '../types/supabase';
 import { z } from 'zod';
 
+const baseImagePattern = /^\/horny-meme-pool\/base-.*\.(png|jpe?g|webp|gif)$/i;
+
 const forgeRequestSchema = z.object({
-  base_id: z.enum(['base-01', 'base-02', 'base-03', 'base-04']),
+  base_id: z.string().optional(),
+  base_image: z.string().optional(),
   preset: z.enum(['HORNY_CORE_SKETCH', 'HORNY_META_SCENE', 'HORNY_CHAOS_VARIATION']),
   user_input: z.string().min(1).max(240),
   size: z.enum(['1024x1024']).optional(),
   seed: z.string().optional(),
   debug: z.boolean().optional(),
+}).superRefine((data, ctx) => {
+  if (!data.base_id && !data.base_image) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'base_id or base_image is required',
+      path: ['base_id'],
+    });
+  }
+
+  if (data.base_image && !baseImagePattern.test(data.base_image)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'base_image must be a /horny-meme-pool/base-* asset',
+      path: ['base_image'],
+    });
+  }
 });
 
 const releaseRequestSchema = z.object({
@@ -154,10 +173,26 @@ export class ForgeController {
         return;
       }
 
-      const { base_id, preset, user_input, size = '1024x1024', debug = false } = validationResult.data;
+      const { base_id, base_image, preset, user_input, size = '1024x1024', debug = false } = validationResult.data;
+
+      let resolvedBaseId = base_id;
+      const resolvedBaseImage = base_image;
+
+      if (resolvedBaseImage) {
+        const fileName = resolvedBaseImage.split('/').pop();
+        resolvedBaseId = fileName ? fileName.replace(/\.[^.]+$/, '') : resolvedBaseId;
+      }
+
+      if (!resolvedBaseId) {
+        res.status(400).json({
+          error: 'Invalid input',
+          code: 'INVALID_INPUT',
+        });
+        return;
+      }
 
       const userLevel = await this.getUserLevel(req.userId);
-      this.ensureUnlocked(userLevel, base_id, preset);
+      this.ensureUnlocked(userLevel, resolvedBaseId, preset);
 
       const quota = await this.checkQuota({
         userId: req.userId,
@@ -177,7 +212,7 @@ export class ForgeController {
       const promptResult = PromptEngine.process({
         preset,
         userInput: user_input,
-        baseId: base_id,
+        baseId: resolvedBaseId,
       });
 
       // Check if prompt was rejected
@@ -203,7 +238,8 @@ export class ForgeController {
       let modelMeta: { model: string; size: string };
       try {
         const imageResult = await this.imageGen.generate({
-          baseId: base_id,
+          baseId: resolvedBaseId,
+          baseImagePath: resolvedBaseImage,
           finalPrompt: promptResult.final_prompt,
           size,
         });
@@ -236,7 +272,7 @@ export class ForgeController {
       const { error: previewDbError } = await this.supabase.from('forge_previews').insert({
         generation_id: previewResult.generationId,
         user_id: req.userId,
-        base_id,
+        base_id: resolvedBaseId,
         preset,
         moderation_status: moderationResult.status,
         moderation_reasons: moderationResult.reasons,
@@ -255,7 +291,7 @@ export class ForgeController {
       // Build response
       const response: ForgeResponse = {
         generation_id: previewResult.generationId,
-        base_id,
+        base_id: resolvedBaseId,
         preset,
         sanitized_input: promptResult.sanitized_input,
         image_url: previewResult.previewUrl,
@@ -276,7 +312,7 @@ export class ForgeController {
 
       // Log telemetry
       const latency = Date.now() - startTime;
-      console.log(`[FORGE] generation_id=${previewResult.generationId}, preset=${preset}, base_id=${base_id}, latency=${latency}ms`);
+      console.log(`[FORGE] generation_id=${previewResult.generationId}, preset=${preset}, base_id=${resolvedBaseId}, latency=${latency}ms`);
 
       res.status(200).json(response);
     } catch (error: unknown) {

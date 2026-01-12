@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { forgeArtifact, releaseArtifact, type ForgeResponse, type ReleaseError } from '@/lib/api/forge';
-import { BasePicker, type BaseId } from './BasePicker';
+import { BasePicker, type BaseSelection } from './BasePicker';
 import { PresetPicker, type PresetId } from './PresetPicker';
 import { ForgeForm } from './ForgeForm';
 import { ForgePreview } from './ForgePreview';
@@ -22,7 +22,7 @@ export default function MetaForge() {
   const { stats } = useGamification(archivesUser?.id);
 
   // Form State
-  const [selectedBaseId, setSelectedBaseId] = useState<BaseId | null>(null);
+  const [selectedBase, setSelectedBase] = useState<BaseSelection | null>(null);
   const [selectedPreset, setSelectedPreset] = useState<PresetId>('HORNY_CORE_SKETCH');
   const [userInput, setUserInput] = useState('');
   const [caption, setCaption] = useState('');
@@ -39,10 +39,10 @@ export default function MetaForge() {
 
   useEffect(() => {
     if (!clientGamificationEnabled) return;
-    if (selectedBaseId && !isBaseUnlocked(userLevel, selectedBaseId)) {
-      setSelectedBaseId(null);
+    if (selectedBase && !isBaseUnlocked(userLevel, selectedBase.id)) {
+      setSelectedBase(null);
     }
-  }, [selectedBaseId, userLevel, clientGamificationEnabled]);
+  }, [selectedBase, userLevel, clientGamificationEnabled]);
 
   useEffect(() => {
     if (!clientGamificationEnabled) return;
@@ -52,7 +52,7 @@ export default function MetaForge() {
   }, [selectedPreset, userLevel, clientGamificationEnabled]);
 
   const handleInfuse = async () => {
-    if (!selectedBaseId) {
+    if (!selectedBase) {
       toast.error('Select a base image first.');
       return;
     }
@@ -72,7 +72,8 @@ export default function MetaForge() {
 
     try {
       const result = await forgeArtifact({
-        base_id: selectedBaseId,
+        base_id: selectedBase.id,
+        base_image: selectedBase.image,
         preset: selectedPreset,
         user_input: userInput,
       });
@@ -172,8 +173,8 @@ export default function MetaForge() {
         {/* Left Column: Controls */}
         <div className="space-y-10">
           <BasePicker
-            selectedBaseId={selectedBaseId}
-            onSelect={setSelectedBaseId}
+            selectedBase={selectedBase}
+            onSelect={setSelectedBase}
             userLevel={unlockLevel}
           />
 

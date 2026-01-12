@@ -1,9 +1,10 @@
-export type BaseId = 'base-01' | 'base-02' | 'base-03' | 'base-04';
+export type BaseId = string;
 
 export type Preset = 'HORNY_CORE_SKETCH' | 'HORNY_META_SCENE' | 'HORNY_CHAOS_VARIATION';
 
 export interface ForgeRequest {
-  base_id: BaseId;
+  base_id?: BaseId;
+  base_image?: string;
   preset: Preset;
   user_input: string;
   size?: '1024x1024';

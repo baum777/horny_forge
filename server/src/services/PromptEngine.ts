@@ -94,10 +94,10 @@ export class PromptEngine {
     const { preset, sanitizedInput, baseId } = params;
 
     const presetBlock = PRESETS[preset].guardrailBlock;
-    const baseDescription = BASE_IMAGES[baseId].description;
+    const baseDescription = BASE_IMAGES[baseId]?.description ?? 'Selected base image from the meme pool.';
 
     // Build concept summary
-    const conceptSummary = `Surreal horny-meta meme scene: ${sanitizedInput}. Unicorn character infused with the concept, drawn in neon-yellow sketch doodle style on black background.`;
+    const conceptSummary = `Surreal horny-meta meme scene: ${sanitizedInput}. ${baseDescription}`;
 
     // Build final prompt
     const finalPrompt = `${BRAND_DNA_BLOCK} ${presetBlock} Create a surreal horny-meta meme scene: ${sanitizedInput}. The unicorn character from the base image should be infused with this concept, maintaining the exact same character identity (head shape, dot eyes, rainbow horn always visible). Everything must be drawn in the same neon-yellow glowing sketch doodle style on a black background. High contrast, meme readability, clean silhouette, square composition.`;
@@ -143,4 +143,3 @@ export class PromptEngine {
     };
   }
 }
-
