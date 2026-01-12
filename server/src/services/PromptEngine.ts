@@ -10,6 +10,27 @@ import {
   BASE_IMAGES,
 } from '../constants';
 
+const STYLE_DISALLOWED_TERMS = [
+  'photorealism',
+  'photorealistic',
+  'photo-realistic',
+  'hyperrealistic',
+  'hyper-realistic',
+];
+
+const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+const normalizeStyleHints = (input: string): string => {
+  let output = input;
+
+  for (const term of STYLE_DISALLOWED_TERMS) {
+    const regex = new RegExp(escapeRegExp(term), 'gi');
+    output = output.replace(regex, 'illustrated');
+  }
+
+  return output;
+};
+
 export class PromptEngine {
   /**
    * Sanitizes user input: normalizes whitespace, blocks forbidden content, truncates if needed.
@@ -29,6 +50,9 @@ export class PromptEngine {
 
     // Normalize whitespace
     sanitized = sanitized.replace(/\s+/g, ' ');
+    const beforeStyleNormalization = sanitized;
+    sanitized = normalizeStyleHints(sanitized);
+    const styleSanitized = sanitized !== beforeStyleNormalization;
 
     // Check length
     if (sanitized.length > MAX_INPUT_LENGTH) {
@@ -72,14 +96,14 @@ export class PromptEngine {
       return {
         sanitized: DEFAULT_CONCEPT,
         negativeTerms: foundForbidden,
-        status: foundForbidden.length > 0 ? 'rejected' : 'ok',
+        status: foundForbidden.length > 0 ? 'rejected' : styleSanitized ? 'sanitized' : 'ok',
       };
     }
 
     return {
       sanitized,
       negativeTerms: foundForbidden,
-      status: foundForbidden.length > 0 ? 'sanitized' : 'ok',
+      status: foundForbidden.length > 0 ? 'sanitized' : styleSanitized ? 'sanitized' : 'ok',
     };
   }
 

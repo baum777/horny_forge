@@ -43,6 +43,20 @@ describe('PromptEngine', () => {
     expect(hasForbidden).toBe(false);
   });
 
+  it('T06b: Photorealistic hint is normalized to illustrated', () => {
+    const result = PromptEngine.process({
+      preset: 'HORNY_META_SCENE',
+      userInput: 'hyper-realistic photorealistic poster',
+      baseId: 'base-01',
+    });
+    const promptLower = result.final_prompt.toLowerCase();
+    expect(result.safety?.status).toBe('sanitized');
+    expect(result.negative_terms).toHaveLength(0);
+    expect(promptLower).toContain('illustrated');
+    expect(promptLower).not.toContain('photorealistic');
+    expect(promptLower).not.toContain('hyper-realistic');
+  });
+
   it('T07: User tries to force 3D render style', () => {
     const result = PromptEngine.process({
       preset: 'HORNY_CORE_SKETCH',
