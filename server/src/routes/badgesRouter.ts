@@ -262,6 +262,7 @@ badgesRouter.get("/badges", async (req, res) => {
     };
 
     res.json(dto);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (e: any) {
     res.status(500).json({
       error: "badges_readmodel_failed",
@@ -285,6 +286,7 @@ badgesRouter.get("/badges/:id", async (req, res) => {
     }
 
     res.json({ badge });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (e: any) {
     res.status(500).json({
       error: "badge_detail_failed",

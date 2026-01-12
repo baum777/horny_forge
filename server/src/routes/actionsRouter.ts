@@ -22,7 +22,7 @@ export type ActionsDTO = {
     cta:
       | { type: "verify_x"; label: string }
       | { type: "open_url"; label: string; url: string }
-      | { type: "call_api"; label: string; method: "POST"; path: string; body?: any }
+      | { type: "call_api"; label: string; method: "POST"; path: string; body?: unknown }
       | { type: "disabled"; label: string; reason?: string };
   }>;
   system: { notices: Array<{ id: string; severity: Severity; text: string }> };
@@ -143,7 +143,7 @@ actionsRouter.get("/actions", async (req, res) => {
       if (o) state = o.state;
 
       // Compute disabled CTA on non-available states
-      let cta = a.cta;
+      let cta: ActionsDTO['actions'][number]['cta'] = a.cta;
       if (state === "locked") cta = { type: "disabled", label: "Locked", reason: "Verify required" };
       if (state === "cooldown") cta = { type: "disabled", label: "Cooldown", reason: "Try later" };
       if (state === "completed") cta = { type: "disabled", label: "Done" };
@@ -163,10 +163,10 @@ actionsRouter.get("/actions", async (req, res) => {
 
     const dto: ActionsDTO = { user: { status: userStatus }, actions, system: { notices } };
     res.json(dto);
-  } catch (e: any) {
+  } catch (e: unknown) {
     res.status(500).json({
       error: "actions_readmodel_failed",
-      message: e?.message ?? "Unknown error",
+      message: (e as Error)?.message ?? "Unknown error",
       system: { notices: [notice("err", "error", "Actions failed to load.")] },
     });
   }

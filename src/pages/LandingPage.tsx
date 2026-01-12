@@ -7,7 +7,7 @@ export default function LandingPage() {
       <MemeBackground count={9} spawnEveryMs={850} />
 
       <div style={{ position: "relative", zIndex: 10, padding: 24, maxWidth: 980, margin: "0 auto" }}>
-        <h1 style={{ fontSize: 44, margin: "40px 0 10px" }}>$HORN​Y</h1>
+        <h1 style={{ fontSize: 44, margin: "40px 0 10px" }}>$HORNY</h1>
         <p style={{ opacity: 0.85, fontSize: 18, lineHeight: 1.4, maxWidth: 720 }}>
           Participation over possession. Verify with X, earn badges, climb levels — rewards are transparent.
         </p>

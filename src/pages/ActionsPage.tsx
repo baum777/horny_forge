@@ -15,7 +15,7 @@ type ActionsDTO = {
     cta:
       | { type: "verify_x"; label: string }
       | { type: "open_url"; label: string; url: string }
-      | { type: "call_api"; label: string; method: "POST"; path: string; body?: any }
+      | { type: "call_api"; label: string; method: "POST"; path: string; body?: unknown }
       | { type: "disabled"; label: string; reason?: string };
   }>;
   system: { notices: Array<{ id: string; severity: "info" | "warn" | "error"; text: string }> };
@@ -51,7 +51,8 @@ export default function ActionsPage() {
         setData(d);
         setErr(null);
       })
-      .catch((e) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .catch((e: any) => {
         if (!alive) return;
         setErr(e?.message ?? "Failed to load actions");
         setData(null);

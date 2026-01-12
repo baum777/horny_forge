@@ -15,6 +15,7 @@ import actionsRouter from './routes/actionsRouter';
 import badgesRouter from './routes/badgesRouter';
 import rewardsRouter from './routes/rewardsRouter';
 import statusRouter from './routes/statusRouter';
+import { memePoolRouter } from './routes/memePool';
 
 type AppDependencies = {
   forgeController?: ForgeController;
