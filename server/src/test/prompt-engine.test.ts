@@ -78,9 +78,16 @@ describe('PromptEngine', () => {
       baseId: 'base-01',
     });
     const promptLower = result.final_prompt.toLowerCase();
-    const hasForbidden = ['nsfw', 'nude'].some(term => promptLower.includes(term));
-    expect(['rejected', 'sanitized']).toContain(result.safety?.status);
-    expect(hasForbidden).toBe(false);
+    
+    // Check if forbidden terms were detected (as requested)
+    const hasForbidden = result.negative_terms.length > 0;
+    expect(hasForbidden).toBe(true);
+    
+    expect(result.safety?.status).toBe('rejected');
+    
+    // Verify output is clean
+    const outputHasForbidden = ['nsfw', 'nude'].some(term => promptLower.includes(term));
+    expect(outputHasForbidden).toBe(false);
   });
 
   it('T10: Real person / celebrity attempt', () => {

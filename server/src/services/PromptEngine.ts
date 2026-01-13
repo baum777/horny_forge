@@ -103,7 +103,7 @@ export class PromptEngine {
     return {
       sanitized,
       negativeTerms: foundForbidden,
-      status: foundForbidden.length > 0 ? 'sanitized' : styleSanitized ? 'sanitized' : 'ok',
+      status: foundForbidden.length > 0 ? 'rejected' : styleSanitized ? 'sanitized' : 'ok',
     };
   }
 
