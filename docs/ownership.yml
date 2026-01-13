@@ -1,0 +1,21 @@
+backend:
+  doc: docs/backend.md
+  paths:
+    - server/**
+frontend:
+  doc: docs/frontend.md
+  paths:
+    - src/**
+    - public/**
+assets:
+  doc: docs/assets.md
+  paths:
+    - public/**
+    - server/public/**
+gamification:
+  doc: docs/gamification.md
+  paths:
+    - lib/gamification/**
+    - server/src/gamification/**
+    - server/src/badges/**
+

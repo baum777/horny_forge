@@ -1,0 +1,21 @@
+name: Docs Guard
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, ready_for_review]
+
+jobs:
+  docs_guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Verify documentation updates
+        env:
+          BASE_BRANCH: origin/${{ github.event.pull_request.base.ref }}
+        run: node scripts/check-docs-updated.mjs
+
