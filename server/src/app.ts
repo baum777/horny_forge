@@ -58,6 +58,7 @@ export async function createApp(deps: AppDependencies = {}) {
 
   // API Routes
   app.post('/api/forge', requireAuth, (req, res) => forgeController.forge(req as AuthenticatedRequest, res));
+  app.post('/api/forge/preview', requireAuth, (req, res) => forgeController.forge(req as AuthenticatedRequest, res));
   app.post('/api/forge/release', requireAuth, (req, res) => forgeController.release(req as AuthenticatedRequest, res));
   app.use('/api', memePoolRouter);
   app.use('/api', eventRouter);
