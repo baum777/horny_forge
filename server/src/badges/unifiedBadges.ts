@@ -2,8 +2,6 @@ import type { UserStats } from "../gamification/types";
 
 export type UnlockCondition =
   | { type: "action_count"; action: string; count: number }
-  | { type: "quiz_class"; classId: string }
-  | { type: "quiz_score"; dimension: "degen" | "horny" | "conviction"; min: number }
   | { type: "streak"; days: number }
   | { type: "milestone"; metric: string; value: number }
   | { type: "time_spent"; seconds: number }
@@ -24,22 +22,12 @@ export const ALL_BADGES: UnifiedBadge[] = [
   { id: "FIRST_PUMP", name: "First Pump", description: "First release.", emoji: "📈", unlockCondition: { type: "action_count", action: "artifact_release", count: 1 } },
   { id: "FIRST_COMMENT", name: "First Words", description: "First comment.", emoji: "💬", unlockCondition: { type: "action_count", action: "comment", count: 1 } },
   { id: "SHARE_SPARK", name: "Share Spark", description: "First share.", emoji: "📢", unlockCondition: { type: "action_count", action: "share", count: 1 } },
-  { id: "quiz-complete", name: "Desire Scanned", description: "Completed quiz.", emoji: "🔮", unlockCondition: { type: "action_count", action: "quiz_complete", count: 1 } },
 ];
 
 export function checkUnlockCondition(condition: UnlockCondition, stats: UserStats): boolean {
   switch (condition.type) {
     case "action_count":
       return (stats.counts[condition.action] ?? 0) >= condition.count;
-    case "quiz_class":
-      return stats.quizClass === condition.classId;
-    case "quiz_score": {
-      const score = condition.dimension === "degen" ? stats.degen 
-        : condition.dimension === "horny" ? stats.horny 
-        : condition.dimension === "conviction" ? stats.conviction 
-        : undefined;
-      return (score ?? 0) >= condition.min;
-    }
     case "streak":
       return (stats.currentStreak ?? 0) >= condition.days;
     case "milestone":
@@ -51,7 +39,7 @@ export function checkUnlockCondition(condition: UnlockCondition, stats: UserStat
     case "hashtag_usage":
       return (stats.counts[`hashtag_${condition.hashtag}`] ?? 0) >= condition.count;
     case "special":
-      return false;
+      return false; // server-only
     default:
       return false;
   }
@@ -75,4 +63,3 @@ export function evaluateNewBadgesAndFeatures(stats: UserStats): {
 
   return { newBadges, newFeatures };
 }
-

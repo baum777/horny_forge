@@ -10,8 +10,6 @@ export type ActionPayload = {
   artifactId?: string;
   receivedVotesDelta?: number;
   timeDeltaSeconds?: number;
-  quizClassId?: string;
-  quizVector?: { degen: number; horny: number; conviction: number };
   clientNonce?: string;
   idempotencyKey?: string;
 };
@@ -78,31 +76,6 @@ export function validateAction(
       }
       // TODO: Validate ownership/creation proof server-side
       break;
-
-    case 'quiz_complete': {
-      if (!payload.quizClassId || !payload.quizVector) {
-        return { valid: false, reason: 'quiz_complete requires quizClassId and quizVector' };
-      }
-      // Weekly retake cap check
-      const quizCount = userStats.counts['quiz_complete'] || 0;
-      if (quizCount >= 1) {
-        // Check if last quiz was this week
-        const lastQuizISO = typeof userStats.counts['quiz_last_completed'] === 'string' 
-          ? userStats.counts['quiz_last_completed'] 
-          : undefined;
-        if (lastQuizISO) {
-          const lastQuiz = new Date(lastQuizISO);
-          const now = new Date(nowISO);
-          const weekStart = new Date(now);
-          weekStart.setDate(now.getDate() - ((now.getDay() + 6) % 7));
-          weekStart.setHours(0, 0, 0, 0);
-          if (lastQuiz >= weekStart) {
-            return { valid: false, reason: 'quiz_complete weekly cap reached' };
-          }
-        }
-      }
-      break;
-    }
 
     case 'forge':
     case 'meme_create':

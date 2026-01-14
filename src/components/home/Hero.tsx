@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import { Sparkles, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -82,25 +83,23 @@ export default function Hero() {
 
           {/* CTAs */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button
-              variant="gradient"
-              size="lg"
-              onClick={scrollToInteract}
-              className="text-lg px-8"
-            >
-              <Zap className="w-5 h-5 mr-2" />
-              ENTER THE HORNY META
-            </Button>
+            <Link to="/game">
+              <Button
+                variant="gradient"
+                size="lg"
+                className="text-lg px-8 w-full sm:w-auto"
+              >
+                <Zap className="w-5 h-5 mr-2" />
+                PLAY CYBER RUNNER
+              </Button>
+            </Link>
             <Button
               variant="outline"
               size="lg"
-              onClick={() => {
-                const el = document.getElementById('lore');
-                el?.scrollIntoView({ behavior: 'smooth' });
-              }}
-              className="text-lg"
+              onClick={scrollToInteract}
+              className="text-lg w-full sm:w-auto"
             >
-              Read the Lore
+              Enter Hub
             </Button>
           </div>
 

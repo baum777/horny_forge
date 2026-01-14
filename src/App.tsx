@@ -23,6 +23,8 @@ import BadgesPage from "./pages/BadgesPage";
 import RewardsPage from "./pages/RewardsPage";
 import StatusPage from "./pages/StatusPage";
 
+import GamePage from "./pages/GamePage";
+
 const queryClient = new QueryClient();
 
 const App = () => {
@@ -37,6 +39,7 @@ const App = () => {
               <BrowserRouter>
                 <Routes>
                   <Route path="/" element={<Index />} />
+                  <Route path="/game" element={<GamePage />} />
                   <Route path="/landing" element={<LandingPage />} />
                   <Route path="/dashboard" element={<DashboardPage />} />
                   <Route path="/actions" element={<ActionsPage />} />

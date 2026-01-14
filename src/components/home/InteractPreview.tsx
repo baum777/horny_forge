@@ -1,18 +1,10 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Brain, Palette, Trophy, TrendingUp, ArrowRight } from 'lucide-react';
-import { GlassCard, GlassCardHeader, GlassCardTitle, GlassCardDescription, GlassCardContent } from '@/components/ui/glass-card';
+import { Palette, Trophy, ArrowRight } from 'lucide-react';
+import { GlassCard, GlassCardHeader, GlassCardTitle, GlassCardDescription } from '@/components/ui/glass-card';
 import { Button } from '@/components/ui/button';
 
 const features = [
-  {
-    id: 'quiz',
-    title: 'Horny Level Quiz',
-    description: 'Discover your true crypto desire class. Are you a Beta Horny or a Meta Demon?',
-    icon: Brain,
-    color: 'text-pink-500',
-    bgColor: 'bg-pink-500/10',
-  },
   {
     id: 'meme-forge',
     title: 'Meme Forge',
@@ -28,14 +20,6 @@ const features = [
     icon: Trophy,
     color: 'text-purple-500',
     bgColor: 'bg-purple-500/10',
-  },
-  {
-    id: 'fomo',
-    title: 'FOMO Tracker',
-    description: 'Monitor the Horny velocity in real-time. Set alerts. Never miss a pump.',
-    icon: TrendingUp,
-    color: 'text-green-500',
-    bgColor: 'bg-green-500/10',
   },
 ];
 

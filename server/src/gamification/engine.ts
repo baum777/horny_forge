@@ -92,15 +92,6 @@ export function applyAction(prev: UserStats, action: ActionType, ctx: ActionCont
 
   if (action === "votes_received") next.totalVotesReceived += Math.max(0, ctx.receivedVotesDelta ?? 0);
   if (action === "time_spent") next.totalTimeSeconds += Math.max(0, ctx.timeDeltaSeconds ?? 0);
-  if (action === "quiz_complete") {
-    next.quizClass = ctx.quizClassId ?? next.quizClass;
-    if (ctx.quizVector) {
-      next.degen = ctx.quizVector.degen;
-      next.horny = ctx.quizVector.horny;
-      next.conviction = ctx.quizVector.conviction;
-    }
-    next.counts["quiz_complete"] = (next.counts["quiz_complete"] ?? 0) + 1;
-  }
 
   next.dailyHornyEarned += allowedGain;
   next.weeklyHornyEarned += allowedGain;

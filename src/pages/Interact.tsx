@@ -1,21 +1,17 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Brain, Palette, Trophy, TrendingUp } from 'lucide-react';
+import { Palette, Trophy } from 'lucide-react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import HornyMeter from '@/components/features/HornyMeter';
-import Quiz from '@/components/features/Quiz';
 import MetaForge from '@/components/MetaForge/MetaForge';
 import Badges from '@/components/features/Badges';
-import FOMOTracker from '@/components/features/FOMOTracker';
 import { addSectionVisited, unlockBadge, getVisitData } from '@/lib/storage';
 
 const sections = [
-  { id: 'quiz', title: 'Horny Level Quiz', icon: Brain, description: 'Discover your true crypto desire class' },
   { id: 'meta-forge', title: 'Meta Forge', icon: Palette, description: 'Create legendary memes with sacred bases — AI-infused.' },
   { id: 'badges', title: 'Badge Collection', icon: Trophy, description: 'Earn and showcase your achievements' },
-  { id: 'fomo', title: 'FOMO Tracker', icon: TrendingUp, description: 'Monitor horny velocity in real-time' },
 ];
 
 export default function Interact() {
@@ -41,7 +37,7 @@ export default function Interact() {
             addSectionVisited(entry.target.id);
             
             // Check if all sections visited
-            const allSections = ['quiz', 'meta-forge', 'badges', 'fomo', 'hero', 'lore', 'interact-preview'];
+            const allSections = ['meta-forge', 'badges', 'hero', 'lore', 'interact-preview'];
             const visitedAll = allSections.every(s => visitData.sectionsVisited.includes(s));
             if (visitedAll) {
               unlockBadge('all-sections');
@@ -102,26 +98,6 @@ export default function Interact() {
 
         {/* Sections */}
         <div className="space-y-24">
-          {/* Quiz */}
-          <section id="quiz" className="max-w-6xl mx-auto px-4">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-            >
-              <div className="flex items-center gap-3 mb-8">
-                <div className="w-12 h-12 rounded-lg bg-pink-500/20 flex items-center justify-center">
-                  <Brain className="w-6 h-6 text-pink-500" />
-                </div>
-                <div>
-                  <h2 className="text-2xl font-bold">Horny Level Quiz</h2>
-                  <p className="text-muted-foreground">Discover your true crypto desire class</p>
-                </div>
-              </div>
-              <Quiz />
-            </motion.div>
-          </section>
-
           {/* Meta Forge */}
           <section id="meta-forge" className="max-w-6xl mx-auto px-4">
             <motion.div
@@ -159,28 +135,6 @@ export default function Interact() {
                 </div>
               </div>
               <Badges />
-            </motion.div>
-          </section>
-
-          {/* FOMO Tracker */}
-          <section id="fomo" className="max-w-6xl mx-auto px-4">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-            >
-              <div className="flex items-center gap-3 mb-8">
-                <div className="w-12 h-12 rounded-lg bg-green-500/20 flex items-center justify-center">
-                  <TrendingUp className="w-6 h-6 text-green-500" />
-                </div>
-                <div>
-                  <h2 className="text-2xl font-bold">FOMO Tracker</h2>
-                  <p className="text-muted-foreground">Monitor horny velocity in real-time</p>
-                </div>
-              </div>
-              <div className="max-w-lg">
-                <FOMOTracker />
-              </div>
             </motion.div>
           </section>
         </div>

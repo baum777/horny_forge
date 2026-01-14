@@ -10,7 +10,6 @@ const navLinks = [
   { href: '/', label: 'Home' },
   { href: '/interact', label: 'Interact' },
   { href: '/#lore', label: 'Lore' },
-  { href: '/#fomo', label: 'FOMO' },
   { href: '/#badges', label: 'Badges' },
 ];
 

@@ -54,7 +54,6 @@ export const INCENTIVE_RULES: IncentiveRule[] = [
     computeGain: (ctx) => Math.floor(Math.max(0, ctx.timeDeltaSeconds ?? 0) / 60),
   },
 
-  { action: "quiz_complete", hornyGain: 25, visibility: "semi", hornyCap: { weekly: 50 } },
   { action: "streak_tick", hornyGain: 3, visibility: "private", hornyCap: { daily: 10 } },
 
   { action: "special", hornyGain: 0, visibility: "private" },
