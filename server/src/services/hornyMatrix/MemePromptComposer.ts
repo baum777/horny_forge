@@ -1,75 +1,196 @@
-import { BASE_IMAGES, BRAND_DNA_BLOCK } from '../../constants';
-import type { MemePromptPack, HornyMatrixSelection } from './types';
+/**
+ * MemePromptComposer - Composes prompts from HornyMatrix selections
+ * 
+ * CRITICAL: This service MUST never fail without producing a prompt with Brand Directives.
+ * All errors are caught and handled via composeFallback().
+ */
 
-const BRAND_CONSTITUTION = [
+import type { HornyMatrixSelection, MemeGenPromptPack } from './types';
+
+export interface ComposeInput {
+  rewritten_prompt: string;
+  selection: HornyMatrixSelection;
+}
+
+export interface ComposeFallbackInput {
+  rewritten_prompt: string;
+  selection: Partial<HornyMatrixSelection>;
+}
+
+/**
+ * Brand Directives that MUST always be present in any prompt
+ */
+const BRAND_DIRECTIVES = [
   'bold silhouette',
   'high contrast',
-  'symbolic storytelling',
-  'emotionally overacted pose',
-  '32px readable composition',
-  'no text in image',
-].join(', ');
+  'readable at 32px',
+  'no text / no letters / no logos',
+  'symbolic over literal',
+];
 
-const NEGATIVE_PROMPT = [
-  'text',
-  'watermark',
-  'logo',
-  'photorealistic',
-  '3d render',
-  'low contrast',
-  'tiny unreadable details',
-].join(', ');
-
-const MAX_PROMPT_LENGTH = 900;
-
-const clampPrompt = (value: string): { prompt: string; clamped: boolean } => {
-  if (value.length <= MAX_PROMPT_LENGTH) return { prompt: value, clamped: false };
-  return { prompt: value.slice(0, MAX_PROMPT_LENGTH).trim(), clamped: true };
+/**
+ * Safe fallback selection (energy=1, pattern=A, safe flavor)
+ */
+const SAFE_FALLBACK_SELECTION: HornyMatrixSelection = {
+  intent: 'reaction',
+  energy: 1,
+  flavor: 'ironic',
+  pattern: 'A',
+  template: 'top_bottom',
+  contextObjects: [],
+  accentColors: [],
+  bannedTopicsHit: false,
+  rewriteMode: 'metaphorize',
 };
 
-export class MemePromptComposer {
-  compose(params: {
-    rewrittenPrompt: string;
-    selection: HornyMatrixSelection;
-    baseId: string;
-    preset: string;
-  }): MemePromptPack {
-    const { rewrittenPrompt, selection, baseId, preset } = params;
-    const baseDescription = BASE_IMAGES[baseId]?.description ?? 'Selected base image from the meme pool.';
+/**
+ * Composes a prompt pack from matrix selection.
+ * 
+ * @throws Never throws - all errors are handled via fallback
+ */
+export function compose(input: ComposeInput): MemeGenPromptPack {
+  try {
+    const { rewritten_prompt, selection } = input;
 
-    const contextLine = selection.context.length > 0 ? `Context props: ${selection.context.join(', ')}.` : '';
-    const promptSource = [
-      BRAND_DNA_BLOCK,
-      `Horny Brand Constitution: ${BRAND_CONSTITUTION}.`,
-      `Intent: ${selection.intent}. Energy: ${selection.energy}. Flavor: ${selection.flavor}. Pattern ${selection.pattern}.`,
-      `Rewrite mode: ${selection.rewriteMode}.`,
-      `Base reference: ${baseDescription}`,
-      contextLine,
-      `Scene: ${rewrittenPrompt}.`,
-      `Preset: ${preset}.`,
-    ]
-      .filter(Boolean)
-      .join(' ');
+    // Build template-specific skeleton
+    const templateSkeleton = buildTemplateSkeleton(selection.template, selection.pattern);
 
-    const { prompt, clamped } = clampPrompt(promptSource);
+    // Build composition directives
+    const compositionDirectives = buildCompositionDirectives(selection);
+
+    // Build final prompt with Brand Directives
+    const finalPrompt = [
+      rewritten_prompt,
+      templateSkeleton,
+      compositionDirectives,
+      `Brand Directives: ${BRAND_DIRECTIVES.join(', ')}`,
+    ].filter(Boolean).join('. ');
+
+    // Build negative prompt
+    const negativePrompt = [
+      'text',
+      'watermark',
+      'logo',
+      'letters',
+      'blurry',
+      'low-contrast',
+      'clutter',
+      'tiny details',
+      'photorealistic',
+    ].join(', ');
 
     return {
-      prompt,
-      negative_prompt: NEGATIVE_PROMPT,
-      guardrailFlags: clamped ? ['LENGTH_CLAMP'] : [],
+      finalPrompt,
+      negativePrompt,
       meta: {
-        intent: selection.intent,
-        energy: selection.energy,
-        flavor: selection.flavor,
-        pattern: selection.pattern,
-        template_key: selection.templateKey,
-        rewrite_mode: selection.rewriteMode,
-        context: selection.context,
-        base_id: baseId,
-        preset,
-        schema_version: 'v1',
-        composer_version: 'v1',
+        ...selection,
+        noveltyScore: 0.5,
+        riskScore: 0.2,
+        usedGuardrails: [],
       },
     };
+  } catch (error) {
+    // This should never happen, but if it does, use fallback
+    console.error('[MemePromptComposer] compose() error:', error);
+    return composeFallback({
+      rewritten_prompt: input.rewritten_prompt || 'meme scene',
+      selection: input.selection || {},
+    });
   }
 }
+
+/**
+ * Fallback composer that ALWAYS produces a valid prompt with Brand Directives.
+ * 
+ * This method MUST never throw and MUST always include Brand Directives.
+ */
+export function composeFallback(input: ComposeFallbackInput): MemeGenPromptPack {
+  const { rewritten_prompt, selection } = input;
+
+  // Use safe fallback selection, merging with provided selection
+  const safeSelection: HornyMatrixSelection = {
+    ...SAFE_FALLBACK_SELECTION,
+    ...selection,
+    energy: (selection.energy ?? 1) as 1 | 2 | 3 | 4 | 5,
+    pattern: (selection.pattern ?? 'A') as 'A' | 'B' | 'C',
+    template: (selection.template ?? 'top_bottom') as any,
+  };
+
+  // Build minimal but safe prompt
+  const finalPrompt = [
+    rewritten_prompt || 'simple meme scene',
+    `Pattern ${safeSelection.pattern}: isolated focus, minimal context`,
+    `Brand Directives: ${BRAND_DIRECTIVES.join(', ')}`,
+  ].join('. ');
+
+  const negativePrompt = [
+    'text',
+    'watermark',
+    'logo',
+    'letters',
+    'blurry',
+    'low-contrast',
+    'clutter',
+  ].join(', ');
+
+  return {
+    finalPrompt,
+    negativePrompt,
+    meta: {
+      ...safeSelection,
+      noveltyScore: 0.3,
+      riskScore: 0.1,
+      usedGuardrails: ['COMPOSER_FALLBACK'],
+      fallback_used: true,
+      fallback_stage: 'composer',
+    } as any,
+  };
+}
+
+function buildTemplateSkeleton(template: string, pattern: string): string {
+  const skeletons: Record<string, Record<string, string>> = {
+    top_bottom: {
+      A: 'single strong subject, bold silhouette, meme readable thumbnail, clean background',
+      B: 'character + minimal scene hint, center focus, high contrast',
+      C: 'full scene with clear subject, meme composition',
+    },
+    caption_single: {
+      A: 'single subject + minimal scene hint, center focus',
+      B: 'character + mini scene, balanced composition',
+      C: 'full scene story frame, clear narrative',
+    },
+    reaction_card: {
+      A: 'character bust framed for reaction card layout',
+      B: 'character pose + context, safe margins',
+      C: 'full reaction scene, clear emotional expression',
+    },
+    comic_2panel: {
+      A: 'two sequential beats, clear contrast',
+      B: 'two panels with character progression',
+      C: 'full two-panel story, narrative flow',
+    },
+    chart_meme: {
+      A: 'chart context scene, clean chart area',
+      B: 'chart with comedic visual metaphor',
+      C: 'full chart meme scene, visual storytelling',
+    },
+  };
+
+  return skeletons[template]?.[pattern] || 'meme composition, clear focus';
+}
+
+function buildCompositionDirectives(selection: HornyMatrixSelection): string {
+  const parts: string[] = [];
+
+  parts.push(`Intent: ${selection.intent}`);
+  parts.push(`Energy: ${selection.energy}`);
+  parts.push(`Flavor: ${selection.flavor}`);
+  parts.push(`Pattern ${selection.pattern}`);
+
+  if (selection.contextObjects.length > 0) {
+    parts.push(`Context: ${selection.contextObjects.map(c => c.label).join(', ')}`);
+  }
+
+  return parts.join('; ');
+}
+

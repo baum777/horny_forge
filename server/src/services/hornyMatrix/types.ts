@@ -1,51 +1,75 @@
-export type MatrixIntent = 'hype' | 'copium' | 'victory' | 'panic' | 'mystic' | 'chaos';
-export type MatrixFlavor = 'absurdist' | 'mythic' | 'degenerate' | 'clean' | 'retro' | 'glitch';
-export type MatrixPattern = 'A' | 'B' | 'C';
-export type RewriteMode = 'metaphorize' | 'abstract' | 'strict';
+/**
+ * HornyMatrix Types
+ */
 
-export interface HornyMatrixNudges {
-  energy?: number;
-  flavor?: MatrixFlavor;
-  templateKey?: string;
+export type Intent = 'reaction' | 'situation' | 'character' | 'symbol' | 'headline' | 'parody';
+
+export type Energy = 1 | 2 | 3 | 4 | 5;
+
+export type Flavor =
+  | 'mischievous'
+  | 'ironic'
+  | 'chaotic'
+  | 'cursed'
+  | 'delusional'
+  | 'divine'
+  | 'innocent_wrong'
+  | 'dominant';
+
+export type SafetyRewriteMode = 'none' | 'metaphorize' | 'abstract' | 'sanitize_strict';
+
+export type CompositionPattern = 'A' | 'B' | 'C';
+
+export type MemeTemplateKey =
+  | 'top_bottom'
+  | 'caption_single'
+  | 'reaction_card'
+  | 'comic_2panel'
+  | 'chart_meme';
+
+export interface MatrixContextObject {
+  id: string;
+  label: string;
+  allowedColors: string[];
 }
 
 export interface HornyMatrixSelection {
-  intent: MatrixIntent;
-  energy: number;
-  flavor: MatrixFlavor;
-  pattern: MatrixPattern;
-  templateKey?: string;
-  context: string[];
-  rewriteMode: RewriteMode;
+  intent: Intent;
+  energy: Energy;
+  flavor: Flavor;
+  pattern: CompositionPattern;
+  template: MemeTemplateKey;
+  contextObjects: MatrixContextObject[];
+  accentColors: string[];
+  bannedTopicsHit: boolean;
+  rewriteMode: SafetyRewriteMode;
+  seedHint?: string;
 }
 
-export interface SafetyRewriteResult {
-  rewrittenPrompt: string;
-  flags: string[];
-  usedGuardrails: string[];
-}
-
-export interface MatrixScores {
-  risk: number;
-  novelty: number;
-  coherence: number;
-}
-
-export interface MemePromptPack {
-  prompt: string;
-  negative_prompt: string;
-  guardrailFlags: string[];
-  meta: {
-    intent: MatrixIntent;
-    energy: number;
-    flavor: MatrixFlavor;
-    pattern: MatrixPattern;
-    template_key?: string;
-    rewrite_mode: RewriteMode;
-    context: string[];
-    base_id: string;
-    preset: string;
-    schema_version: 'v1';
-    composer_version: 'v1';
+export interface MemeGenPromptPack {
+  finalPrompt: string;
+  negativePrompt: string;
+  meta: HornyMatrixSelection & {
+    noveltyScore: number;
+    riskScore: number;
+    usedGuardrails: string[];
+    fallback_used?: boolean;
+    fallback_stage?: string;
   };
 }
+
+export interface MatrixMeta {
+  schema_version?: string;
+  fallback_used?: boolean;
+  fallback_stage?: string;
+  legacy_record?: boolean;
+  intent?: Intent;
+  energy?: Energy;
+  flavor?: Flavor;
+  pattern?: CompositionPattern;
+  noveltyScore?: number;
+  riskScore?: number;
+  coherenceScore?: number;
+  used_guardrails?: string[];
+}
+

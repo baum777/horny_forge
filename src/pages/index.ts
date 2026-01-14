@@ -8,3 +8,4 @@ export { default as Interact } from "./Interact";
 export { default as Legal } from "./Legal";
 export { default as NotFound } from "./NotFound";
 export { default as Profile } from "./Profile";
+export { default as GamePage } from "./GamePage";

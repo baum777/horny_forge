@@ -4,9 +4,7 @@ import { clientGamificationEnabled } from '@/lib/gamificationFlags';
 const STORAGE_KEYS = {
   USER: 'horny_user',
   BADGES: 'horny_badges',
-  QUIZ_RESULT: 'horny_quiz_result',
   MEMES: 'horny_memes',
-  FOMO_ALERT: 'horny_fomo_alert',
   HORNY_METER: 'horny_meter',
   VISIT_DATA: 'horny_visit_data',
 } as const;
@@ -15,12 +13,6 @@ export interface User {
   handle: string;
   avatar: string;
   joinedAt: string;
-}
-
-export interface QuizResult {
-  class: string;
-  level: number;
-  completedAt: string;
 }
 
 export interface Badge {
@@ -36,12 +28,6 @@ export interface Meme {
   accentStyle: 'pink' | 'red' | 'gold';
   createdAt: string;
   imageData?: string;
-}
-
-export interface FOMOAlert {
-  threshold: number;
-  direction: 'up' | 'down';
-  armed: boolean;
 }
 
 export interface VisitData {
@@ -82,10 +68,6 @@ export const getUser = () => getItem<User>(STORAGE_KEYS.USER);
 export const setUser = (user: User) => setItem(STORAGE_KEYS.USER, user);
 export const clearUser = () => removeItem(STORAGE_KEYS.USER);
 
-// Quiz
-export const getQuizResult = () => getItem<QuizResult>(STORAGE_KEYS.QUIZ_RESULT);
-export const setQuizResult = (result: QuizResult) => setItem(STORAGE_KEYS.QUIZ_RESULT, result);
-
 // Badges
 export const getBadges = () =>
   clientGamificationEnabled ? getItem<Record<string, Badge>>(STORAGE_KEYS.BADGES) || {} : {};
@@ -112,11 +94,6 @@ export const addMeme = (meme: Meme) => {
   // Keep only last 12
   setItem(STORAGE_KEYS.MEMES, memes.slice(0, 12));
 };
-
-// FOMO Alert
-export const getFOMOAlert = () => getItem<FOMOAlert>(STORAGE_KEYS.FOMO_ALERT);
-export const setFOMOAlert = (alert: FOMOAlert) => setItem(STORAGE_KEYS.FOMO_ALERT, alert);
-export const clearFOMOAlert = () => removeItem(STORAGE_KEYS.FOMO_ALERT);
 
 // Horny Meter
 export const getHornyMeter = () =>

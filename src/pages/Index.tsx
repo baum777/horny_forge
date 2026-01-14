@@ -4,7 +4,6 @@ import Footer from '@/components/layout/Footer';
 import Hero from '@/components/home/Hero';
 import LoreSection from '@/components/home/LoreSection';
 import InteractPreview from '@/components/home/InteractPreview';
-import LiveTicker from '@/components/features/LiveTicker';
 import HornyMeter from '@/components/features/HornyMeter';
 import MemeBackground from '@/components/MemeBackground';
 import { addSectionVisited, unlockBadge } from '@/lib/storage';
@@ -13,7 +12,7 @@ import MemeBackground from '@/components/MemeBackground';
 export default function Index() {
   useEffect(() => {
     // Track section visits for badge
-    const sections = ['hero', 'lore', 'interact-preview', 'fomo'];
+    const sections = ['hero', 'lore', 'interact-preview'];
     
     const observer = new IntersectionObserver(
       (entries) => {
@@ -54,10 +53,6 @@ export default function Index() {
       <main>
         <div id="hero">
           <Hero />
-        </div>
-        
-        <div id="fomo">
-          <LiveTicker />
         </div>
         
         <LoreSection />
