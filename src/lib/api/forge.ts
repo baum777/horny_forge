@@ -2,7 +2,11 @@ export interface ForgeRequest {
   base_id: string;
   base_image?: string;
   preset: 'HORNY_CORE_SKETCH' | 'HORNY_META_SCENE' | 'HORNY_CHAOS_VARIATION';
-  user_input: string;
+  user_input?: string;
+  user_prompt?: string;
+  energy?: number;
+  flavor?: string;
+  template_key?: string;
   seed?: string;
   size?: '1024x1024';
 }
@@ -14,6 +18,8 @@ export interface ForgeResponse {
   sanitized_input: string;
   image_url: string;
   created_at: string;
+  matrix_meta?: Record<string, unknown>;
+  scores?: Record<string, unknown>;
   meta: {
     expires_in_seconds: number;
     model: string;
@@ -43,6 +49,7 @@ export interface ReleaseRequest {
   generation_id: string;
   caption?: string;
   tags: string[];
+  remix_of?: string;
 }
 
 export interface ReleaseResponse {
