@@ -23,9 +23,6 @@ export default function Footer() {
             <Link to="/legal" className="text-sm text-muted-foreground hover:text-primary transition-colors">
               Disclaimer
             </Link>
-            <a href="#fomo" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-              FOMO Tracker
-            </a>
           </div>
 
           {/* Social */}
