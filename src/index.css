@@ -4,45 +4,68 @@
 
 @layer base {
   :root {
-    /* HORNY Design System Tokens */
-    --horny-energy: 330 100% 71%;
-    --horny-rage: 0 100% 50%;
-    --horny-meta-void: 0 0% 0%;
-    --horny-purity: 0 0% 100%;
-    --horny-gains: 51 100% 50%;
-    --horny-success: 120 61% 50%;
-    --horny-error: 0 100% 27%;
+    /* HORNY Design System Tokens v1.0 */
+    --horny-yellow: #FFE600;
+    --horny-black: #0B0B0B;
+    --horny-white: #FFFFFF;
 
-    /* Dark mode default - semantic mappings */
-    --background: 0 0% 2%;
-    --foreground: 0 0% 100%;
-    --card: 0 0% 5%;
-    --card-foreground: 0 0% 100%;
-    --popover: 0 0% 5%;
-    --popover-foreground: 0 0% 100%;
-    --primary: 330 100% 71%;
-    --primary-foreground: 0 0% 0%;
-    --secondary: 0 100% 50%;
-    --secondary-foreground: 0 0% 100%;
-    --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 65%;
+    /* Text */
+    --text-primary: #EAEAEA;
+    --text-secondary: #9E9E9E;
+
+    /* Surfaces */
+    --surface-bg: #0B0B0B;
+    --surface-1: #0F0F10;
+    --surface-2: #141416;
+    --surface-3: #1B1B1E;
+
+    /* Borders */
+    --border-subtle: rgba(255,255,255,0.08);
+    --border-accent: rgba(255,230,0,0.22);
+
+    /* Glow */
+    --glow-soft: 0 0 16px rgba(255,230,0,0.35);
+    --glow-strong: 0 0 32px rgba(255,230,0,0.65);
+
+    /* Mappings to Tailwind defaults */
+    --background: 0 0% 4%; /* #0B0B0B approx hsl */
+    --foreground: 0 0% 92%; /* #EAEAEA */
+    
+    --card: 0 0% 6%; /* #0F0F10 */
+    --card-foreground: 0 0% 92%;
+    
+    --popover: 0 0% 6%;
+    --popover-foreground: 0 0% 92%;
+    
+    --primary: 51 100% 50%; /* #FFE600 */
+    --primary-foreground: 0 0% 4%;
+    
+    --secondary: 0 0% 9%; /* #141416 */
+    --secondary-foreground: 0 0% 92%;
+    
+    --muted: 0 0% 11%; /* #1B1B1E */
+    --muted-foreground: 0 0% 62%; /* #9E9E9E */
+    
     --accent: 51 100% 50%;
-    --accent-foreground: 0 0% 0%;
+    --accent-foreground: 0 0% 4%;
+    
     --destructive: 0 100% 27%;
     --destructive-foreground: 0 0% 100%;
-    --border: 0 0% 20%;
+    
+    --border: 0 0% 20%; /* fallback */
     --input: 0 0% 15%;
-    --ring: 330 100% 71%;
+    --ring: 51 100% 50%;
+    
     --radius: 0.75rem;
 
     --sidebar-background: 0 0% 5%;
     --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 330 100% 71%;
+    --sidebar-primary: 51 100% 50%;
     --sidebar-primary-foreground: 0 0% 0%;
     --sidebar-accent: 0 0% 15%;
     --sidebar-accent-foreground: 0 0% 100%;
     --sidebar-border: 0 0% 20%;
-    --sidebar-ring: 330 100% 71%;
+    --sidebar-ring: 51 100% 50%;
   }
 
   * {
@@ -51,24 +74,41 @@
 
   body {
     @apply bg-background text-foreground antialiased;
+    font-family: 'Inter', system-ui, sans-serif;
   }
 }
 
 @layer utilities {
   .text-gradient {
-    background: linear-gradient(90deg, hsl(330 100% 71%) 0%, hsl(0 100% 50%) 100%);
+    /* Updated gradient to use yellow */
+    background: linear-gradient(90deg, #FFE600 0%, #EAB308 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
+  
+  /* Energy Levels */
+  .energy-1 {
+    /* Static, fade only */
+    transition: opacity 0.2s ease;
+  }
+  
+  .energy-2 {
+    /* Hover glow */
+    transition: all 0.2s ease;
+  }
+  .energy-2:hover {
+    box-shadow: var(--glow-soft);
+  }
 
   .bg-gradient-horny {
-    background: linear-gradient(90deg, hsl(330 100% 71%) 0%, hsl(0 100% 50%) 100%);
+    background: linear-gradient(90deg, #FFE600 0%, #EAB308 100%);
   }
 
   .glass-card {
     @apply bg-card/80 backdrop-blur-md border border-border/50 rounded-xl;
   }
+
 
   .neon-border {
     border: 1px solid transparent;

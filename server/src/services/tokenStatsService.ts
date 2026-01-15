@@ -5,10 +5,12 @@ type DexPair = {
   marketCap?: number;
   liquidity?: { usd?: number };
   volume?: { h24?: number };
+  priceChange?: { h24?: number };
 };
 
 export type TokenStats = {
   priceUsd: number | null;
+  priceChange24h: number | null;
   fdvUsd: number | null;
   liquidityUsd: number | null;
   volume24hUsd: number | null;
@@ -67,6 +69,7 @@ function emptyResponse(fallbackPairUrl: string | null): TokenStatsResponse {
   return {
     stats: {
       priceUsd: null,
+      priceChange24h: null,
       fdvUsd: null,
       liquidityUsd: null,
       volume24hUsd: null,
@@ -101,6 +104,7 @@ async function fetchDexScreenerTokenStats(params: {
 
   return {
     priceUsd: toNumber(best?.priceUsd) ?? null,
+    priceChange24h: toNumber(best?.priceChange?.h24) ?? null,
     fdvUsd: toNumber(best?.marketCap) ?? toNumber(best?.fdv) ?? null,
     liquidityUsd: toNumber(best?.liquidity?.usd) ?? null,
     volume24hUsd: toNumber(best?.volume?.h24) ?? null,

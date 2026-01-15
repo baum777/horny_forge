@@ -107,6 +107,7 @@ export function FloatingImages(props: {
 
         const t = window.setTimeout(() => {
           setItems((cur) => cur.filter((x) => x.id !== item.id));
+          timeouts.delete(t);
         }, dur + delay + 120);
 
         timeouts.add(t);

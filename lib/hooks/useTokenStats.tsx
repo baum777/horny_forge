@@ -66,6 +66,7 @@ function emptyStale(): CachedPayload {
   return {
     stats: {
       priceUsd: null,
+      priceChange24h: null,
       fdvUsd: null,
       liquidityUsd: null,
       volume24hUsd: null,

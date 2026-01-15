@@ -1,5 +1,6 @@
 export type TokenStats = {
   priceUsd: number | null;
+  priceChange24h: number | null;
   fdvUsd: number | null;
   liquidityUsd: number | null;
   volume24hUsd: number | null;

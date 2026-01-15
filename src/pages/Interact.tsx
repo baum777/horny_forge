@@ -8,6 +8,7 @@ import HornyMeter from '@/components/features/HornyMeter';
 import MetaForge from '@/components/MetaForge/MetaForge';
 import Badges from '@/components/features/Badges';
 import { addSectionVisited, unlockBadge, getVisitData } from '@/lib/storage';
+import { PageShell } from '@/components/layout/PageShell';
 
 const sections = [
   { id: 'meta-forge', title: 'Meta Forge', icon: Palette, description: 'Create legendary memes with sacred bases — AI-infused.' },
@@ -57,10 +58,17 @@ export default function Interact() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
+    <PageShell
+      spec={{
+        page: "interact",
+        flavor: "subtle",
+        energy: 2,
+      }}
+    >
+      <div className="min-h-screen bg-background">
+        <Navbar />
 
-      <main className="pt-24 pb-16">
+        <main className="pt-24 pb-16">
         {/* Header */}
         <div className="max-w-6xl mx-auto px-4 mb-16">
           <motion.div
@@ -143,5 +151,6 @@ export default function Interact() {
       <Footer />
       <HornyMeter />
     </div>
+  </PageShell>
   );
 }

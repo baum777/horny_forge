@@ -3,6 +3,7 @@ import { Loader2 } from 'lucide-react';
 import { ArtifactCard } from './ArtifactCard';
 import { Button } from '@/components/ui/button';
 import type { Artifact } from '@/lib/archives/types';
+import { copyContent } from '@/lib/content';
 
 interface GalleryGridProps {
   artifacts: Artifact[];
@@ -27,10 +28,9 @@ export function GalleryGrid({
         className="text-center py-20"
       >
         <div className="text-6xl mb-4">🔮</div>
-        <h3 className="text-xl font-bold mb-2">The void awaits...</h3>
-        <p className="text-muted-foreground">
-          No artifacts match your search. The Archives hunger for new creations.
-        </p>
+        <h3 className="text-xl font-bold mb-2">Voting Gallery is quiet.</h3>
+        <p className="text-muted-foreground mb-1">{copyContent.gallery.emptyStates.hot}</p>
+        <p className="text-muted-foreground">{copyContent.gallery.emptyStates.new}</p>
       </motion.div>
     );
   }

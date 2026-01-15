@@ -8,6 +8,7 @@ import { TokenPulseStrip } from '@/components/archives/TokenPulseStrip';
 import { useArtifacts } from '@/hooks/useArtifacts';
 import Footer from '@/components/layout/Footer';
 import type { SortOption } from '@/lib/archives/types';
+import { PageShell } from '@/components/layout/PageShell';
 
 export default function Archives() {
   const [sort, setSort] = useState<SortOption>('newest');
@@ -26,79 +27,87 @@ export default function Archives() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background">
-      <ArchivesNavbar />
+    <PageShell
+      spec={{
+        page: "feed",
+        flavor: "mixed",
+        energy: 2,
+      }}
+    >
+      <div className="min-h-screen bg-background">
+        <ArchivesNavbar />
 
-      {/* Token Pulse Strip - below nav */}
-      <div className="pt-16">
-        <TokenPulseStrip />
-      </div>
-
-      {/* Hero Header */}
-      <section className="pt-8 pb-8 relative overflow-hidden">
-        {/* Background glow */}
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent pointer-events-none" />
-        
-        <div className="container mx-auto px-4 text-center relative z-10">
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-4xl md:text-6xl font-bold mb-4"
-          >
-            <span className="text-gradient">THE HORNY ARCHIVES</span>
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="text-lg text-muted-foreground max-w-lg mx-auto"
-          >
-            A living record of collective desire. Infuse. Vote. Ascend.
-          </motion.p>
+        {/* Token Pulse Strip - below nav */}
+        <div className="pt-16">
+          <TokenPulseStrip />
         </div>
-      </section>
 
-      {/* Filters & Gallery */}
-      <section className="pb-20">
-        <div className="container mx-auto px-4 space-y-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-          >
-            <FiltersBar
-              sort={sort}
-              onSortChange={setSort}
-              search={search}
-              onSearchChange={setSearch}
-              selectedTag={selectedTag}
-              onTagChange={setSelectedTag}
-            />
-          </motion.div>
-
-          {error && (
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-center py-8"
+        {/* Hero Header */}
+        <section className="pt-8 pb-8 relative overflow-hidden">
+          {/* Background glow */}
+          <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent pointer-events-none" />
+          
+          <div className="container mx-auto px-4 text-center relative z-10">
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-4xl md:text-6xl font-bold mb-4"
             >
-              <p className="text-destructive">The Archives resist. Retry your query.</p>
+              <span className="text-gradient">THE HORNY ARCHIVES</span>
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="text-lg text-muted-foreground max-w-lg mx-auto"
+            >
+              A living record of collective desire. Infuse. Vote. Ascend.
+            </motion.p>
+          </div>
+        </section>
+
+        {/* Filters & Gallery */}
+        <section className="pb-20">
+          <div className="container mx-auto px-4 space-y-6">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <FiltersBar
+                sort={sort}
+                onSortChange={setSort}
+                search={search}
+                onSearchChange={setSearch}
+                selectedTag={selectedTag}
+                onTagChange={setSelectedTag}
+              />
             </motion.div>
-          )}
 
-          <GalleryGrid
-            artifacts={artifacts}
-            loading={loading}
-            hasMore={hasMore}
-            onLoadMore={loadMore}
-            onRequiresAuth={handleRequiresAuth}
-          />
-        </div>
-      </section>
+            {error && (
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-center py-8"
+              >
+                <p className="text-destructive">The Archives resist. Retry your query.</p>
+              </motion.div>
+            )}
 
-      <Footer />
+            <GalleryGrid
+              artifacts={artifacts}
+              loading={loading}
+              hasMore={hasMore}
+              onLoadMore={loadMore}
+              onRequiresAuth={handleRequiresAuth}
+            />
+          </div>
+        </section>
 
-      <ArchivesLoginModal isOpen={showLogin} onClose={() => setShowLogin(false)} />
-    </div>
+        <Footer />
+
+        <ArchivesLoginModal isOpen={showLogin} onClose={() => setShowLogin(false)} />
+      </div>
+    </PageShell>
   );
 }

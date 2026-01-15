@@ -5,12 +5,13 @@ import { Menu, X, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getUser, type User as UserType } from '@/lib/storage';
 import LoginModal from '@/components/modals/LoginModal';
+import { NavLink } from '../NavLink'; // Ensure this component exists or use Link directly if simple
 
-const navLinks = [
-  { href: '/', label: 'Home' },
-  { href: '/interact', label: 'Interact' },
-  { href: '/#lore', label: 'Lore' },
-  { href: '/#badges', label: 'Badges' },
+const LINKS = [
+  { href: "/dashboard", label: "Dashboard" },
+  { href: "/forge", label: "Forge" },
+  { href: "/gallery", label: "Gallery" },
+  { href: "/quests", label: "Quests" },
 ];
 
 export default function Navbar() {
@@ -37,144 +38,139 @@ export default function Navbar() {
     setShowLogin(false);
   }, []);
 
-  const scrollToSection = (href: string) => {
-    if (href.startsWith('/#')) {
-      const id = href.replace('/#', '');
-      const element = document.getElementById(id);
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth' });
-      }
-    }
-    setIsOpen(false);
+  // Highlight active link logic
+  const isActive = (path: string) => {
+    if (path === '/' && location.pathname !== '/') return false;
+    return location.pathname.startsWith(path);
   };
 
   return (
     <>
-      <motion.nav
-        initial={{ y: -100 }}
-        animate={{ y: 0 }}
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          scrolled ? 'bg-background/90 backdrop-blur-md border-b border-border' : 'bg-transparent'
-        }`}
-      >
+      <nav className={`fixed top-0 left-0 right-0 z-50 border-b border-white/5 bg-background/80 backdrop-blur-md transition-all duration-300 ${scrolled ? 'bg-background/90' : ''}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-2">
-              <span className="text-2xl font-black text-gradient">$HORNY</span>
+            <Link to="/" className="flex-shrink-0 flex items-center gap-2 group">
+              <span className="text-xl font-black tracking-tighter text-white group-hover:text-[#FFE600] transition-colors">
+                $HORNY
+              </span>
             </Link>
 
             {/* Desktop Nav */}
-            <div className="hidden md:flex items-center gap-6">
-              {navLinks.map((link) => (
-                <button
-                  key={link.href}
-                  onClick={() => {
-                    if (link.href.startsWith('/#')) {
-                      scrollToSection(link.href);
-                    }
-                  }}
-                  className={`text-sm font-medium transition-colors hover:text-primary ${
-                    location.pathname === link.href ? 'text-primary' : 'text-muted-foreground'
+            <div className="hidden md:flex items-center gap-4">
+              {LINKS.map((link) => (
+                <Link 
+                  key={link.href} 
+                  to={link.href}
+                  className={`text-sm font-medium transition-colors ${
+                    isActive(link.href) ? "text-[#FFE600]" : "text-muted-foreground hover:text-white"
                   }`}
                 >
-                  {link.href.startsWith('/#') ? (
-                    link.label
-                  ) : (
-                    <Link to={link.href}>{link.label}</Link>
-                  )}
-                </button>
+                  {link.label}
+                </Link>
               ))}
             </div>
 
-            {/* Right side */}
+            {/* Desktop Actions */}
             <div className="hidden md:flex items-center gap-4">
               {user ? (
                 <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted">
-                  <User className="w-4 h-4 text-primary" />
+                  <User className="w-4 h-4 text-[#FFE600]" />
                   <span className="text-sm font-medium">@{user.handle}</span>
                 </div>
-              ) : (
-                <Button variant="ghost" size="sm" onClick={() => setShowLogin(true)}>
-                  Login with X
+              ) : null}
+              
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                asChild 
+                className="text-muted-foreground hover:text-[#FFE600] hover:bg-white/5"
+              >
+                <Link to="/profile">Profile</Link>
+              </Button>
+              
+              {!user && (
+                <Button 
+                  size="sm" 
+                  onClick={() => setShowLogin(true)}
+                  className="bg-white text-black hover:bg-[#FFE600] hover:text-black font-bold border-none"
+                >
+                  Connect X
                 </Button>
               )}
-              <Button
-                variant="gradient"
-                size="sm"
-                onClick={() => {
-                  if (location.pathname === '/') {
-                    const el = document.getElementById('interact-preview');
-                    el?.scrollIntoView({ behavior: 'smooth' });
-                  } else {
-                    window.location.href = '/interact';
-                  }
-                }}
-              >
-                GET HORNY
-              </Button>
             </div>
 
-            {/* Mobile menu button */}
-            <button
-              className="md:hidden p-2"
-              onClick={() => setIsOpen(!isOpen)}
-              aria-label="Toggle menu"
-            >
-              {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
+            {/* Mobile Menu Trigger */}
+            <div className="md:hidden">
+               <button
+                className="p-2 text-white"
+                onClick={() => setIsOpen(!isOpen)}
+                aria-label="Toggle menu"
+              >
+                {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Mobile menu */}
+        {/* Mobile Menu Overlay */}
         <AnimatePresence>
           {isOpen && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="md:hidden bg-background/95 backdrop-blur-md border-b border-border"
+              className="md:hidden bg-[#0B0B0B] border-b border-white/10"
             >
-              <div className="px-4 py-4 space-y-3">
-                {navLinks.map((link) => (
-                  <button
+              <div className="flex flex-col p-4 space-y-2">
+                {LINKS.map((link) => (
+                  <Link
                     key={link.href}
-                    onClick={() => {
-                      if (link.href.startsWith('/#')) {
-                        scrollToSection(link.href);
-                      } else {
-                        setIsOpen(false);
-                      }
-                    }}
-                    className="block w-full text-left py-2 text-muted-foreground hover:text-primary transition-colors"
+                    to={link.href}
+                    onClick={() => setIsOpen(false)}
+                    className={`block px-4 py-3 rounded-lg text-lg font-medium transition-colors ${
+                      isActive(link.href) 
+                        ? "bg-[#FFE600]/10 text-[#FFE600]" 
+                        : "text-muted-foreground hover:text-white hover:bg-white/5"
+                    }`}
                   >
-                    {link.href.startsWith('/#') ? (
-                      link.label
-                    ) : (
-                      <Link to={link.href}>{link.label}</Link>
-                    )}
-                  </button>
+                    {link.label}
+                  </Link>
                 ))}
-                <div className="pt-4 border-t border-border space-y-3">
+                
+                <div className="h-px bg-white/5 my-2" />
+                
+                <Link
+                  to="/profile"
+                  onClick={() => setIsOpen(false)}
+                  className="block px-4 py-3 text-lg font-medium text-muted-foreground hover:text-white"
+                >
+                  Profile
+                </Link>
+
+                <div className="pt-4">
                   {user ? (
-                    <div className="flex items-center gap-2">
-                      <User className="w-4 h-4 text-primary" />
-                      <span className="text-sm">@{user.handle}</span>
+                     <div className="flex items-center gap-2 px-4 py-2">
+                      <User className="w-5 h-5 text-[#FFE600]" />
+                      <span className="text-white font-medium">@{user.handle}</span>
                     </div>
                   ) : (
-                    <Button variant="ghost" className="w-full" onClick={() => setShowLogin(true)}>
-                      Login with X
+                    <Button 
+                      className="w-full bg-[#FFE600] text-black hover:bg-[#FFE600]/90 font-bold"
+                      onClick={() => {
+                        setIsOpen(false);
+                        setShowLogin(true);
+                      }}
+                    >
+                      Connect X
                     </Button>
                   )}
-                  <Button variant="gradient" className="w-full">
-                    GET HORNY
-                  </Button>
                 </div>
               </div>
             </motion.div>
           )}
         </AnimatePresence>
-      </motion.nav>
+      </nav>
 
       <LoginModal
         isOpen={showLogin}
