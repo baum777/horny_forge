@@ -57,6 +57,7 @@ export default function Profile() {
   const level = stats?.level ?? 1;
   const xpTotal = stats?.xp_total ?? 0;
   const streakDays = stats?.streak_days ?? 0;
+  const unlockedBadges = badges?.map((badge) => badge.badge_id) ?? [];
 
   return (
     <PageShell
@@ -132,7 +133,7 @@ export default function Profile() {
         </div>
 
         <div className="mb-10">
-          <BadgeGrid unlockedBadges={badges.map((badge) => badge.badge_id)} />
+          <BadgeGrid unlockedBadges={unlockedBadges} />
         </div>
 
         {/* My Artifacts */}
