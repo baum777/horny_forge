@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { LiveTicker } from './LiveTicker';
 import { SocialGroup } from '@/components/ui/SocialGroup';
 import { ContractAddress } from '@/components/ui/ContractAddress';
+import { copyContent } from '@/lib/content';
 
 export default function Hero() {
   const scrollToInteract = () => {
@@ -42,15 +43,12 @@ export default function Hero() {
 
           {/* Headline */}
           <h1 className="text-6xl md:text-8xl font-black mb-6 tracking-tight text-white">
-            $HORNY
+            {copyContent.landing.hero.headline}
           </h1>
 
           {/* Subline */}
           <p className="text-xl md:text-2xl text-muted-foreground mb-4 max-w-2xl mx-auto leading-relaxed">
-            Create → remix → compete inside the <span className="text-white font-semibold">$HORNY universe</span>.
-          </p>
-          <p className="text-lg text-muted-foreground mb-10 max-w-xl mx-auto">
-            The playground to channel the $Horny energy into Memes.
+            {copyContent.landing.hero.subline}
           </p>
 
           {/* CTAs */}
@@ -59,27 +57,25 @@ export default function Hero() {
               size="lg"
               className="text-lg px-8 w-full sm:w-auto bg-[#FFE600] text-black hover:bg-[#FFE600]/90 font-bold border-none"
             >
-              Start Forging
+              {copyContent.landing.marketingMini.ctaPrimary}
             </Button>
-            <Link to="/game">
+            <Link to="/gallery">
               <Button
                 variant="outline"
                 size="lg"
                 className="text-lg w-full sm:w-auto border-white/20 hover:bg-white/5 hover:text-white"
               >
                 <Zap className="w-4 h-4 mr-2" />
-                Proof how $horny u are
+                {copyContent.landing.marketingMini.ctaSecondary}
               </Button>
             </Link>
           </div>
 
           {/* Trust Microcopy */}
           <div className="flex items-center justify-center gap-6 text-xs md:text-sm text-muted-foreground mb-12">
-            <span>No wallet required</span>
-            <span className="w-1 h-1 bg-white/20 rounded-full" />
-            <span>Free to play</span>
-            <span className="w-1 h-1 bg-white/20 rounded-full" />
-            <span>Community driven</span>
+            {copyContent.landing.hero.trust.map((line) => (
+              <span key={line}>{line}</span>
+            ))}
           </div>
 
           {/* Socials & CA */}

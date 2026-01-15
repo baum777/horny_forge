@@ -1,5 +1,6 @@
 import { PageShell } from "@/components/layout/PageShell";
 import { TeaserLayout } from "@/components/ui/TeaserLayout";
+import { copyContent } from "@/lib/content";
 
 export default function GamePage() {
   return (
@@ -19,6 +20,11 @@ export default function GamePage() {
                System Initializing
              </p>
           </div>
+        </div>
+        <div className="mt-6 text-xs text-muted-foreground space-y-1">
+          <p>{copyContent.errors.auth.connect}</p>
+          <p>{copyContent.errors.auth.session}</p>
+          <p>{copyContent.errors.auth.notVerified}</p>
         </div>
       </TeaserLayout>
     </PageShell>
