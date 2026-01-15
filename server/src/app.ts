@@ -16,6 +16,7 @@ import badgesRouter from './routes/badgesRouter';
 import rewardsRouter from './routes/rewardsRouter';
 import statusRouter from './routes/statusRouter';
 import { memePoolRouter } from './routes/memePool';
+import createMemesRouter from './routes/memes';
 
 type AppDependencies = {
   forgeController?: ForgeController;
@@ -69,6 +70,7 @@ export async function createApp(deps: AppDependencies = {}) {
   app.use('/api', badgesRouter);
   app.use('/api', rewardsRouter);
   app.use('/api', statusRouter);
+  app.use('/api', createMemesRouter(deps.supabaseAdmin));
   app.use('/api/gamification', gamificationRouter);
   app.use('/api/admin', adminRouter);
   app.use('/', ogRouter);

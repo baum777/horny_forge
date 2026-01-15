@@ -10,6 +10,12 @@ export interface Artifact {
   author_avatar: string | null;
   created_at: string;
   votes_count: number;
+  matrix_meta: Record<string, unknown>;
+  scores: {
+    novelty: number | null;
+    coherence: number | null;
+    risk: number | null;
+  };
   author_level?: number | null;
   author_top_badge_id?: string | null;
 }

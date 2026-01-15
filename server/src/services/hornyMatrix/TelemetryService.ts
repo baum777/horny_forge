@@ -42,7 +42,7 @@ export function emitTelemetryEvent(
   event: string,
   payload: Record<string, unknown>,
   requestId: string
-): void {
+): boolean {
   // Get or create event set for this request
   if (!emittedEvents.has(requestId)) {
     emittedEvents.set(requestId, new Set());
@@ -51,14 +51,14 @@ export function emitTelemetryEvent(
   const eventSet = emittedEvents.get(requestId)!;
 
   // Check if this event type was already emitted for this request
-  const eventKey = `${event}:${JSON.stringify(payload)}`;
+  const eventKey = event;
   if (eventSet.has(eventKey)) {
     logger.debug('telemetry_event_skipped_duplicate', {
       event,
       requestId,
       reason: 'already_emitted',
     });
-    return;
+    return false;
   }
 
   // Mark as emitted
@@ -74,6 +74,7 @@ export function emitTelemetryEvent(
   // In production, send to external telemetry service (e.g., PostHog, Mixpanel)
   // Example:
   // telemetryClient.track(event, { ...payload, request_id: requestId });
+  return true;
 }
 
 /**
@@ -82,14 +83,7 @@ export function emitTelemetryEvent(
 export function hasEmitted(requestId: string, event: string, payload?: Record<string, unknown>): boolean {
   const eventSet = emittedEvents.get(requestId);
   if (!eventSet) return false;
-
-  if (payload) {
-    const eventKey = `${event}:${JSON.stringify(payload)}`;
-    return eventSet.has(eventKey);
-  }
-
-  // Check if any event with this name was emitted
-  return Array.from(eventSet).some(key => key.startsWith(`${event}:`));
+  return eventSet.has(event);
 }
 
 /**
@@ -98,4 +92,3 @@ export function hasEmitted(requestId: string, event: string, payload?: Record<st
 export function clearRequestTracking(requestId: string): void {
   emittedEvents.delete(requestId);
 }
-

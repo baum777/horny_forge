@@ -14,6 +14,7 @@ export interface ForgeRequest {
   size?: '1024x1024';
   seed?: string;
   debug?: boolean;
+  preview_request_id?: string;
 }
 
 export interface ForgeResponse {
@@ -25,6 +26,7 @@ export interface ForgeResponse {
   created_at: string;
   matrix_meta?: Record<string, unknown>;
   scores?: Record<string, unknown>;
+  preview_request_id?: string;
   meta: {
     expires_in_seconds: number;
     model: string;
@@ -49,6 +51,7 @@ export interface ReleaseRequest {
   caption?: string;
   tags: string[];
   remix_of?: string;
+  release_request_id?: string;
 }
 
 export interface ReleaseResponse {

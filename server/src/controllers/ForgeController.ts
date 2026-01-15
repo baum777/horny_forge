@@ -1,4 +1,5 @@
 import type { Request, Response } from 'express';
+import { randomUUID } from 'node:crypto';
 import { ImageGenAdapter } from '../services/ImageGenAdapter';
 import { StorageAdapter } from '../services/StorageAdapter';
 import { ModerationService } from '../services/ModerationService';
@@ -7,6 +8,7 @@ import { HornyMatrixEngine } from '../services/hornyMatrix/HornyMatrixEngine';
 import { SafetyRewrite } from '../services/hornyMatrix/SafetyRewrite';
 import { MemePromptComposer } from '../services/hornyMatrix/MemePromptComposer';
 import { scoreMatrix } from '../services/hornyMatrix/scoring';
+import { emitTelemetryEvent } from '../services/hornyMatrix/TelemetryService';
 import { MatrixTelemetry } from '../services/telemetry/MatrixTelemetry';
 import type { MatrixFlavor } from '../services/hornyMatrix/types';
 import { config } from '../config';
@@ -30,6 +32,7 @@ const forgeRequestSchema = z.object({
   size: z.enum(['1024x1024']).optional(),
   seed: z.string().optional(),
   debug: z.boolean().optional(),
+  preview_request_id: z.string().optional(),
 }).superRefine((data, ctx) => {
   if (!data.user_input && !data.user_prompt) {
     ctx.addIssue({
@@ -60,6 +63,7 @@ const releaseRequestSchema = z.object({
   caption: z.string().max(140).optional(),
   tags: z.array(z.string()).min(1).max(3),
   remix_of: z.string().optional(),
+  release_request_id: z.string().optional(),
 });
 
 export class ForgeController {
@@ -210,8 +214,10 @@ export class ForgeController {
         template_key,
         size = '1024x1024',
         debug = false,
+        preview_request_id,
       } = validationResult.data;
       const resolvedUserInput = user_input ?? user_prompt ?? '';
+      const previewRequestId = preview_request_id ?? randomUUID();
 
       let resolvedBaseId = base_id;
       const resolvedBaseImage = base_image;
@@ -273,15 +279,19 @@ export class ForgeController {
         baseId: resolvedBaseId,
         preset,
       });
+      const composerFallbackUsed = Boolean(promptPack.meta?.fallback_used);
+      const fallbackStage = composerFallbackUsed ? 'composer' : fallbackUsed ? 'matrix' : undefined;
 
       const usedGuardrails = [
         ...new Set([
           ...safetyRewrite.usedGuardrails,
           ...promptPack.guardrailFlags,
+          ...(Array.isArray(promptPack.meta?.used_guardrails) ? promptPack.meta.used_guardrails : []),
           ...(fallbackUsed ? ['MATRIX_FALLBACK'] : []),
           ...(energyClamped ? ['ENERGY_CLAMP'] : []),
         ]),
       ];
+      const fallbackUsedCombined = fallbackUsed || composerFallbackUsed;
 
       if (safetyRewrite.flags.includes('empty')) {
         res.status(400).json({
@@ -352,7 +362,8 @@ export class ForgeController {
           ...promptPack.meta,
           flags: safetyRewrite.flags,
           used_guardrails: usedGuardrails,
-          fallback_used: fallbackUsed,
+          fallback_used: fallbackUsedCombined,
+          fallback_stage: fallbackStage,
           energy_clamped: energyClamped,
         },
         scores,
@@ -382,7 +393,8 @@ export class ForgeController {
           ...promptPack.meta,
           flags: safetyRewrite.flags,
           used_guardrails: usedGuardrails,
-          fallback_used: fallbackUsed,
+          fallback_used: fallbackUsedCombined,
+          fallback_stage: fallbackStage,
           energy_clamped: energyClamped,
         },
         scores,
@@ -391,6 +403,7 @@ export class ForgeController {
           model: modelMeta.model,
           size: modelMeta.size,
         },
+        preview_request_id: previewRequestId,
       };
 
       // Include debug info if requested or in development
@@ -403,15 +416,36 @@ export class ForgeController {
       // Log telemetry
       const latency = Date.now() - startTime;
       console.log(`[FORGE] generation_id=${previewResult.generationId}, preset=${preset}, base_id=${resolvedBaseId}, latency=${latency}ms`);
-      this.telemetry
-        .record({
-          event_type: 'matrix_preview_created',
-          user_id: req.userId,
-          matrix_meta: response.matrix_meta ?? null,
-          scores,
-        })
-        .catch((error: unknown) => console.warn('Failed to record matrix telemetry:', error));
-      if (fallbackUsed) {
+      const matrixMeta = response.matrix_meta ?? {};
+      const previewTelemetryPayload = {
+        meme_preview_id: previewResult.generationId,
+        user_id: req.userId,
+        schema_version: matrixMeta.schema_version ?? null,
+        axes: {
+          intent: matrixMeta.intent ?? null,
+          energy: matrixMeta.energy ?? null,
+          flavor: matrixMeta.flavor ?? null,
+          pattern: matrixMeta.pattern ?? null,
+          template_key: matrixMeta.template_key ?? null,
+        },
+        scores,
+        flags: {
+          fallback_used: matrixMeta.fallback_used ?? false,
+          energy_clamped: matrixMeta.energy_clamped ?? false,
+        },
+      };
+      const previewEmitted = emitTelemetryEvent('matrix_preview_created', previewTelemetryPayload, previewRequestId);
+      if (previewEmitted) {
+        this.telemetry
+          .record({
+            event_type: 'matrix_preview_created',
+            user_id: req.userId,
+            matrix_meta: response.matrix_meta ?? null,
+            scores,
+          })
+          .catch((error: unknown) => console.warn('Failed to record matrix telemetry:', error));
+      }
+      if (fallbackUsedCombined) {
         this.telemetry
           .record({
             event_type: 'matrix_fallback_used',
@@ -465,7 +499,8 @@ export class ForgeController {
         return;
       }
 
-      const { generation_id, caption, tags, remix_of } = validationResult.data;
+      const { generation_id, caption, tags, remix_of, release_request_id } = validationResult.data;
+      const releaseRequestId = release_request_id ?? `${generation_id}:release`;
 
       const userLevel = await this.getUserLevel(req.userId);
       const quota = await this.checkQuota({
@@ -614,15 +649,37 @@ export class ForgeController {
         redirect_url: `/archives/${artifact.id}`,
       };
 
-      this.telemetry
-        .record({
-          event_type: 'matrix_release_created',
-          user_id: req.userId,
-          meme_id: releaseResult.artifactId,
-          matrix_meta: previewRecord?.matrix_meta ?? null,
-          scores: previewRecord?.scores ?? null,
-        })
-        .catch((error: unknown) => console.warn('Failed to record matrix telemetry:', error));
+      const releaseMatrixMeta = previewRecord?.matrix_meta ?? {};
+      const releaseScores = previewRecord?.scores ?? null;
+      const releaseTelemetryPayload = {
+        meme_id: releaseResult.artifactId,
+        user_id: req.userId,
+        schema_version: releaseMatrixMeta.schema_version ?? null,
+        axes: {
+          intent: releaseMatrixMeta.intent ?? null,
+          energy: releaseMatrixMeta.energy ?? null,
+          flavor: releaseMatrixMeta.flavor ?? null,
+          pattern: releaseMatrixMeta.pattern ?? null,
+          template_key: releaseMatrixMeta.template_key ?? null,
+        },
+        scores: releaseScores,
+        flags: {
+          fallback_used: releaseMatrixMeta.fallback_used ?? false,
+          energy_clamped: releaseMatrixMeta.energy_clamped ?? false,
+        },
+      };
+      const releaseEmitted = emitTelemetryEvent('matrix_release_created', releaseTelemetryPayload, releaseRequestId);
+      if (releaseEmitted) {
+        this.telemetry
+          .record({
+            event_type: 'matrix_release_created',
+            user_id: req.userId,
+            meme_id: releaseResult.artifactId,
+            matrix_meta: previewRecord?.matrix_meta ?? null,
+            scores: releaseScores,
+          })
+          .catch((error: unknown) => console.warn('Failed to record matrix telemetry:', error));
+      }
 
       res.status(200).json(response);
     } catch (error: unknown) {

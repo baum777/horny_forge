@@ -7,6 +7,8 @@
   - `flavor` (enum)
   - `template_key` (string)
   - `remix_of` (uuid | null)
+- Optional request id:
+  - `preview_request_id` (string, client-supplied for retries)
 
 ## Output
 - `matrix_meta`:
@@ -16,11 +18,13 @@
   - `template_key`
   - `schema_version`, `composer_version`
   - `used_guardrails[]`
-  - `fallback_used`, `energy_clamped`
+  - `fallback_used`, `fallback_stage`, `energy_clamped`
 - `scores`:
   - `risk`, `novelty`, `coherence` (0..1)
 - `prompt_pack`:
   - `prompt`, `negative_prompt`
+- `preview_request_id`:
+  - echoed back if provided, or generated server-side for retry dedupe
 
 ## Guardrails
 - SafetyRewrite must:
@@ -88,7 +92,7 @@ This function:
   noveltyScore: 0.3,
   riskScore: 0.1,
   coherenceScore: 0.5,
-  used_guardrails: ["LEGACY_RECORD"]
+  used_guardrails: ["LEGACY_RECORD_DEFAULT"]
 }
 ```
 
@@ -97,6 +101,7 @@ This function:
 - **Reading**: Legacy records return normalized `matrix_meta` with `legacy_record: true`
 - **Writing**: New records MUST include `matrix_meta` with `schema_version: "v2"`
 - **Filtering**: Queries can filter by `matrix_meta.legacy_record` to distinguish old/new records
+ - **Scores**: Legacy records provide default `scores` with `novelty/coherence/risk = null`
 
 ## Composer Fallback Contract
 
@@ -176,10 +181,13 @@ import { emitTelemetryEvent } from '@/services/hornyMatrix/TelemetryService';
 
 // Only first event per request_id is emitted
 emitTelemetryEvent('matrix_preview_created', {
-  generation_id: previewResult.generationId,
-  preset,
-  base_id,
-}, previewResult.generationId); // generation_id used as request_id
+  meme_preview_id: previewResult.generationId,
+  preview_request_id,
+  schema_version,
+  axes,
+  scores,
+  flags,
+}, preview_request_id);
 ```
 
 ### Behavior
@@ -238,4 +246,3 @@ Brand Directives MUST be present in:
 - ✅ Same event + requestId → only first emitted
 - ✅ Different requestId → both emitted
 - ✅ Cleanup after timeout → tracking cleared
-

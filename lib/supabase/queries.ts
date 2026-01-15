@@ -18,6 +18,49 @@ export type FetchArtifactsParams = {
   page?: number;
 };
 
+const LEGACY_MATRIX_META = {
+  schema_version: "legacy",
+  legacy_record: true,
+  fallback_used: true,
+  used_guardrails: ["LEGACY_RECORD_DEFAULT"],
+};
+
+const LEGACY_SCORES = {
+  novelty: null,
+  coherence: null,
+  risk: null,
+};
+
+function normalizeMatrixMeta(matrixMeta: unknown): Record<string, unknown> {
+  if (matrixMeta && typeof matrixMeta === "object") {
+    const meta = matrixMeta as Record<string, unknown>;
+    return {
+      ...LEGACY_MATRIX_META,
+      ...meta,
+      legacy_record: meta.schema_version === "legacy" || !meta.schema_version,
+    };
+  }
+  return LEGACY_MATRIX_META;
+}
+
+function normalizeScores(scores: unknown): Artifact["scores"] {
+  if (!scores || typeof scores !== "object") return LEGACY_SCORES;
+  const normalized = scores as Record<string, unknown>;
+  return {
+    novelty: typeof normalized.novelty === "number" ? normalized.novelty : null,
+    coherence: typeof normalized.coherence === "number" ? normalized.coherence : null,
+    risk: typeof normalized.risk === "number" ? normalized.risk : null,
+  };
+}
+
+function normalizeArtifact(artifact: Artifact): Artifact {
+  return {
+    ...artifact,
+    matrix_meta: normalizeMatrixMeta(artifact.matrix_meta),
+    scores: normalizeScores(artifact.scores),
+  };
+}
+
 export async function fetchArtifacts({
   sort = "newest",
   tag = null,
@@ -50,7 +93,8 @@ export async function fetchArtifacts({
   const to = from + limit - 1;
   const { data, error } = await query.range(from, to);
 
-  return { data: (data ?? []) as Artifact[], error };
+  const normalized = (data ?? []).map((artifact) => normalizeArtifact(artifact as Artifact));
+  return { data: normalized, error };
 }
 
 export async function fetchArtifactById(id: string) {
@@ -60,7 +104,8 @@ export async function fetchArtifactById(id: string) {
     .eq("id", id)
     .single();
 
-  return { data: (data as Artifact) ?? null, error };
+  const normalized = data ? normalizeArtifact(data as Artifact) : null;
+  return { data: normalized, error };
 }
 
 export async function fetchMoreFromAuthor(params: {
@@ -79,7 +124,8 @@ export async function fetchMoreFromAuthor(params: {
   if (excludeId) query = query.neq("id", excludeId);
 
   const { data, error } = await query;
-  return { data: (data ?? []) as Artifact[], error };
+  const normalized = (data ?? []).map((artifact) => normalizeArtifact(artifact as Artifact));
+  return { data: normalized, error };
 }
 
 export async function fetchUserStatsByIds(userIds: string[]) {

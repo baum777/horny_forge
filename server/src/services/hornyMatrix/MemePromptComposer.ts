@@ -1,25 +1,10 @@
 /**
  * MemePromptComposer - Composes prompts from HornyMatrix selections
- * 
+ *
  * CRITICAL: This service MUST never fail without producing a prompt with Brand Directives.
  * All errors are caught and handled via composeFallback().
  */
 
-import type { HornyMatrixSelection, MemeGenPromptPack } from './types';
-
-export interface ComposeInput {
-  rewritten_prompt: string;
-  selection: HornyMatrixSelection;
-}
-
-export interface ComposeFallbackInput {
-  rewritten_prompt: string;
-  selection: Partial<HornyMatrixSelection>;
-}
-
-/**
- * Brand Directives that MUST always be present in any prompt
- */
 const BRAND_DIRECTIVES = [
   'bold silhouette',
   'high contrast',
@@ -28,45 +13,74 @@ const BRAND_DIRECTIVES = [
   'symbolic over literal',
 ];
 
-/**
- * Safe fallback selection (energy=1, pattern=A, safe flavor)
- */
-const SAFE_FALLBACK_SELECTION: HornyMatrixSelection = {
+const SAFE_FALLBACK_SELECTION = {
   intent: 'reaction',
   energy: 1,
   flavor: 'ironic',
   pattern: 'A',
-  template: 'top_bottom',
-  contextObjects: [],
-  accentColors: [],
-  bannedTopicsHit: false,
-  rewriteMode: 'metaphorize',
+  rewriteMode: 'strict',
+  context: [],
 };
 
-/**
- * Composes a prompt pack from matrix selection.
- * 
- * @throws Never throws - all errors are handled via fallback
- */
-export function compose(input: ComposeInput): MemeGenPromptPack {
-  try {
-    const { rewritten_prompt, selection } = input;
+type ComposerInput = {
+  rewrittenPrompt: string;
+  selection: Record<string, unknown>;
+  baseId: string;
+  preset: string;
+};
 
-    // Build template-specific skeleton
-    const templateSkeleton = buildTemplateSkeleton(selection.template, selection.pattern);
+type PromptPack = {
+  prompt: string;
+  negativePrompt: string;
+  meta: Record<string, unknown>;
+  guardrailFlags: string[];
+};
 
-    // Build composition directives
-    const compositionDirectives = buildCompositionDirectives(selection);
+export class MemePromptComposer {
+  compose(input: ComposerInput): PromptPack {
+    try {
+      return this.buildPrompt(input);
+    } catch (error) {
+      console.error('[MemePromptComposer] compose() error:', error);
+      return this.composeFallback(input);
+    }
+  }
 
-    // Build final prompt with Brand Directives
-    const finalPrompt = [
-      rewritten_prompt,
+  buildPrompt(input: ComposerInput): PromptPack {
+    const { rewrittenPrompt, selection, baseId } = input;
+    const metaSelection = selection as {
+      intent?: string;
+      energy?: number;
+      flavor?: string;
+      pattern?: string;
+      rewriteMode?: string;
+      context?: string[];
+      templateKey?: string;
+    };
+
+    const templateKey = metaSelection.templateKey ?? baseId;
+    const pattern = metaSelection.pattern ?? 'A';
+    const context = Array.isArray(metaSelection.context) ? metaSelection.context : [];
+
+    const templateSkeleton = buildTemplateSkeleton(templateKey, pattern);
+    const compositionDirectives = buildCompositionDirectives({
+      intent: metaSelection.intent,
+      energy: metaSelection.energy,
+      flavor: metaSelection.flavor,
+      pattern,
+      context,
+    });
+
+    const prompt = [
+      rewrittenPrompt,
       templateSkeleton,
       compositionDirectives,
       `Brand Directives: ${BRAND_DIRECTIVES.join(', ')}`,
-    ].filter(Boolean).join('. ');
+      'no text in image',
+    ]
+      .filter(Boolean)
+      .join('. ');
 
-    // Build negative prompt
     const negativePrompt = [
       'text',
       'watermark',
@@ -80,71 +94,75 @@ export function compose(input: ComposeInput): MemeGenPromptPack {
     ].join(', ');
 
     return {
-      finalPrompt,
+      prompt,
       negativePrompt,
       meta: {
-        ...selection,
-        noveltyScore: 0.5,
-        riskScore: 0.2,
-        usedGuardrails: [],
+        ...metaSelection,
+        template_key: templateKey,
+        rewrite_mode: metaSelection.rewriteMode,
+        context,
+        schema_version: 'v2',
+        composer_version: 'v2',
+        used_guardrails: [],
       },
+      guardrailFlags: [],
     };
-  } catch (error) {
-    // This should never happen, but if it does, use fallback
-    console.error('[MemePromptComposer] compose() error:', error);
-    return composeFallback({
-      rewritten_prompt: input.rewritten_prompt || 'meme scene',
-      selection: input.selection || {},
-    });
   }
-}
 
-/**
- * Fallback composer that ALWAYS produces a valid prompt with Brand Directives.
- * 
- * This method MUST never throw and MUST always include Brand Directives.
- */
-export function composeFallback(input: ComposeFallbackInput): MemeGenPromptPack {
-  const { rewritten_prompt, selection } = input;
+  composeFallback(input: ComposerInput): PromptPack {
+    const { rewrittenPrompt, selection, baseId } = input;
+    const metaSelection = selection as {
+      intent?: string;
+      energy?: number;
+      flavor?: string;
+      pattern?: string;
+      rewriteMode?: string;
+      context?: string[];
+      templateKey?: string;
+    };
 
-  // Use safe fallback selection, merging with provided selection
-  const safeSelection: HornyMatrixSelection = {
-    ...SAFE_FALLBACK_SELECTION,
-    ...selection,
-    energy: (selection.energy ?? 1) as 1 | 2 | 3 | 4 | 5,
-    pattern: (selection.pattern ?? 'A') as 'A' | 'B' | 'C',
-    template: (selection.template ?? 'top_bottom') as any,
-  };
+    const safeSelection = {
+      ...SAFE_FALLBACK_SELECTION,
+      ...metaSelection,
+      energy: metaSelection.energy ?? SAFE_FALLBACK_SELECTION.energy,
+      pattern: metaSelection.pattern ?? SAFE_FALLBACK_SELECTION.pattern,
+      rewriteMode: metaSelection.rewriteMode ?? SAFE_FALLBACK_SELECTION.rewriteMode,
+      context: Array.isArray(metaSelection.context) ? metaSelection.context : SAFE_FALLBACK_SELECTION.context,
+    };
 
-  // Build minimal but safe prompt
-  const finalPrompt = [
-    rewritten_prompt || 'simple meme scene',
-    `Pattern ${safeSelection.pattern}: isolated focus, minimal context`,
-    `Brand Directives: ${BRAND_DIRECTIVES.join(', ')}`,
-  ].join('. ');
+    const prompt = [
+      rewrittenPrompt || 'simple meme scene',
+      `Pattern ${safeSelection.pattern}: isolated focus, minimal context`,
+      `Brand Directives: ${BRAND_DIRECTIVES.join(', ')}`,
+      'no text in image',
+    ].join('. ');
 
-  const negativePrompt = [
-    'text',
-    'watermark',
-    'logo',
-    'letters',
-    'blurry',
-    'low-contrast',
-    'clutter',
-  ].join(', ');
+    const negativePrompt = [
+      'text',
+      'watermark',
+      'logo',
+      'letters',
+      'blurry',
+      'low-contrast',
+      'clutter',
+    ].join(', ');
 
-  return {
-    finalPrompt,
-    negativePrompt,
-    meta: {
-      ...safeSelection,
-      noveltyScore: 0.3,
-      riskScore: 0.1,
-      usedGuardrails: ['COMPOSER_FALLBACK'],
-      fallback_used: true,
-      fallback_stage: 'composer',
-    } as any,
-  };
+    return {
+      prompt,
+      negativePrompt,
+      meta: {
+        ...safeSelection,
+        template_key: metaSelection.templateKey ?? baseId,
+        rewrite_mode: safeSelection.rewriteMode,
+        schema_version: 'v2',
+        composer_version: 'v2',
+        used_guardrails: ['COMPOSER_FALLBACK'],
+        fallback_used: true,
+        fallback_stage: 'composer',
+      },
+      guardrailFlags: ['COMPOSER_FALLBACK'],
+    };
+  }
 }
 
 function buildTemplateSkeleton(template: string, pattern: string): string {
@@ -179,18 +197,23 @@ function buildTemplateSkeleton(template: string, pattern: string): string {
   return skeletons[template]?.[pattern] || 'meme composition, clear focus';
 }
 
-function buildCompositionDirectives(selection: HornyMatrixSelection): string {
+function buildCompositionDirectives(selection: {
+  intent?: string;
+  energy?: number;
+  flavor?: string;
+  pattern?: string;
+  context?: string[];
+}): string {
   const parts: string[] = [];
 
-  parts.push(`Intent: ${selection.intent}`);
-  parts.push(`Energy: ${selection.energy}`);
-  parts.push(`Flavor: ${selection.flavor}`);
-  parts.push(`Pattern ${selection.pattern}`);
+  if (selection.intent) parts.push(`Intent: ${selection.intent}`);
+  if (selection.energy) parts.push(`Energy: ${selection.energy}`);
+  if (selection.flavor) parts.push(`Flavor: ${selection.flavor}`);
+  if (selection.pattern) parts.push(`Pattern ${selection.pattern}`);
 
-  if (selection.contextObjects.length > 0) {
-    parts.push(`Context: ${selection.contextObjects.map(c => c.label).join(', ')}`);
+  if (selection.context && selection.context.length > 0) {
+    parts.push(`Context: ${selection.context.join(', ')}`);
   }
 
   return parts.join('; ');
 }
-
