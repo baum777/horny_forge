@@ -7,7 +7,7 @@ import InteractPreview from '@/components/home/InteractPreview';
 import HornyMeter from '@/components/features/HornyMeter';
 import MemeBackground from '@/components/MemeBackground';
 import { addSectionVisited, unlockBadge } from '@/lib/storage';
-import { PageShell } from '@/components/layout/PageShell';
+import MemeBackground from '@/components/MemeBackground';
 
 export default function Index() {
   useEffect(() => {
@@ -35,46 +35,38 @@ export default function Index() {
   }, []);
 
   return (
-    <PageShell
-      spec={{
-        page: "home",
-        flavor: "default",
-        energy: 2,
-      }}
-    >
-      <div className="min-h-screen bg-background relative overflow-hidden">
-        <MemeBackground count={9} spawnEveryMs={850} />
-        {/* Background noise texture */}
-        <div className="fixed inset-0 pointer-events-none opacity-[0.015]">
-          <svg className="w-full h-full">
-            <filter id="noise">
-              <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch" />
-            </filter>
-            <rect width="100%" height="100%" filter="url(#noise)" />
-          </svg>
-        </div>
-        <MemeBackground />
-
-        <Navbar />
-        
-        <main>
-          <div id="hero">
-            <Hero />
-          </div>
-          
-          <LoreSection />
-          
-          <InteractPreview />
-          
-          <div id="badges" className="py-12">
-            {/* Badges section teaser handled in InteractPreview */}
-          </div>
-        </main>
-
-        <Footer />
-        
-        <HornyMeter />
+    <div className="min-h-screen bg-background relative overflow-hidden">
+      <MemeBackground count={9} spawnEveryMs={850} />
+      {/* Background noise texture */}
+      <div className="fixed inset-0 pointer-events-none opacity-[0.015]">
+        <svg className="w-full h-full">
+          <filter id="noise">
+            <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch" />
+          </filter>
+          <rect width="100%" height="100%" filter="url(#noise)" />
+        </svg>
       </div>
-    </PageShell>
+      <MemeBackground />
+
+      <Navbar />
+      
+      <main>
+        <div id="hero">
+          <Hero />
+        </div>
+        
+        <LoreSection />
+        
+        <InteractPreview />
+        
+        <div id="badges" className="py-12">
+          {/* Badges section teaser handled in InteractPreview */}
+        </div>
+      </main>
+
+      <Footer />
+      
+      <HornyMeter />
+    </div>
   );
 }

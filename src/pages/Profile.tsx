@@ -11,7 +11,6 @@ import Footer from '@/components/layout/Footer';
 import { useGamification } from '@/hooks/useGamification';
 import { LevelBar } from '@/components/profile/LevelBar';
 import { BadgeGrid } from '@/components/profile/BadgeGrid';
-import { PageShell } from '@/components/layout/PageShell';
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -59,18 +58,10 @@ export default function Profile() {
   const streakDays = stats?.streak_days ?? 0;
 
   return (
-    <PageShell
-      spec={{
-        page: "profile",
-        flavor: "subtle",
-        energy: 3,
-        tier: "user-tier",
-      }}
-    >
-      <div className="min-h-screen bg-background">
-        <ArchivesNavbar />
+    <div className="min-h-screen bg-background">
+      <ArchivesNavbar />
 
-        <div className="container mx-auto px-4 pt-24 pb-20">
+      <div className="container mx-auto px-4 pt-24 pb-20">
         {/* Profile Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
