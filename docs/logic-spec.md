@@ -254,3 +254,243 @@ Outputs:
 * `freeze_applied`
 * `freeze_removed`
 
+---
+
+## 9) API Endpoints & Validation
+
+### 9.1 Authentication Endpoints
+
+#### `GET /api/me` (or `/api/gamification/me`)
+**Auth**: Required (X OAuth)
+**Response**: User stats including level, XP, badges, unlocked features
+
+### 9.2 Forge Endpoints
+
+#### `POST /api/forge`
+**Auth**: Required
+**Body**:
+```json
+{
+  "base_id": "string (optional)",
+  "base_image": "string (optional, must match /horny_base/base-*.png pattern)",
+  "preset": "HORNY_CORE_SKETCH | HORNY_META_SCENE | HORNY_CHAOS_VARIATION",
+  "user_input": "string (1-240 chars)",
+  "size": "1024x1024 (optional)",
+  "seed": "string (optional)",
+  "debug": "boolean (optional)"
+}
+```
+**Validation**:
+* Either `base_id` or `base_image` required
+* `user_input` max 240 characters
+* `base_image` must match horny_base pattern
+
+#### `POST /api/forge/release`
+**Auth**: Required
+**Body**:
+```json
+{
+  "generation_id": "string (required)",
+  "caption": "string (max 140 chars, optional)",
+  "tags": ["string"] (1-3 tags required)
+}
+```
+
+### 9.3 Gamification Endpoints
+
+#### `POST /api/gamification/action`
+**Auth**: Required
+**Headers**: `Idempotency-Key` (required)
+**Body**:
+```json
+{
+  "action": "vote | comment | share | follow | forge | artifact_release | meme_create | votes_received | time_spent | streak_tick | special",
+  "artifactId": "string (optional, required for vote/comment/share)",
+  "idempotencyKey": "string (optional, can also be in header)",
+  "receivedVotesDelta": "number (optional, for votes_received)",
+  "timeDeltaSeconds": "number (optional, for time_spent, max 3600)",
+  "quizClassId": "string (optional)",
+  "quizVector": "array (optional)"
+}
+```
+
+**Validation Rules**:
+* `vote`: Requires `artifactId`, 30s cooldown per artifact
+* `comment`: Requires `artifactId`
+* `share`: Requires `artifactId` (future: OAuth proof validation)
+* `votes_received`: **BLOCKED** from client (server-side only)
+* `time_spent`: Requires `timeDeltaSeconds`, max 3600s per session
+* `artifact_release`: Requires `artifactId` (future: ownership proof)
+
+**Rate Limiting**:
+* Per user: 60 requests/minute
+* Per IP: 100 requests/minute
+
+**Response**:
+```json
+{
+  "stats": { ...user stats... },
+  "result": {
+    "deltaHorny": 0,
+    "newLevel": 5,
+    "visibilityBoost": { ... },
+    "newlyUnlockedBadges": [],
+    "newlyUnlockedFeatures": [],
+    "tier": "private | semi | public"
+  }
+}
+```
+
+### 9.4 Gallery Endpoints
+
+#### `GET /api/gallery/voting?sort=hot|new`
+**Auth**: Optional (public readable)
+**Query Params**:
+* `sort`: `hot` (time-decay 72h, min 3 ratings) | `new` (created_at desc)
+
+#### `GET /api/gallery/ace`
+**Auth**: Optional (public readable)
+**Filters**: avg_rating >= 4.2, rating_count >= 25, report_count < 3, within 30 days
+
+#### `POST /api/gallery/:memeId/rate`
+**Auth**: Required
+**Body**:
+```json
+{
+  "rating": 1-5,
+  "fingerprintHash": "string (optional)"
+}
+```
+**Validation**:
+* One rating per user per meme (unique constraint)
+* Edit window: 15 minutes
+* XP only on first rating (2/4/6/8 based on rating)
+
+#### `POST /api/gallery/:memeId/report`
+**Auth**: Required
+**Body**:
+```json
+{
+  "reason": "string (optional)",
+  "fingerprintHash": "string (optional)"
+}
+```
+**Validation**:
+* Unique reporter per meme
+* Auto-hide when report_count >= threshold
+
+### 9.5 Quest Endpoints
+
+#### `POST /api/quests/claim`
+**Auth**: Required
+**Body**:
+```json
+{
+  "tier": 1-4
+}
+```
+**Validation**:
+* User verified
+* Not frozen
+* Weekly cap not exceeded (200k/week including pending)
+* Tier unlocked by min_level
+* Eligibility recomputed server-side
+* Remaining slots > 0 (atomic check)
+
+---
+
+## 10) Idempotency Keys
+
+**Format**: `{action}:{context}:{nonce}`
+
+**Examples**:
+* `xp:x_linked:{user_id}`
+* `xp:gen:{generated_image_id}`
+* `xp:publish:{published_meme_id}`
+* `xp:rate:{meme_id}:{user_id}`
+* `xp:badge:{badge_key}:{user_id}`
+* `weekly:{week_id}:tier:{tier}:user:{user_id}`
+* `vote:art_123:550e8400-e29b-41d4-a716-446655440000`
+
+**Behavior**:
+* First request: Action processed, response cached
+* Duplicate request: Cached response returned (no double rewards)
+
+---
+
+## 11) Caps & Limits
+
+### Global Caps
+* **Daily Horny Cap**: 150
+* **Weekly Horny Cap**: 600
+
+### Per-Action Caps (Daily)
+* `vote`: 20
+* `comment`: 15
+* `share`: 10
+* `follow`: 20
+* `forge`: 30
+* `artifact_release`: 50
+* `meme_create`: 30
+* `votes_received`: 100
+* `time_spent`: 20
+* `streak_tick`: 10
+
+### Cooldowns
+* **Vote cooldown**: 30 seconds per artifact
+* **Rating edit window**: 15 minutes
+
+### Rate Limits
+* **Per user**: 60 requests/minute
+* **Per IP**: 100 requests/minute
+
+---
+
+## 12) Level Progression
+
+### Level Curve
+* Level 1: 0 XP
+* Level 2: 100 XP
+* Level 3: 300 XP
+* Level 4: 700 XP
+* Level 5: 1,500 XP
+* Level 6: 3,000 XP
+* Level 7: 6,000 XP
+* Level 8: 12,000 XP
+* Level 9: 25,000 XP
+* Level 10: 50,000 XP
+
+### Visibility Boosts (per level)
+* Level 1: feedWeight 1.0
+* Level 2: feedWeight 1.05
+* Level 3: feedWeight 1.1, features: ["subtle_glow"]
+* Level 4: feedWeight 1.2, features: ["subtle_glow"]
+* Level 5: feedWeight 1.3, features: ["glow_effect", "verified_mark"]
+* Level 6: feedWeight 1.45, features: ["glow_effect", "verified_mark"]
+* Level 7: feedWeight 1.6, features: ["glow_effect", "verified_mark", "highlight_chance"]
+* Level 8: feedWeight 1.75, features: ["highlight_chance", "creator_frame"]
+* Level 9: feedWeight 1.9, features: ["creator_frame", "viral_slot_chance"]
+* Level 10: feedWeight 2.1, features: ["mythic_aura", "viral_slot_chance"]
+
+---
+
+## 13) Gamification Actions & Rewards
+
+### Action Types & Base Rewards
+* `vote`: +2 Horny
+* `comment`: +2 Horny
+* `share`: +5 Horny
+* `follow`: +1 Horny
+* `forge`: +5 Horny (unlocks: ["forge_preset_pack_1"])
+* `artifact_release`: +10 Horny
+* `meme_create`: +5 Horny
+* `votes_received`: Computed (1 per vote received)
+* `time_spent`: Computed (1 per 60 seconds, max 3600s)
+* `streak_tick`: +3 Horny
+* `special`: +0 Horny (custom events)
+
+### Visibility Tiers
+* `private`: Internal only
+* `semi`: Visible to connections
+* `public`: Fully public
+

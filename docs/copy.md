@@ -199,5 +199,117 @@ Session expired. Please refresh the page.
 * “View Gallery”
 
 ### Trust Line
-* “First-come-first-served weekly prize pools.”
+* "First-come-first-served weekly prize pools."
 
+---
+
+## 8. Teaser & Locked State Copy (v1.0)
+
+### Game Page (Teaser State)
+**Title:**
+$Horny RUNNER
+
+**Subtitle:**
+$Horny Runner unlocking soon
+
+**System Message:**
+System Initializing
+
+---
+
+### Forge Page (Teaser State)
+**Title:**
+The Forge is warming up.
+
+**Subtitle:**
+Create. Remix. Win.
+
+---
+
+### Weekly Quests Page (Teaser State)
+**Title:**
+Weekly Quests starting soon.
+
+**Subtitle:**
+First come, first served. Real rewards.
+
+---
+
+### My Gallery Page (Teaser State)
+**Title:**
+Your collection is loading...
+
+**Subtitle:**
+Drafts. Published. Hidden.
+
+---
+
+### Badges Page (Locked State)
+**Title:**
+Coming Soon — stay $Horny
+
+**Subtitle:**
+Badges show who you are — not what you earned.
+
+---
+
+## 9. Navigation & Footer Copy
+
+### Navigation Links
+* Home
+* Forge
+* Game
+* Gallery
+* Quests
+* My Gallery
+* Badges
+* Profile
+
+### Footer
+
+**Brand:**
+$HORNY
+
+**Tagline:**
+The Horny Meta Universe. Where desire meets gains.
+
+**Microcopy:**
+No wallets required. Badges are status. Rewards are earned weekly.
+
+**Copyright:**
+© {year} $HORNY. Not financial advice. DYOR. NFA.
+
+**Social Links:**
+* X (Twitter)
+* Discord
+* Dex (DEXScreener)
+
+**Contract Address:**
+* Full contract address displayed in monospace font (no truncation)
+
+---
+
+## 10. Additional UI Copy
+
+### Loading States
+* "Loading..."
+* "Initializing..."
+* "Processing..."
+
+### Success Messages
+* "Success!"
+* "Done!"
+* "Saved!"
+
+### General Actions
+* "Connect X"
+* "Disconnect"
+* "Save"
+* "Cancel"
+* "Continue"
+* "Back"
+* "Next"
+* "Submit"
+* "Retry"
+
+---
