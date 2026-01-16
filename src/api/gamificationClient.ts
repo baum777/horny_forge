@@ -33,9 +33,10 @@ export async function performGamificationAction(
   action: ActionType,
   payload: Record<string, unknown> = {}
 ): Promise<GamificationResponse> {
-  const idempotencyKey =
+  const idempotencyKey = String(
     payload.idempotencyKey ??
-    `${action}:${payload.artifactId ?? ""}:${payload.clientNonce ?? crypto.randomUUID()}`;
+      `${action}:${payload.artifactId ?? ""}:${payload.clientNonce ?? crypto.randomUUID()}`
+  );
 
   const res = await fetch(`${SERVER_BASE}/api/gamification/action`, {
     method: "POST",
@@ -53,4 +54,3 @@ export async function performGamificationAction(
   saveUserStatsCache(data.stats as UserStats);
   return data as GamificationResponse;
 }
-

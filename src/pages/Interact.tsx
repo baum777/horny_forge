@@ -39,6 +39,7 @@ export default function Interact() {
             
             // Check if all sections visited
             const allSections = ['meta-forge', 'badges', 'hero', 'lore', 'interact-preview'];
+            const visitData = getVisitData();
             const visitedAll = allSections.every(s => visitData.sectionsVisited.includes(s));
             if (visitedAll) {
               unlockBadge('all-sections');
