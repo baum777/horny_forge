@@ -20,7 +20,7 @@ export const LEGACY_MATRIX_META: MatrixMeta = {
   noveltyScore: 0.3,
   riskScore: 0.1,
   coherenceScore: 0.5,
-  used_guardrails: ['LEGACY_RECORD'],
+  used_guardrails: ['LEGACY_RECORD_DEFAULT'],
 };
 
 /**
@@ -54,4 +54,3 @@ export function isLegacyRecord(matrixMeta: MatrixMeta | null | undefined): boole
   if (!matrixMeta) return true;
   return matrixMeta.legacy_record === true || matrixMeta.schema_version === 'legacy';
 }
-

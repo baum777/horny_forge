@@ -6,10 +6,15 @@ export interface ForgeRequest {
   base_id?: BaseId;
   base_image?: string;
   preset: Preset;
-  user_input: string;
+  user_input?: string;
+  user_prompt?: string;
+  energy?: number;
+  flavor?: string;
+  template_key?: string;
   size?: '1024x1024';
   seed?: string;
   debug?: boolean;
+  preview_request_id?: string;
 }
 
 export interface ForgeResponse {
@@ -19,6 +24,9 @@ export interface ForgeResponse {
   sanitized_input: string;
   image_url: string;
   created_at: string;
+  matrix_meta?: Record<string, unknown>;
+  scores?: Record<string, unknown>;
+  preview_request_id?: string;
   meta: {
     expires_in_seconds: number;
     model: string;
@@ -42,6 +50,8 @@ export interface ReleaseRequest {
   generation_id: string;
   caption?: string;
   tags: string[];
+  remix_of?: string;
+  release_request_id?: string;
 }
 
 export interface ReleaseResponse {

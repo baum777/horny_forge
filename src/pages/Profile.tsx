@@ -169,7 +169,8 @@ export default function Profile() {
         </section>
       </div>
 
-      <Footer />
+    <Footer />
     </div>
-  );
+  </PageShell>
+);
 }

@@ -7,6 +7,10 @@ type ArtifactRecord = {
   caption: string | null;
   author_handle: string | null;
   image_url: string | null;
+  matrix_meta?: Record<string, unknown> | null;
+  scores?: Record<string, unknown> | null;
+  created_at?: string | null;
+  tags?: string[] | null;
 };
 
 type VoteRecord = {
@@ -91,6 +95,15 @@ export function createMockSupabase(state: TestState) {
           eq(_column: string, value: string) {
             id = value;
             return this;
+          },
+          order() {
+            return this;
+          },
+          range() {
+            return Promise.resolve({
+              data: Array.from(state.artifacts.values()),
+              error: null,
+            });
           },
           maybeSingle() {
             return Promise.resolve({

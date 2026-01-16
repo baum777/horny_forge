@@ -1,0 +1,13 @@
+{
+  "risk": {
+    "warn": 0.6,
+    "block": 0.85
+  },
+  "coherence": {
+    "warn": 0.4,
+    "retry": 0.25
+  },
+  "novelty": {
+    "boost": 0.75
+  }
+}

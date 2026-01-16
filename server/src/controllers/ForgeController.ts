@@ -1,9 +1,16 @@
 import type { Request, Response } from 'express';
-import { PromptEngine } from '../services/PromptEngine';
+import { randomUUID } from 'node:crypto';
 import { ImageGenAdapter } from '../services/ImageGenAdapter';
 import { StorageAdapter } from '../services/StorageAdapter';
 import { ModerationService } from '../services/ModerationService';
 import { SimilarityService } from '../services/SimilarityService';
+import { HornyMatrixEngine } from '../services/hornyMatrix/HornyMatrixEngine';
+import { SafetyRewrite } from '../services/hornyMatrix/SafetyRewrite';
+import { MemePromptComposer } from '../services/hornyMatrix/MemePromptComposer';
+import { scoreMatrix } from '../services/hornyMatrix/scoring';
+import { emitTelemetryEvent } from '../services/hornyMatrix/TelemetryService';
+import { MatrixTelemetry } from '../services/telemetry/MatrixTelemetry';
+import type { MatrixFlavor } from '../services/hornyMatrix/types';
 import { config } from '../config';
 import type { ForgeResponse, ForgeError, ReleaseResponse } from '../types';
 import type { AuthenticatedRequest } from '../middleware/auth';
@@ -17,11 +24,23 @@ const forgeRequestSchema = z.object({
   base_id: z.string().optional(),
   base_image: z.string().optional(),
   preset: z.enum(['HORNY_CORE_SKETCH', 'HORNY_META_SCENE', 'HORNY_CHAOS_VARIATION']),
-  user_input: z.string().min(1).max(240),
+  user_input: z.string().min(1).max(240).optional(),
+  user_prompt: z.string().min(1).max(240).optional(),
+  energy: z.number().min(1).max(5).optional(),
+  flavor: z.string().optional(),
+  template_key: z.string().optional(),
   size: z.enum(['1024x1024']).optional(),
   seed: z.string().optional(),
   debug: z.boolean().optional(),
+  preview_request_id: z.string().optional(),
 }).superRefine((data, ctx) => {
+  if (!data.user_input && !data.user_prompt) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'user_input or user_prompt is required',
+      path: ['user_input'],
+    });
+  }
   if (!data.base_id && !data.base_image) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
@@ -43,6 +62,8 @@ const releaseRequestSchema = z.object({
   generation_id: z.string().min(1),
   caption: z.string().max(140).optional(),
   tags: z.array(z.string()).min(1).max(3),
+  remix_of: z.string().optional(),
+  release_request_id: z.string().optional(),
 });
 
 export class ForgeController {
@@ -51,6 +72,10 @@ export class ForgeController {
   private supabase;
   private moderation: ModerationService;
   private similarity: SimilarityService;
+  private matrixEngine: HornyMatrixEngine;
+  private safetyRewrite: SafetyRewrite;
+  private promptComposer: MemePromptComposer;
+  private telemetry: MatrixTelemetry;
 
   constructor() {
     this.imageGen = new ImageGenAdapter();
@@ -58,6 +83,10 @@ export class ForgeController {
     this.supabase = createClient<Database>(config.supabase.url, config.supabase.serviceRoleKey);
     this.moderation = new ModerationService();
     this.similarity = new SimilarityService();
+    this.matrixEngine = new HornyMatrixEngine();
+    this.safetyRewrite = new SafetyRewrite();
+    this.promptComposer = new MemePromptComposer();
+    this.telemetry = new MatrixTelemetry();
   }
 
   private getForgeDailyLimit(level: number): number {
@@ -72,6 +101,7 @@ export class ForgeController {
     if (level >= 5) return 7;
     return 5;
   }
+
 
   private async getUserLevel(userId: string): Promise<number> {
     const { data, error } = await this.supabase
@@ -173,7 +203,21 @@ export class ForgeController {
         return;
       }
 
-      const { base_id, base_image, preset, user_input, size = '1024x1024', debug = false } = validationResult.data;
+      const {
+        base_id,
+        base_image,
+        preset,
+        user_input,
+        user_prompt,
+        energy,
+        flavor,
+        template_key,
+        size = '1024x1024',
+        debug = false,
+        preview_request_id,
+      } = validationResult.data;
+      const resolvedUserInput = user_input ?? user_prompt ?? '';
+      const previewRequestId = preview_request_id ?? randomUUID();
 
       let resolvedBaseId = base_id;
       const resolvedBaseImage = base_image;
@@ -208,15 +252,48 @@ export class ForgeController {
         return;
       }
 
-      // Process prompt
-      const promptResult = PromptEngine.process({
-        preset,
-        userInput: user_input,
-        baseId: resolvedBaseId,
-      });
+      const safetyRewrite = this.safetyRewrite.rewrite(resolvedUserInput);
+      const { energy: clampedEnergyValue, clamped: energyClamped } = this.matrixEngine.clampEnergy(userLevel, energy);
+      let matrixSelection;
+      let fallbackUsed = false;
 
-      // Check if prompt was rejected
-      if (promptResult.safety?.status === 'rejected') {
+      try {
+        matrixSelection = this.matrixEngine.select({
+          userPrompt: safetyRewrite.rewrittenPrompt,
+          nudges: {
+            energy: clampedEnergyValue,
+            flavor: flavor as MatrixFlavor | undefined,
+            templateKey: template_key ?? resolvedBaseId,
+          },
+          flags: safetyRewrite.flags,
+        });
+      } catch (error: unknown) {
+        console.warn('Matrix selection failed, falling back to safe defaults:', error);
+        matrixSelection = this.matrixEngine.selectSafeDefault(safetyRewrite.rewrittenPrompt);
+        fallbackUsed = true;
+      }
+
+      const promptPack = this.promptComposer.compose({
+        rewrittenPrompt: safetyRewrite.rewrittenPrompt,
+        selection: matrixSelection,
+        baseId: resolvedBaseId,
+        preset,
+      });
+      const composerFallbackUsed = Boolean(promptPack.meta?.fallback_used);
+      const fallbackStage = composerFallbackUsed ? 'composer' : fallbackUsed ? 'matrix' : undefined;
+
+      const usedGuardrails = [
+        ...new Set([
+          ...safetyRewrite.usedGuardrails,
+          ...promptPack.guardrailFlags,
+          ...(Array.isArray(promptPack.meta?.used_guardrails) ? promptPack.meta.used_guardrails : []),
+          ...(fallbackUsed ? ['MATRIX_FALLBACK'] : []),
+          ...(energyClamped ? ['ENERGY_CLAMP'] : []),
+        ]),
+      ];
+      const fallbackUsedCombined = fallbackUsed || composerFallbackUsed;
+
+      if (safetyRewrite.flags.includes('empty')) {
         res.status(400).json({
           error: 'Input contains blocked content',
           code: 'PROMPT_REJECTED',
@@ -224,7 +301,13 @@ export class ForgeController {
         return;
       }
 
-      const moderationResult = await this.moderation.moderateText([user_input, promptResult.final_prompt]);
+      const scores = scoreMatrix({
+        selection: matrixSelection,
+        flags: safetyRewrite.flags,
+        rewrittenPrompt: safetyRewrite.rewrittenPrompt,
+      });
+
+      const moderationResult = await this.moderation.moderateText([resolvedUserInput, promptPack.prompt]);
       if (moderationResult.status === 'fail') {
         res.status(400).json({
           error: 'unsafe_prompt',
@@ -240,7 +323,7 @@ export class ForgeController {
         const imageResult = await this.imageGen.generate({
           baseId: resolvedBaseId,
           baseImagePath: resolvedBaseImage,
-          finalPrompt: promptResult.final_prompt,
+          finalPrompt: promptPack.prompt,
           size,
         });
         imageBytes = imageResult.imageBytes;
@@ -274,6 +357,16 @@ export class ForgeController {
         user_id: req.userId,
         base_id: resolvedBaseId,
         preset,
+        template_key: promptPack.meta.template_key ?? resolvedBaseId,
+        matrix_meta: {
+          ...promptPack.meta,
+          flags: safetyRewrite.flags,
+          used_guardrails: usedGuardrails,
+          fallback_used: fallbackUsedCombined,
+          fallback_stage: fallbackStage,
+          energy_clamped: energyClamped,
+        },
+        scores,
         moderation_status: moderationResult.status,
         moderation_reasons: moderationResult.reasons,
         safety_checked_at: safetyCheckedAt,
@@ -293,26 +386,85 @@ export class ForgeController {
         generation_id: previewResult.generationId,
         base_id: resolvedBaseId,
         preset,
-        sanitized_input: promptResult.sanitized_input,
+        sanitized_input: safetyRewrite.rewrittenPrompt,
         image_url: previewResult.previewUrl,
         created_at: new Date().toISOString(),
+        matrix_meta: {
+          ...promptPack.meta,
+          flags: safetyRewrite.flags,
+          used_guardrails: usedGuardrails,
+          fallback_used: fallbackUsedCombined,
+          fallback_stage: fallbackStage,
+          energy_clamped: energyClamped,
+        },
+        scores,
         meta: {
           expires_in_seconds: config.forge.previewTtlSeconds,
           model: modelMeta.model,
           size: modelMeta.size,
         },
+        preview_request_id: previewRequestId,
       };
 
       // Include debug info if requested or in development
       if (debug || config.nodeEnv === 'development') {
         response.debug = {
-          final_prompt: promptResult.final_prompt,
+          final_prompt: promptPack.prompt,
         };
       }
 
       // Log telemetry
       const latency = Date.now() - startTime;
       console.log(`[FORGE] generation_id=${previewResult.generationId}, preset=${preset}, base_id=${resolvedBaseId}, latency=${latency}ms`);
+      const matrixMeta = response.matrix_meta ?? {};
+      const previewTelemetryPayload = {
+        meme_preview_id: previewResult.generationId,
+        user_id: req.userId,
+        schema_version: matrixMeta.schema_version ?? null,
+        axes: {
+          intent: matrixMeta.intent ?? null,
+          energy: matrixMeta.energy ?? null,
+          flavor: matrixMeta.flavor ?? null,
+          pattern: matrixMeta.pattern ?? null,
+          template_key: matrixMeta.template_key ?? null,
+        },
+        scores,
+        flags: {
+          fallback_used: matrixMeta.fallback_used ?? false,
+          energy_clamped: matrixMeta.energy_clamped ?? false,
+        },
+      };
+      const previewEmitted = emitTelemetryEvent('matrix_preview_created', previewTelemetryPayload, previewRequestId);
+      if (previewEmitted) {
+        this.telemetry
+          .record({
+            event_type: 'matrix_preview_created',
+            user_id: req.userId,
+            matrix_meta: response.matrix_meta ?? null,
+            scores,
+          })
+          .catch((error: unknown) => console.warn('Failed to record matrix telemetry:', error));
+      }
+      if (fallbackUsedCombined) {
+        this.telemetry
+          .record({
+            event_type: 'matrix_fallback_used',
+            user_id: req.userId,
+            matrix_meta: response.matrix_meta ?? null,
+            scores,
+          })
+          .catch((error: unknown) => console.warn('Failed to record matrix fallback telemetry:', error));
+      }
+      if (usedGuardrails.some((flag) => flag !== 'NO_GUARDRAIL')) {
+        this.telemetry
+          .record({
+            event_type: 'matrix_guardrail_applied',
+            user_id: req.userId,
+            matrix_meta: response.matrix_meta ?? null,
+            scores,
+          })
+          .catch((error: unknown) => console.warn('Failed to record guardrail telemetry:', error));
+      }
 
       res.status(200).json(response);
     } catch (error: unknown) {
@@ -347,7 +499,8 @@ export class ForgeController {
         return;
       }
 
-      const { generation_id, caption, tags } = validationResult.data;
+      const { generation_id, caption, tags, remix_of, release_request_id } = validationResult.data;
+      const releaseRequestId = release_request_id ?? `${generation_id}:release`;
 
       const userLevel = await this.getUserLevel(req.userId);
       const quota = await this.checkQuota({
@@ -381,7 +534,7 @@ export class ForgeController {
 
       const { data: previewRecord, error: previewRecordError } = await this.supabase
         .from('forge_previews')
-        .select('moderation_status, moderation_reasons')
+        .select('moderation_status, moderation_reasons, matrix_meta, scores, template_key, base_id')
         .eq('generation_id', generation_id)
         .maybeSingle();
 
@@ -464,6 +617,10 @@ export class ForgeController {
           author_id: req.userId,
           author_handle: req.userHandle || null,
           author_avatar: req.userAvatar || null,
+          remix_of: remix_of ?? null,
+          template_key: previewRecord?.template_key ?? previewRecord?.base_id ?? null,
+          matrix_meta: previewRecord?.matrix_meta ?? null,
+          scores: previewRecord?.scores ?? null,
           // @ts-expect-error - Supabase table types are not fully generated
           moderation_status: previewRecord.moderation_status,
           // @ts-expect-error - Supabase table types are not fully generated
@@ -491,6 +648,38 @@ export class ForgeController {
         // @ts-expect-error - Supabase table types are not fully generated
         redirect_url: `/archives/${artifact.id}`,
       };
+
+      const releaseMatrixMeta = previewRecord?.matrix_meta ?? {};
+      const releaseScores = previewRecord?.scores ?? null;
+      const releaseTelemetryPayload = {
+        meme_id: releaseResult.artifactId,
+        user_id: req.userId,
+        schema_version: releaseMatrixMeta.schema_version ?? null,
+        axes: {
+          intent: releaseMatrixMeta.intent ?? null,
+          energy: releaseMatrixMeta.energy ?? null,
+          flavor: releaseMatrixMeta.flavor ?? null,
+          pattern: releaseMatrixMeta.pattern ?? null,
+          template_key: releaseMatrixMeta.template_key ?? null,
+        },
+        scores: releaseScores,
+        flags: {
+          fallback_used: releaseMatrixMeta.fallback_used ?? false,
+          energy_clamped: releaseMatrixMeta.energy_clamped ?? false,
+        },
+      };
+      const releaseEmitted = emitTelemetryEvent('matrix_release_created', releaseTelemetryPayload, releaseRequestId);
+      if (releaseEmitted) {
+        this.telemetry
+          .record({
+            event_type: 'matrix_release_created',
+            user_id: req.userId,
+            meme_id: releaseResult.artifactId,
+            matrix_meta: previewRecord?.matrix_meta ?? null,
+            scores: releaseScores,
+          })
+          .catch((error: unknown) => console.warn('Failed to record matrix telemetry:', error));
+      }
 
       res.status(200).json(response);
     } catch (error: unknown) {
