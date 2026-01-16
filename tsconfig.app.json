@@ -26,5 +26,5 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src", "lib", "middleware.ts"]
+  "include": ["src", "lib", "middleware.ts", "env.d.ts"]
 }
