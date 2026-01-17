@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { apiGet } from "@/lib/api";
+import { PageShell } from "@/components/layout/PageShell";
 
 type RewardsDTO = {
   user: { status: "anonymous" | "verified" | "cooldown" | "rate_limited"; id?: string };
@@ -96,7 +97,14 @@ export default function RewardsPage() {
   }, [data, filter]);
 
   return (
-    <div style={{ minHeight: "100vh", padding: 24, maxWidth: 1100, margin: "0 auto" }}>
+    <PageShell
+      spec={{
+        page: "rewards",
+        flavor: "subtle",
+        energy: 1,
+      }}
+    >
+      <div style={{ minHeight: "100vh", padding: 24, maxWidth: 1100, margin: "0 auto" }}>
       <header style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 18 }}>
         <h2 style={{ fontSize: 28, margin: 0 }}>Rewards</h2>
         <div style={{ fontSize: 13, opacity: 0.75 }}>Read-only · transparency-first</div>
@@ -231,7 +239,8 @@ export default function RewardsPage() {
           </Card>
         </div>
       )}
-    </div>
+      </div>
+    </PageShell>
   );
 }
 
