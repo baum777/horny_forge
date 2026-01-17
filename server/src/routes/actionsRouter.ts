@@ -97,7 +97,7 @@ const ACTIONS_CATALOGUE = [
     category: "event" as const,
     rewardHint: "XP + badge",
     requiresVerified: true,
-    // Wire to existing /api/forge endpoint
+    // Wire to existing /api/forge endpoint (schema-conform body)
     cta: {
       type: "call_api" as const,
       label: "Forge",

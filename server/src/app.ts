@@ -18,6 +18,7 @@ import rewardsRouter from './routes/rewardsRouter';
 import statusRouter from './routes/statusRouter';
 import { memePoolRouter } from './routes/memePool';
 import createMemesRouter from './routes/memes';
+import createGalleryRouter from './routes/galleryRouter';
 
 type AppDependencies = {
   forgeController?: ForgeController;
@@ -37,6 +38,7 @@ export async function createApp(deps: AppDependencies = {}) {
   const eventRouter = createEventRouter(deps.awardEvent);
   const ogRouter = createOgRouter(deps.supabaseAdmin);
   const shareRouters = createShareRouters(deps.supabaseAdmin);
+  const galleryRouter = createGalleryRouter();
 
   // Middleware
   app.use(cors({
@@ -71,6 +73,7 @@ export async function createApp(deps: AppDependencies = {}) {
   app.use('/api', badgesRouter);
   app.use('/api', rewardsRouter);
   app.use('/api', statusRouter);
+  app.use('/api', galleryRouter);
   app.use('/api', createMemesRouter(deps.supabaseAdmin));
   app.use('/api/gamification', gamificationRouter);
   app.use('/api/admin', adminRouter);

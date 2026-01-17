@@ -554,7 +554,9 @@ export class ForgeController {
         return;
       }
 
+      // Similarity check compares output to base images (not content moderation).
       const similarityResult = await this.similarity.compareToBase(previewBytes);
+      // safety_checked_at tracks similarity check timing for release gating.
       const safetyCheckedAt = new Date().toISOString();
 
       const { error: previewUpdateError } = await this.supabase

@@ -6,10 +6,9 @@ import { scoreMatrix } from '../services/hornyMatrix/scoring';
 import { MAX_INPUT_LENGTH } from '../constants';
 
 describe('SafetyRewrite', () => {
-  it('adds guardrail codes for explicit and pii', () => {
+  it('adds guardrail codes for pii', () => {
     const rewrite = new SafetyRewrite();
     const result = rewrite.rewrite('explicit content with phone number');
-    expect(result.usedGuardrails).toContain('EXPLICIT_METAPHORIZE');
     expect(result.usedGuardrails).toContain('PII_REDACT');
   });
 

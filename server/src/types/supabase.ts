@@ -11,6 +11,10 @@ export interface Database {
           author_avatar: string | null;
           image_url: string;
           tags: string[];
+          avg_rating: number | null;
+          rating_count: number | null;
+          report_count: number | null;
+          hidden: boolean | null;
           brand_similarity: number | null;
           base_match_id: string | null;
           safety_checked_at: string | null;
@@ -24,6 +28,10 @@ export interface Database {
           author_avatar?: string | null;
           image_url: string;
           tags: string[];
+          avg_rating?: number | null;
+          rating_count?: number | null;
+          report_count?: number | null;
+          hidden?: boolean | null;
           brand_similarity?: number | null;
           base_match_id?: string | null;
           safety_checked_at?: string | null;
@@ -37,6 +45,10 @@ export interface Database {
           author_avatar?: string | null;
           image_url?: string;
           tags?: string[];
+          avg_rating?: number | null;
+          rating_count?: number | null;
+          report_count?: number | null;
+          hidden?: boolean | null;
           brand_similarity?: number | null;
           base_match_id?: string | null;
           safety_checked_at?: string | null;
@@ -118,6 +130,35 @@ export interface Database {
           id?: string;
           artifact_id?: string;
           user_id?: string;
+          [key: string]: unknown;
+        };
+      };
+      meme_ratings: {
+        Row: {
+          id: string;
+          artifact_id: string;
+          user_id: string;
+          rating: number;
+          created_at: string;
+          updated_at: string;
+          [key: string]: unknown;
+        };
+        Insert: {
+          id?: string;
+          artifact_id: string;
+          user_id: string;
+          rating: number;
+          created_at?: string;
+          updated_at?: string;
+          [key: string]: unknown;
+        };
+        Update: {
+          id?: string;
+          artifact_id?: string;
+          user_id?: string;
+          rating?: number;
+          created_at?: string;
+          updated_at?: string;
           [key: string]: unknown;
         };
       };

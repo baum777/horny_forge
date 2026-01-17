@@ -1,0 +1,244 @@
+version: 1
+week_id: "AUTO"            # server resolves to current ISO week if AUTO
+timezone: "Europe/Berlin"
+
+claim:
+  first_come_first_served: true
+  requires_verified: true
+  freeze_blocks_claim: true
+  user_weekly_cap: 200000          # hard cap per user per week (includes pending)
+  user_weekly_boost_cap: 50000     # max boost tokens per user per week (voting+x combined)
+
+tiers:
+  - tier: 1
+    name: "Entry"
+    min_level: 2
+    slots: 10
+    reward_per_claim: 25000
+    pool_total: 250000
+    paths:
+      - id: "t1_forge_publish"
+        title: "Forge & Publish"
+        requirements:
+          all:
+            - type: "generate_count"
+              op: ">="
+              value: 3
+            - type: "publish_count"
+              op: ">="
+              value: 1
+      - id: "t1_publish_vote"
+        title: "Publish & Vote"
+        requirements:
+          all:
+            - type: "publish_count"
+              op: ">="
+              value: 1
+            - type: "votes_cast"
+              op: ">="
+              value: 10
+
+  - tier: 2
+    name: "Engagement"
+    min_level: 3
+    slots: 6
+    reward_per_claim: 50000
+    pool_total: 300000
+    paths:
+      - id: "t2_more_publishing"
+        title: "More Publishing"
+        requirements:
+          all:
+            - type: "generate_count"
+              op: ">="
+              value: 5
+            - type: "publish_count"
+              op: ">="
+              value: 2
+      - id: "t2_publish_vote"
+        title: "Publish + Vote"
+        requirements:
+          all:
+            - type: "publish_count"
+              op: ">="
+              value: 1
+            - type: "votes_cast"
+              op: ">="
+              value: 25
+      - id: "t2_softboost_voting"
+        title: "Soft Boost Path (Voting)"
+        requirements:
+          all:
+            - type: "publish_count"
+              op: ">="
+              value: 1
+            - type: "voting_boost_eligible"
+              op: "="
+              value: true
+            - type: "voting_score_week"
+              op: ">="
+              value: 40
+      - id: "t2_softboost_x"
+        title: "Soft Boost Path (X)"
+        requirements:
+          all:
+            - type: "publish_count"
+              op: ">="
+              value: 1
+            - type: "x_boost_eligible"
+              op: "="
+              value: true
+            - type: "x_score_week"
+              op: ">="
+              value: 25
+
+  - tier: 3
+    name: "Performance"
+    min_level: 5
+    slots: 4
+    reward_per_claim: 75000
+    pool_total: 300000
+    paths:
+      - id: "t3_50_votes_clean"
+        title: "50 Votes on One Meme (Clean)"
+        requirements:
+          all:
+            - type: "best_meme_rating_count"
+              op: ">="
+              value: 50
+            - type: "meme_hidden_count"
+              op: "="
+              value: 0
+      - id: "t3_quality_matrix"
+        title: "Quality + Matrix"
+        requirements:
+          all:
+            - type: "best_meme_rating_count"
+              op: ">="
+              value: 30
+            - type: "best_meme_avg_rating"
+              op: ">="
+              value: 4.2
+            - type: "matrix_any"
+              op: "includes"
+              value:
+                - "novelty_high"
+                - "rare_pattern_combo"
+      - id: "t3_softboost_combo"
+        title: "Soft Boost Combo"
+        requirements:
+          all:
+            - type: "publish_count"
+              op: ">="
+              value: 1
+            - type: "voting_score_week"
+              op: ">="
+              value: 60
+            - type: "x_score_week"
+              op: ">="
+              value: 35
+
+  - tier: 4
+    name: "Apex"
+    min_level: 7
+    slots: 4
+    reward_per_claim: 100000
+    pool_total: 400000
+    paths:
+      - id: "t4_ace_entry"
+        title: "Ace/MVP Entry"
+        requirements:
+          all:
+            - type: "ace_mvp_eligible_count"
+              op: ">="
+              value: 1
+            - type: "meme_reports_max"
+              op: "<"
+              value: 3
+      - id: "t4_100_votes_clean"
+        title: "100 Votes, Clean"
+        requirements:
+          all:
+            - type: "best_meme_rating_count"
+              op: ">="
+              value: 100
+            - type: "meme_hidden_count"
+              op: "="
+              value: 0
+      - id: "t4_softboost_apex"
+        title: "Apex Soft Boost"
+        requirements:
+          all:
+            - type: "publish_count"
+              op: ">="
+              value: 1
+            - type: "voting_score_week"
+              op: ">="
+              value: 70
+            - type: "x_score_week"
+              op: ">="
+              value: 45
+            - type: "meme_hidden_count"
+              op: "="
+              value: 0
+
+boosts:
+  enabled: true
+
+  voting:
+    description: "Soft boost derived from voting on the user's published memes during the quest week."
+    bonus_pool_weekly: 150000
+    user_boost_cap_weekly: 30000
+    eligibility:
+      min_unique_verified_voters: 10
+      min_avg_rating: 3.8
+      window_days: 7
+      require_published: true
+      require_not_hidden: true
+    scoring:
+      max_counted_unique_voters_per_meme: 50
+      max_vote_score_per_meme: 80
+      rating_multiplier:
+        below_3_8: 0.0
+        "3_8_to_4_1": 1.0
+        "4_2_to_4_5": 1.2
+        above_4_5: 1.4
+      velocity_multiplier:
+        below_5: 0.8
+        "5_to_15": 1.0
+        above_15: 1.2
+
+  x_engagement:
+    description: "Soft boost derived from verified X engagement on tracked share posts within 72h of posting."
+    bonus_pool_weekly: 150000
+    user_boost_cap_weekly: 20000
+    eligibility:
+      require_official_share_flow: true
+      require_hashtag: "$HORNY"
+      require_tracked_meme_id: true
+      engagement_window_hours: 72
+      min_x_score: 25
+    scoring:
+      weights:
+        like: 1
+        retweet: 3
+        reply: 2
+      max_x_score_per_post: 60
+      diminishing_returns:
+        up_to_25: 1.0
+        "26_to_60": 0.6
+        above_60: 0.3
+      risk_adjustments:
+        new_x_account_factor: 0.2
+        banned_or_flagged_factor: 0.0
+
+moderation:
+  report_autohide_n: "TUNING"     # resolved from tuning_thresholds, fallback to env/default
+  hidden_meme_nullifies_boost: true
+  freeze_blocks_claim: true
+
+notes:
+  - "Boosts never grant direct tokens; they only affect quest completion paths and bonus pool distribution."
+  - "All boost computation and eligibility checks are server-side; UI displays derived progress only."
+  - "Bonus distribution should be proportional by user_score / total_score, capped per user, and included in weekly cap."
+

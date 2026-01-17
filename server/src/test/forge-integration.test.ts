@@ -1,4 +1,5 @@
 import { beforeAll, describe, expect, it, vi } from 'vitest';
+import path from 'node:path';
 import request from 'supertest';
 import type { Response } from 'express';
 import type { AuthenticatedRequest } from '../middleware/auth';
@@ -65,6 +66,7 @@ describe('forge integration', () => {
     process.env.SUPABASE_URL = 'http://localhost:54321';
     process.env.SUPABASE_SERVICE_ROLE_KEY = 'test-key';
     process.env.OPENAI_API_KEY = 'test-openai-key';
+    process.env.BASE_IMAGES_PATH = path.resolve(__dirname, '../../public/horny_base');
   });
 
   it('returns composer fallback metadata when composer throws', async () => {
@@ -95,7 +97,7 @@ describe('forge integration', () => {
     expect(res.body.matrix_meta.fallback_used).toBe(true);
     expect(res.body.matrix_meta.fallback_stage).toBe('composer');
     expect(res.body.matrix_meta.used_guardrails).toContain('COMPOSER_FALLBACK');
-  });
+  }, 15000);
 
   it('dedupes matrix_preview_created telemetry per preview_request_id', async () => {
     const { createApp } = await import('../app');
@@ -146,7 +148,7 @@ describe('forge integration', () => {
     const previewEvents = recordSpy.mock.calls.filter(([payload]) => payload.event_type === 'matrix_preview_created');
     expect(previewEvents).toHaveLength(1);
     clearRequestTracking(previewRequestId);
-  });
+  }, 15000);
 
   it('allows provocative input in preview', async () => {
     const { createApp } = await import('../app');

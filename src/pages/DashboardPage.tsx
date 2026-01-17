@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { apiGet } from "@/lib/api";
+import { PageShell } from "@/components/layout/PageShell";
 import type { DashboardDTO } from "@/types/dashboard";
 
 function Card({ title, children }: { title: string; children: React.ReactNode }) {
@@ -38,7 +39,14 @@ export default function DashboardPage() {
   }, []);
 
   return (
-    <div style={{ minHeight: "100vh", padding: 24, maxWidth: 1100, margin: "0 auto" }}>
+    <PageShell
+      spec={{
+        page: "dashboard",
+        flavor: "default",
+        energy: 2,
+      }}
+    >
+      <div style={{ minHeight: "100vh", padding: 24, maxWidth: 1100, margin: "0 auto" }}>
       <header style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 18 }}>
         <h2 style={{ fontSize: 28, margin: 0 }}>Dashboard</h2>
         <div style={{ fontSize: 13, opacity: 0.75 }}>State-driven UI (no fake promises)</div>
@@ -214,7 +222,8 @@ export default function DashboardPage() {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </PageShell>
   );
 }
 
