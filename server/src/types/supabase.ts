@@ -11,8 +11,11 @@ export interface Database {
           author_avatar: string | null;
           image_url: string;
           tags: string[];
-          moderation_status: string | null;
-          moderation_reasons: Record<string, unknown> | null;
+          created_at: string | null;
+          avg_rating: number | null;
+          rating_count: number | null;
+          report_count: number | null;
+          hidden: boolean | null;
           brand_similarity: number | null;
           base_match_id: string | null;
           safety_checked_at: string | null;
@@ -26,8 +29,11 @@ export interface Database {
           author_avatar?: string | null;
           image_url: string;
           tags: string[];
-          moderation_status?: string | null;
-          moderation_reasons?: Record<string, unknown> | null;
+          created_at?: string | null;
+          avg_rating?: number | null;
+          rating_count?: number | null;
+          report_count?: number | null;
+          hidden?: boolean | null;
           brand_similarity?: number | null;
           base_match_id?: string | null;
           safety_checked_at?: string | null;
@@ -41,8 +47,11 @@ export interface Database {
           author_avatar?: string | null;
           image_url?: string;
           tags?: string[];
-          moderation_status?: string | null;
-          moderation_reasons?: Record<string, unknown> | null;
+          created_at?: string | null;
+          avg_rating?: number | null;
+          rating_count?: number | null;
+          report_count?: number | null;
+          hidden?: boolean | null;
           brand_similarity?: number | null;
           base_match_id?: string | null;
           safety_checked_at?: string | null;
@@ -81,8 +90,6 @@ export interface Database {
           user_id: string;
           base_id: string;
           preset: string;
-          moderation_status: string | null;
-          moderation_reasons: Record<string, unknown> | null;
           brand_similarity: number | null;
           base_match_id: string | null;
           safety_checked_at: string | null;
@@ -93,8 +100,6 @@ export interface Database {
           user_id: string;
           base_id: string;
           preset: string;
-          moderation_status?: string | null;
-          moderation_reasons?: Record<string, unknown> | null;
           brand_similarity?: number | null;
           base_match_id?: string | null;
           safety_checked_at?: string | null;
@@ -105,8 +110,6 @@ export interface Database {
           user_id?: string;
           base_id?: string;
           preset?: string;
-          moderation_status?: string | null;
-          moderation_reasons?: Record<string, unknown> | null;
           brand_similarity?: number | null;
           base_match_id?: string | null;
           safety_checked_at?: string | null;
@@ -133,6 +136,137 @@ export interface Database {
           [key: string]: unknown;
         };
       };
+      weekly_quest_tiers: {
+        Row: {
+          week_id: string;
+          tier: number;
+          slots_total: number;
+          slots_remaining: number;
+          pool_total: number;
+          reward_per_claim: number;
+          created_at: string;
+          updated_at: string;
+          [key: string]: unknown;
+        };
+        Insert: {
+          week_id: string;
+          tier: number;
+          slots_total: number;
+          slots_remaining: number;
+          pool_total: number;
+          reward_per_claim: number;
+          created_at?: string;
+          updated_at?: string;
+          [key: string]: unknown;
+        };
+        Update: {
+          week_id?: string;
+          tier?: number;
+          slots_total?: number;
+          slots_remaining?: number;
+          pool_total?: number;
+          reward_per_claim?: number;
+          created_at?: string;
+          updated_at?: string;
+          [key: string]: unknown;
+        };
+      };
+      weekly_quest_claims: {
+        Row: {
+          id: string;
+          week_id: string;
+          tier: number;
+          user_id: string;
+          reward_amount: number;
+          boost_amount: number;
+          created_at: string;
+          [key: string]: unknown;
+        };
+        Insert: {
+          id?: string;
+          week_id: string;
+          tier: number;
+          user_id: string;
+          reward_amount: number;
+          boost_amount?: number;
+          created_at?: string;
+          [key: string]: unknown;
+        };
+        Update: {
+          id?: string;
+          week_id?: string;
+          tier?: number;
+          user_id?: string;
+          reward_amount?: number;
+          boost_amount?: number;
+          created_at?: string;
+          [key: string]: unknown;
+        };
+      };
+      token_rewards: {
+        Row: {
+          id: string;
+          user_id: string;
+          amount: number;
+          status: string;
+          week_id: string;
+          tier: number;
+          idempotency_key: string;
+          created_at: string;
+          [key: string]: unknown;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          amount: number;
+          status?: string;
+          week_id: string;
+          tier: number;
+          idempotency_key: string;
+          created_at?: string;
+          [key: string]: unknown;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          amount?: number;
+          status?: string;
+          week_id?: string;
+          tier?: number;
+          idempotency_key?: string;
+          created_at?: string;
+          [key: string]: unknown;
+        };
+      };
+      meme_ratings: {
+        Row: {
+          id: string;
+          artifact_id: string;
+          user_id: string;
+          rating: number;
+          created_at: string;
+          updated_at: string;
+          [key: string]: unknown;
+        };
+        Insert: {
+          id?: string;
+          artifact_id: string;
+          user_id: string;
+          rating: number;
+          created_at?: string;
+          updated_at?: string;
+          [key: string]: unknown;
+        };
+        Update: {
+          id?: string;
+          artifact_id?: string;
+          user_id?: string;
+          rating?: number;
+          created_at?: string;
+          updated_at?: string;
+          [key: string]: unknown;
+        };
+      };
     };
     Functions: {
       award_event: {
@@ -155,6 +289,21 @@ export interface Database {
           allowed: boolean;
           remaining: number;
         } | null;
+      };
+      rpc_claim_weekly_quest: {
+        Args: {
+          p_week_id: string;
+          p_tier: number;
+          p_user_id: string;
+          p_reward_amount: number;
+          p_boost_amount: number;
+          p_idempotency_key: string;
+        };
+        Returns: {
+          success: boolean;
+          error?: string;
+          slots_remaining?: number;
+        };
       };
     };
   };

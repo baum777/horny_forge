@@ -36,11 +36,9 @@ describe('PromptEngine', () => {
       baseId: 'base-01',
     });
     const promptLower = result.final_prompt.toLowerCase();
-    const hasForbidden = ['photorealistic', 'cinematic', 'dslr'].some(term =>
-      promptLower.includes(term)
-    );
-    expect(['sanitized', 'rejected']).toContain(result.safety?.status);
-    expect(hasForbidden).toBe(false);
+    expect(result.safety?.status).toBe('sanitized');
+    expect(promptLower).toContain('illustrated');
+    expect(promptLower).not.toContain('photorealistic');
   });
 
   it('T06b: Photorealistic hint is normalized to illustrated', () => {
@@ -64,42 +62,35 @@ describe('PromptEngine', () => {
       baseId: 'base-01',
     });
     const promptLower = result.final_prompt.toLowerCase();
-    const hasForbidden = ['3d render', 'octane', 'ray tracing', 'ultra realistic'].some(term =>
-      promptLower.includes(term)
-    );
-    expect(['sanitized', 'rejected']).toContain(result.safety?.status);
-    expect(hasForbidden).toBe(false);
+    expect(result.safety?.status).toBe('ok');
+    expect(promptLower).toContain('3d');
+    expect(promptLower).toContain('octane');
+    expect(promptLower).toContain('ray tracing');
   });
 
-  it('T09: Explicit attempt (must block/sanitize)', () => {
+  it('T09: Explicit attempt (no semantic filtering)', () => {
     const result = PromptEngine.process({
       preset: 'HORNY_CHAOS_VARIATION',
       userInput: 'make it NSFW nude horny',
       baseId: 'base-01',
     });
     const promptLower = result.final_prompt.toLowerCase();
-    
-    // Check if forbidden terms were detected (as requested)
-    const hasForbidden = result.negative_terms.length > 0;
-    expect(hasForbidden).toBe(true);
-    
-    expect(result.safety?.status).toBe('rejected');
-    
-    // Verify output is clean
-    const outputHasForbidden = ['nsfw', 'nude'].some(term => promptLower.includes(term));
-    expect(outputHasForbidden).toBe(false);
+    expect(result.safety?.status).toBe('ok');
+    expect(result.negative_terms).toHaveLength(0);
+    expect(promptLower).toContain('nsfw');
+    expect(promptLower).toContain('nude');
   });
 
-  it('T10: Real person / celebrity attempt', () => {
+  it('T10: Real person / celebrity attempt (no semantic filtering)', () => {
     const result = PromptEngine.process({
       preset: 'HORNY_META_SCENE',
       userInput: 'put Elon Musk holding the unicorn',
       baseId: 'base-01',
     });
     const promptLower = result.final_prompt.toLowerCase();
-    const hasForbidden = ['elon', 'musk'].some(term => promptLower.includes(term));
-    expect(['sanitized', 'rejected']).toContain(result.safety?.status);
-    expect(hasForbidden).toBe(false);
+    expect(result.safety?.status).toBe('ok');
+    expect(promptLower).toContain('elon');
+    expect(promptLower).toContain('musk');
   });
 
   it('T11: Empty input (fallback concept)', () => {

@@ -88,12 +88,8 @@ export default function MetaForge() {
     } catch (error: unknown) {
       console.error('Forge error:', error);
       const errorObj = error && typeof error === 'object' && 'code' in error ? error as { code?: string; error?: string } : null;
-      if (errorObj?.code === 'UNSAFE_PROMPT' || errorObj?.error === 'unsafe_prompt') {
-        toast.error('Prompt blocked by safety checks. Try a different idea.');
-      } else {
-        const errorMessage = errorObj?.error || (error instanceof Error ? error.message : 'Artifact unstable. Retry.');
-        toast.error(errorMessage);
-      }
+      const errorMessage = errorObj?.error || (error instanceof Error ? error.message : 'Artifact unstable. Retry.');
+      toast.error(errorMessage);
     } finally {
       setIsGenerating(false);
     }
@@ -137,9 +133,6 @@ export default function MetaForge() {
       if (errorObj?.code === 'OFF_BRAND' || errorObj?.error === 'off_brand') {
         setReleaseError(error as ReleaseError);
         toast.error('Off-brand artifact. Try again using the suggested base.');
-      } else if (errorObj?.code === 'UNSAFE_PROMPT' || errorObj?.error === 'unsafe_prompt') {
-        setReleaseError(error as ReleaseError);
-        toast.error('Release blocked by safety checks.');
       } else {
         toast.error('Failed to release artifact. Try again.');
       }

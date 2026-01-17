@@ -2,8 +2,6 @@ import type { Preset, BaseId, PromptBuilderOutput } from '../types';
 import {
   PRESETS,
   BRAND_DNA_BLOCK,
-  FORBIDDEN_KEYWORDS,
-  FORBIDDEN_PERSONS,
   MAX_INPUT_LENGTH,
   MAX_WORDS,
   DEFAULT_CONCEPT,
@@ -65,45 +63,22 @@ export class PromptEngine {
       sanitized = words.slice(0, MAX_WORDS).join(' ');
     }
 
-    // Check for forbidden keywords
-    const lowerInput = sanitized.toLowerCase();
-    const foundForbidden: string[] = [];
-
-    for (const keyword of FORBIDDEN_KEYWORDS) {
-      if (lowerInput.includes(keyword.toLowerCase())) {
-        foundForbidden.push(keyword);
-        // Remove or replace forbidden keyword
-        const regex = new RegExp(keyword, 'gi');
-        sanitized = sanitized.replace(regex, '').trim();
-      }
-    }
-
-    // Check for forbidden persons
-    for (const person of FORBIDDEN_PERSONS) {
-      if (lowerInput.includes(person.toLowerCase())) {
-        foundForbidden.push(person);
-        // Replace with generic term
-        const regex = new RegExp(person, 'gi');
-        sanitized = sanitized.replace(regex, 'symbolic figure').trim();
-      }
-    }
-
     // Clean up multiple spaces again
     sanitized = sanitized.replace(/\s+/g, ' ').trim();
 
-    // If too much was removed or input is now empty, use default
+    // If input is now empty or too short, use default
     if (!sanitized || sanitized.length < 3) {
       return {
         sanitized: DEFAULT_CONCEPT,
-        negativeTerms: foundForbidden,
-        status: foundForbidden.length > 0 ? 'rejected' : styleSanitized ? 'sanitized' : 'ok',
+        negativeTerms,
+        status: styleSanitized ? 'sanitized' : 'ok',
       };
     }
 
     return {
       sanitized,
-      negativeTerms: foundForbidden,
-      status: foundForbidden.length > 0 ? 'rejected' : styleSanitized ? 'sanitized' : 'ok',
+      negativeTerms,
+      status: styleSanitized ? 'sanitized' : 'ok',
     };
   }
 

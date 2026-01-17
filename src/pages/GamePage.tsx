@@ -19,7 +19,7 @@ export default function GamePage() {
         <div className="relative w-full max-w-2xl aspect-video mx-auto mt-8 border-2 border-[#FFE600]/30 rounded-lg overflow-hidden bg-black/50 backdrop-blur-sm">
           {/* Blurred Silhouette */}
           <div className="absolute inset-0 bg-black flex items-center justify-center opacity-50 blur-sm">
-             <div className="w-16 h-16 bg-[#FFE600] rounded-full animate-pulse" />
+             <div className="w-16 h-16 bg-[#FFE600] rounded-full" />
           </div>
           
           <div className="absolute inset-0 flex flex-col items-center justify-center z-10 space-y-4">

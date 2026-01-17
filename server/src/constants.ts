@@ -2,19 +2,19 @@ import type { BaseId, Preset } from './types';
 
 export const BASE_IMAGES: Record<BaseId, { file: string; description: string }> = {
   'base-01': {
-    file: 'base-01-unicorn-head.png',
+    file: 'base-01.png',
     description: 'Unicorn head with rainbow horn, dot eyes, neon-yellow sketch style on black background',
   },
   'base-02': {
-    file: 'base-02-landscape.png',
+    file: 'base-02.png',
     description: 'Landscape scene with unicorn character, neon-yellow sketch doodle style, black background',
   },
   'base-03': {
-    file: 'base-03-jesus-meme.png',
+    file: 'base-03.png',
     description: 'Epic meme scene with unicorn character, neon-yellow sketch style, high contrast',
   },
   'base-04': {
-    file: 'base-04-rocket.png',
+    file: 'base-04.png',
     description: 'Rocket launch scene with unicorn character, neon-yellow sketch doodle style, black background',
   },
 };
@@ -69,17 +69,6 @@ export const FORBIDDEN_KEYWORDS = [
   'painterly',
   'brushstrokes',
   'textured brushwork',
-  'nsfw',
-  'nude',
-  'nudity',
-  'explicit',
-];
-
-export const FORBIDDEN_PERSONS = [
-  'elon musk',
-  'musk',
-  'celebrities',
-  'real person',
 ];
 
 export const MAX_INPUT_LENGTH = 240;

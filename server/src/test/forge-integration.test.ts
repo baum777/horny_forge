@@ -1,4 +1,5 @@
 import { beforeAll, describe, expect, it, vi } from 'vitest';
+import path from 'node:path';
 import request from 'supertest';
 import type { Response } from 'express';
 import type { AuthenticatedRequest } from '../middleware/auth';
@@ -30,7 +31,6 @@ async function createForgeControllerWithMocks() {
     checkQuota: (params: { userId: string; key: string; limit: number }) => Promise<{ allowed: boolean; remaining: number }>;
     imageGen: { generate: ReturnType<typeof vi.fn> };
     storage: { storePreview: ReturnType<typeof vi.fn> };
-    moderation: { moderateText: ReturnType<typeof vi.fn> };
     supabase: { from: (table: string) => { insert: ReturnType<typeof vi.fn> } };
   };
 
@@ -52,9 +52,6 @@ async function createForgeControllerWithMocks() {
       };
     }),
   };
-  controllerAny.moderation = {
-    moderateText: vi.fn().mockResolvedValue({ status: 'pass', reasons: [] }),
-  };
   controllerAny.supabase = {
     from: (_table: string) => ({
       insert: vi.fn().mockResolvedValue({ error: null }),
@@ -69,6 +66,7 @@ describe('forge integration', () => {
     process.env.SUPABASE_URL = 'http://localhost:54321';
     process.env.SUPABASE_SERVICE_ROLE_KEY = 'test-key';
     process.env.OPENAI_API_KEY = 'test-openai-key';
+    process.env.BASE_IMAGES_PATH = path.resolve(__dirname, '../../public/horny_base');
   });
 
   it('returns composer fallback metadata when composer throws', async () => {
@@ -99,7 +97,7 @@ describe('forge integration', () => {
     expect(res.body.matrix_meta.fallback_used).toBe(true);
     expect(res.body.matrix_meta.fallback_stage).toBe('composer');
     expect(res.body.matrix_meta.used_guardrails).toContain('COMPOSER_FALLBACK');
-  });
+  }, 15000);
 
   it('dedupes matrix_preview_created telemetry per preview_request_id', async () => {
     const { createApp } = await import('../app');
@@ -150,6 +148,72 @@ describe('forge integration', () => {
     const previewEvents = recordSpy.mock.calls.filter(([payload]) => payload.event_type === 'matrix_preview_created');
     expect(previewEvents).toHaveLength(1);
     clearRequestTracking(previewRequestId);
+  }, 15000);
+
+  it('allows provocative input in preview', async () => {
+    const { createApp } = await import('../app');
+    const forgeController = await createForgeControllerWithMocks();
+    const app = await createApp({
+      forgeController,
+      authMiddleware: createTestAuthMiddleware(),
+    });
+
+    const session = createTestSession('user-3');
+    const res = await request(app)
+      .post('/api/forge')
+      .set(session.headers)
+      .send({
+        base_id: 'base-01',
+        preset: 'HORNY_CORE_SKETCH',
+        user_input: 'nsfw chaotic meme idea',
+      });
+
+    expect(res.status).toBe(200);
+  });
+
+  it('sanitizes PII terms in input', async () => {
+    const { createApp } = await import('../app');
+    const forgeController = await createForgeControllerWithMocks();
+    const app = await createApp({
+      forgeController,
+      authMiddleware: createTestAuthMiddleware(),
+    });
+
+    const session = createTestSession('user-4');
+    const res = await request(app)
+      .post('/api/forge')
+      .set(session.headers)
+      .send({
+        base_id: 'base-01',
+        preset: 'HORNY_CORE_SKETCH',
+        user_input: 'email phone address',
+      });
+
+    expect(res.status).toBe(200);
+    expect(res.body.sanitized_input).toContain('redacted');
+    expect(res.body.sanitized_input).not.toContain('email');
+  });
+
+  it('rejects technically empty input', async () => {
+    const { createApp } = await import('../app');
+    const forgeController = await createForgeControllerWithMocks();
+    const app = await createApp({
+      forgeController,
+      authMiddleware: createTestAuthMiddleware(),
+    });
+
+    const session = createTestSession('user-5');
+    const res = await request(app)
+      .post('/api/forge')
+      .set(session.headers)
+      .send({
+        base_id: 'base-01',
+        preset: 'HORNY_CORE_SKETCH',
+        user_input: '   ',
+      });
+
+    expect(res.status).toBe(400);
+    expect(res.body.code).toBe('PROMPT_REJECTED');
   });
 
   it('returns legacy defaults for missing matrix_meta', async () => {

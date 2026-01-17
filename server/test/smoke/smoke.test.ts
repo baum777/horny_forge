@@ -40,10 +40,6 @@ class MockForgeController {
       res.status(401).json({ error: 'Authentication required', code: 'UNAUTHORIZED' });
       return;
     }
-    if (req.headers['x-test-moderation'] === 'fail') {
-      res.status(403).json({ error: 'unsafe_prompt', code: 'UNSAFE_PROMPT' });
-      return;
-    }
     if (req.headers['x-test-similarity'] === 'low') {
       res.status(403).json({ error: 'off_brand', code: 'OFF_BRAND', brand_similarity: 0.12 });
       return;
@@ -138,16 +134,6 @@ describe('smoke tests', () => {
       .set('x-test-quota', 'exceeded')
       .send({ base_id: 'base-01', preset: 'HORNY_CORE_SKETCH', user_input: 'test' });
     expect(res.status).toBe(429);
-  });
-
-  it('release blocked when moderation fails', async () => {
-    const session = createTestSession('user-1');
-    const res = await request(app)
-      .post('/api/forge/release')
-      .set(session.headers)
-      .set('x-test-moderation', 'fail')
-      .send({ generation_id: 'gen-1', tags: ['test'] });
-    expect(res.status).toBe(403);
   });
 
   it('release blocked when brand similarity is low', async () => {

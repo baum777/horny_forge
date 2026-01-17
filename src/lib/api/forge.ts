@@ -39,8 +39,8 @@ export interface ForgeError {
     | 'UNAUTHORIZED'
     | 'RATE_LIMIT'
     | 'PROMPT_REJECTED'
-    | 'UNSAFE_PROMPT'
     | 'GEN_FAIL'
+    | 'GEN_UNAVAILABLE'
     | 'STORAGE_FAIL'
     | 'DB_FAIL'
     | 'NOT_FOUND';
@@ -63,7 +63,7 @@ export interface ReleaseResponse {
 
 export interface ReleaseError {
   error: string;
-  code: 'INVALID_INPUT' | 'UNAUTHORIZED' | 'RATE_LIMIT' | 'UNSAFE_PROMPT' | 'OFF_BRAND' | 'STORAGE_FAIL' | 'DB_FAIL' | 'NOT_FOUND';
+  code: 'INVALID_INPUT' | 'UNAUTHORIZED' | 'RATE_LIMIT' | 'OFF_BRAND' | 'STORAGE_FAIL' | 'DB_FAIL' | 'NOT_FOUND';
   brand_similarity?: number;
   base_match_id?: string | null;
 }

@@ -58,6 +58,7 @@ const App = () => {
                   {/* Core App */}
                   <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="/gallery" element={<Archives />} />
+                  <Route path="/feed" element={<Archives />} />
                   <Route path="/gallery/:id" element={<ArtifactDetail />} />
                   <Route path="/profile" element={<Profile />} />
                   <Route path="/interact" element={<Interact />} />

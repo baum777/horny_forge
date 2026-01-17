@@ -13,10 +13,12 @@ export interface RateLimitOptions {
   windowMs: number;
   maxRequests: number;
   keyGenerator?: (req: Request) => string;
+  errorCode?: string;
+  errorMessage?: string;
 }
 
 export function createRateLimiter(options: RateLimitOptions) {
-  const { windowMs, maxRequests, keyGenerator } = options;
+  const { windowMs, maxRequests, keyGenerator, errorCode = 'RATE_LIMIT_EXCEEDED', errorMessage = 'Rate limit exceeded' } = options;
 
   return (req: Request, res: Response, next: NextFunction) => {
     const key = keyGenerator ? keyGenerator(req) : getDefaultKey(req);
@@ -34,8 +36,8 @@ export function createRateLimiter(options: RateLimitOptions) {
 
     if (entry.count >= maxRequests) {
       res.status(429).json({
-        error: 'Rate limit exceeded',
-        code: 'RATE_LIMIT_EXCEEDED',
+        error: errorMessage,
+        code: errorCode,
         retryAfter: Math.ceil((entry.resetAt - now) / 1000),
       });
       return;
@@ -67,5 +69,15 @@ export const ipRateLimit = createRateLimiter({
   windowMs: 60_000, // 1 minute
   maxRequests: 100, // 100 requests per minute per IP
   keyGenerator: (req) => `ip:${req.ip || req.socket.remoteAddress || 'unknown'}`,
+});
+
+export const forgeRateLimit = createRateLimiter({
+  windowMs: 60_000, // 1 minute
+  maxRequests: 60, // 60 requests per minute
+  errorCode: 'RATE_LIMIT',
+  keyGenerator: (req) => {
+    const authReq = req as AuthenticatedRequest;
+    return `forge:${authReq.userId || req.ip || 'anonymous'}`;
+  },
 });
 

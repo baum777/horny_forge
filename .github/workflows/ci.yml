@@ -37,6 +37,9 @@ jobs:
       - name: Typecheck frontend
         run: npm run typecheck
 
+      - name: Build frontend
+        run: npm run build
+
       - name: Install server deps
         run: |
           npm config set registry https://registry.npmjs.org/

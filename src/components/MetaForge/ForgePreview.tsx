@@ -31,7 +31,6 @@ export const ForgePreview: React.FC<ForgePreviewProps> = ({
     releaseError = null,
 }) => {
     const showOffBrand = releaseError?.code === 'OFF_BRAND' || releaseError?.error === 'off_brand';
-    const showUnsafe = releaseError?.code === 'UNSAFE_PROMPT' || releaseError?.error === 'unsafe_prompt';
 
     return (
         <div className="space-y-6 sticky top-8">
@@ -144,32 +143,23 @@ export const ForgePreview: React.FC<ForgePreviewProps> = ({
                     animate={{ opacity: 1, y: 0 }}
                     className="space-y-3"
                 >
-                    {(showOffBrand || showUnsafe) && (
+                    {showOffBrand && (
                         <div className="rounded-xl border border-white/10 bg-black/40 p-4 text-xs text-muted-foreground space-y-3">
-                            {showOffBrand && (
-                                <>
-                                    <p className="text-foreground font-semibold">Release blocked: off-brand output.</p>
-                                    <p>
-                                        Use base{' '}
-                                        <span className="text-foreground font-mono">
-                                            {releaseError?.base_match_id ?? metadata?.base_id ?? 'base-01'}
-                                        </span>{' '}
-                                        / preset{' '}
-                                        <span className="text-foreground font-mono">
-                                            {metadata?.preset ?? 'HORNY_CORE_SKETCH'}
-                                        </span>{' '}
-                                        and try again.
-                                    </p>
-                                    <Button variant="outline" size="sm" onClick={onRegenerate}>
-                                        Try again
-                                    </Button>
-                                </>
-                            )}
-                            {showUnsafe && (
-                                <p className="text-foreground font-semibold">
-                                    Release blocked by safety checks. Please try a different idea.
-                                </p>
-                            )}
+                            <p className="text-foreground font-semibold">Release blocked: off-brand output.</p>
+                            <p>
+                                Use base{' '}
+                                <span className="text-foreground font-mono">
+                                    {releaseError?.base_match_id ?? metadata?.base_id ?? 'base-01'}
+                                </span>{' '}
+                                / preset{' '}
+                                <span className="text-foreground font-mono">
+                                    {metadata?.preset ?? 'HORNY_CORE_SKETCH'}
+                                </span>{' '}
+                                and try again.
+                            </p>
+                            <Button variant="outline" size="sm" onClick={onRegenerate}>
+                                Try again
+                            </Button>
                         </div>
                     )}
                     <div className="flex gap-2">

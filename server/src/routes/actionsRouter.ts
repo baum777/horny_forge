@@ -97,13 +97,17 @@ const ACTIONS_CATALOGUE = [
     category: "event" as const,
     rewardHint: "XP + badge",
     requiresVerified: true,
-    // Wire to existing /api/forge endpoint
+    // Wire to existing /api/forge endpoint (schema-conform body)
     cta: {
       type: "call_api" as const,
       label: "Forge",
       method: "POST" as const,
       path: "/api/forge",
-      body: { type: "signal" },
+      body: {
+        preset: "HORNY_CORE_SKETCH",
+        base_id: "base-01",
+        user_input: "signal",
+      },
     },
   },
 ];

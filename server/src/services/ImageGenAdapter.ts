@@ -21,11 +21,12 @@ export interface ImageGenResult {
 }
 
 export class ImageGenAdapter {
-  private client: OpenAI;
+  private client: OpenAI | null;
 
   constructor() {
     if (!config.openai.apiKey) {
-      throw new Error('OPENAI_API_KEY not configured');
+      this.client = null;
+      return;
     }
     this.client = new OpenAI({ apiKey: config.openai.apiKey });
   }
@@ -59,6 +60,12 @@ export class ImageGenAdapter {
     const { baseId, baseImagePath, finalPrompt, size = '1024x1024' } = params;
 
     try {
+      if (!this.client) {
+        const error = new Error('Image generation unavailable');
+        (error as { code?: string; status?: number }).code = 'GEN_UNAVAILABLE';
+        (error as { code?: string; status?: number }).status = 503;
+        throw error;
+      }
       // Load base image
       const baseImageBytes = await this.loadBaseImage(baseId, baseImagePath);
 

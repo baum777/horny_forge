@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import { PageShell } from "@/components/layout/PageShell";
 import DashboardShell from "@/components/dashboard/DashboardShell";
 import UserStatusCard from "@/components/dashboard/UserStatusCard";
 import ActionList from "@/components/dashboard/ActionList";
@@ -64,7 +65,14 @@ const Dashboard = () => {
   );
 
   return (
-    <div className="min-h-screen bg-background">
+    <PageShell
+      spec={{
+        page: "dashboard",
+        flavor: "default",
+        energy: 2,
+      }}
+    >
+      <div className="min-h-screen bg-background">
       <Navbar />
       <DashboardShell>
         {loading && (
@@ -105,7 +113,8 @@ const Dashboard = () => {
         )}
       </DashboardShell>
       <Footer />
-    </div>
+      </div>
+    </PageShell>
   );
 };
 

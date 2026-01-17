@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { apiGet } from "@/lib/api";
+import { PageShell } from "@/components/layout/PageShell";
 
 type StatusDTO = {
   overall: "ok" | "degraded" | "down";
@@ -71,7 +72,14 @@ export default function StatusPage() {
   }, []);
 
   return (
-    <div style={{ minHeight: "100vh", padding: 24, maxWidth: 1100, margin: "0 auto" }}>
+    <PageShell
+      spec={{
+        page: "status",
+        flavor: "subtle",
+        energy: 1,
+      }}
+    >
+      <div style={{ minHeight: "100vh", padding: 24, maxWidth: 1100, margin: "0 auto" }}>
       <header style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 18 }}>
         <h2 style={{ fontSize: 28, margin: 0 }}>Status</h2>
         <div style={{ fontSize: 13, opacity: 0.75 }}>{data ? `checked ${new Date(data.checkedAt).toLocaleString()}` : ""}</div>
@@ -165,7 +173,8 @@ export default function StatusPage() {
           </Card>
         </div>
       )}
-    </div>
+      </div>
+    </PageShell>
   );
 }
 

@@ -2,7 +2,6 @@ import type { Request, Response } from 'express';
 import { randomUUID } from 'node:crypto';
 import { ImageGenAdapter } from '../services/ImageGenAdapter';
 import { StorageAdapter } from '../services/StorageAdapter';
-import { ModerationService } from '../services/ModerationService';
 import { SimilarityService } from '../services/SimilarityService';
 import { HornyMatrixEngine } from '../services/hornyMatrix/HornyMatrixEngine';
 import { SafetyRewrite } from '../services/hornyMatrix/SafetyRewrite';
@@ -71,7 +70,6 @@ export class ForgeController {
   private imageGen: ImageGenAdapter;
   private storage: StorageAdapter;
   private supabase;
-  private moderation: ModerationService;
   private similarity: SimilarityService;
   private matrixEngine: HornyMatrixEngine;
   private safetyRewrite: SafetyRewrite;
@@ -82,7 +80,6 @@ export class ForgeController {
     this.imageGen = new ImageGenAdapter();
     this.storage = new StorageAdapter();
     this.supabase = createClient<Database>(config.supabase.url, config.supabase.serviceRoleKey);
-    this.moderation = new ModerationService();
     this.similarity = new SimilarityService();
     this.matrixEngine = new HornyMatrixEngine();
     this.safetyRewrite = new SafetyRewrite();
@@ -295,7 +292,7 @@ export class ForgeController {
 
       if (safetyRewrite.flags.includes('empty')) {
         res.status(400).json({
-          error: 'Input contains blocked content',
+          error: 'Input is empty or unusable',
           code: 'PROMPT_REJECTED',
         });
         return;
@@ -306,15 +303,6 @@ export class ForgeController {
         flags: safetyRewrite.flags,
         rewrittenPrompt: safetyRewrite.rewrittenPrompt,
       });
-
-      const moderationResult = await this.moderation.moderateText([resolvedUserInput, promptPack.prompt]);
-      if (moderationResult.status === 'fail') {
-        res.status(400).json({
-          error: 'unsafe_prompt',
-          code: 'UNSAFE_PROMPT',
-        });
-        return;
-      }
 
       // Generate image
       let imageBytes: Buffer;
@@ -330,6 +318,14 @@ export class ForgeController {
         modelMeta = imageResult.modelMeta;
       } catch (error: unknown) {
         console.error('Image generation failed:', error);
+        const errorObj = error && typeof error === 'object' ? (error as { code?: string; status?: number }) : null;
+        if (errorObj?.code === 'GEN_UNAVAILABLE') {
+          res.status(503).json({
+            error: 'Image generation unavailable',
+            code: 'GEN_UNAVAILABLE',
+          });
+          return;
+        }
         res.status(500).json({
           error: 'Artifact unstable. Retry.',
           code: 'GEN_FAIL',
@@ -350,7 +346,6 @@ export class ForgeController {
         return;
       }
 
-      const safetyCheckedAt = new Date().toISOString();
       // @ts-expect-error - Supabase table types are not fully generated
       const { error: previewDbError } = await this.supabase.from('forge_previews').insert({
         generation_id: previewResult.generationId,
@@ -367,9 +362,6 @@ export class ForgeController {
           energy_clamped: energyClamped,
         },
         scores,
-        moderation_status: moderationResult.status,
-        moderation_reasons: moderationResult.reasons,
-        safety_checked_at: safetyCheckedAt,
       });
 
       if (previewDbError) {
@@ -541,7 +533,7 @@ export class ForgeController {
 
       const { data: previewRecord, error: previewRecordError } = await this.supabase
         .from('forge_previews')
-        .select('moderation_status, moderation_reasons, matrix_meta, scores, template_key, base_id')
+        .select('matrix_meta, scores, template_key, base_id')
         .eq('generation_id', generation_id)
         .maybeSingle();
 
@@ -554,16 +546,17 @@ export class ForgeController {
         return;
       }
 
-      // @ts-expect-error - Supabase table types are not fully generated
-      if (!previewRecord || previewRecord.moderation_status !== 'pass') {
-        res.status(403).json({
-          error: 'unsafe_prompt',
-          code: 'UNSAFE_PROMPT',
+      if (!previewRecord) {
+        res.status(404).json({
+          error: 'Generation not found or expired',
+          code: 'NOT_FOUND',
         });
         return;
       }
 
+      // Similarity check compares output to base images (not content moderation).
       const similarityResult = await this.similarity.compareToBase(previewBytes);
+      // safety_checked_at tracks similarity check timing for release gating.
       const safetyCheckedAt = new Date().toISOString();
 
       const { error: previewUpdateError } = await this.supabase
@@ -628,10 +621,6 @@ export class ForgeController {
           template_key: previewRecord?.template_key ?? previewRecord?.base_id ?? null,
           matrix_meta: previewRecord?.matrix_meta ?? null,
           scores: previewRecord?.scores ?? null,
-          // @ts-expect-error - Supabase table types are not fully generated
-          moderation_status: previewRecord.moderation_status,
-          // @ts-expect-error - Supabase table types are not fully generated
-          moderation_reasons: previewRecord.moderation_reasons,
           brand_similarity: similarityResult.similarity,
           base_match_id: similarityResult.baseMatchId,
           safety_checked_at: safetyCheckedAt,

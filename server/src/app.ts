@@ -4,6 +4,7 @@ import cors from 'cors';
 import { config } from './config';
 import type { ForgeController } from './controllers/ForgeController';
 import { authMiddleware as defaultAuthMiddleware, requireAuth as defaultRequireAuth, type AuthenticatedRequest } from './middleware/auth';
+import { forgeRateLimit } from './middleware/rateLimit';
 import createEventRouter from './routes/event';
 import createOgRouter from './routes/og';
 import { createShareRouters } from './routes/share';
@@ -17,6 +18,8 @@ import rewardsRouter from './routes/rewardsRouter';
 import statusRouter from './routes/statusRouter';
 import { memePoolRouter } from './routes/memePool';
 import createMemesRouter from './routes/memes';
+import createGalleryRouter from './routes/galleryRouter';
+import createQuestsRouter from './routes/questsRouter';
 
 type AppDependencies = {
   forgeController?: ForgeController;
@@ -36,6 +39,8 @@ export async function createApp(deps: AppDependencies = {}) {
   const eventRouter = createEventRouter(deps.awardEvent);
   const ogRouter = createOgRouter(deps.supabaseAdmin);
   const shareRouters = createShareRouters(deps.supabaseAdmin);
+  const galleryRouter = createGalleryRouter();
+  const questsRouter = createQuestsRouter();
 
   // Middleware
   app.use(cors({
@@ -58,9 +63,9 @@ export async function createApp(deps: AppDependencies = {}) {
   });
 
   // API Routes
-  app.post('/api/forge', requireAuth, (req, res) => forgeController.forge(req as AuthenticatedRequest, res));
-  app.post('/api/forge/preview', requireAuth, (req, res) => forgeController.forge(req as AuthenticatedRequest, res));
-  app.post('/api/forge/release', requireAuth, (req, res) => forgeController.release(req as AuthenticatedRequest, res));
+  app.post('/api/forge', requireAuth, forgeRateLimit, (req, res) => forgeController.forge(req as AuthenticatedRequest, res));
+  app.post('/api/forge/preview', requireAuth, forgeRateLimit, (req, res) => forgeController.forge(req as AuthenticatedRequest, res));
+  app.post('/api/forge/release', requireAuth, forgeRateLimit, (req, res) => forgeController.release(req as AuthenticatedRequest, res));
   app.use('/api', memePoolRouter);
   app.use('/api', eventRouter);
   app.use('/api', shareRouters.shareApiRouter);
@@ -70,6 +75,8 @@ export async function createApp(deps: AppDependencies = {}) {
   app.use('/api', badgesRouter);
   app.use('/api', rewardsRouter);
   app.use('/api', statusRouter);
+  app.use('/api', galleryRouter);
+  app.use('/api', questsRouter);
   app.use('/api', createMemesRouter(deps.supabaseAdmin));
   app.use('/api/gamification', gamificationRouter);
   app.use('/api/admin', adminRouter);

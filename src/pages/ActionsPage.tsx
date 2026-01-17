@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { apiGet } from "@/lib/api";
+import { PageShell } from "@/components/layout/PageShell";
 
 type ActionsDTO = {
   user: { status: "anonymous" | "verified" | "cooldown" | "rate_limited" };
@@ -87,7 +88,14 @@ export default function ActionsPage() {
   }
 
   return (
-    <div style={{ minHeight: "100vh", padding: 24, maxWidth: 1100, margin: "0 auto" }}>
+    <PageShell
+      spec={{
+        page: "actions",
+        flavor: "default",
+        energy: 2,
+      }}
+    >
+      <div style={{ minHeight: "100vh", padding: 24, maxWidth: 1100, margin: "0 auto" }}>
       <header style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 18 }}>
         <h2 style={{ fontSize: 28, margin: 0 }}>Actions</h2>
         <div style={{ fontSize: 13, opacity: 0.75 }}>Quest board · state-driven</div>
@@ -150,7 +158,8 @@ export default function ActionsPage() {
           </Card>
         </div>
       )}
-    </div>
+      </div>
+    </PageShell>
   );
 }
 
