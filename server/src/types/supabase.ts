@@ -133,6 +133,108 @@ export interface Database {
           [key: string]: unknown;
         };
       };
+      weekly_quest_tiers: {
+        Row: {
+          week_id: string;
+          tier: number;
+          slots_total: number;
+          slots_remaining: number;
+          pool_total: number;
+          reward_per_claim: number;
+          created_at: string;
+          updated_at: string;
+          [key: string]: unknown;
+        };
+        Insert: {
+          week_id: string;
+          tier: number;
+          slots_total: number;
+          slots_remaining: number;
+          pool_total: number;
+          reward_per_claim: number;
+          created_at?: string;
+          updated_at?: string;
+          [key: string]: unknown;
+        };
+        Update: {
+          week_id?: string;
+          tier?: number;
+          slots_total?: number;
+          slots_remaining?: number;
+          pool_total?: number;
+          reward_per_claim?: number;
+          created_at?: string;
+          updated_at?: string;
+          [key: string]: unknown;
+        };
+      };
+      weekly_quest_claims: {
+        Row: {
+          id: string;
+          week_id: string;
+          tier: number;
+          user_id: string;
+          reward_amount: number;
+          boost_amount: number;
+          created_at: string;
+          [key: string]: unknown;
+        };
+        Insert: {
+          id?: string;
+          week_id: string;
+          tier: number;
+          user_id: string;
+          reward_amount: number;
+          boost_amount?: number;
+          created_at?: string;
+          [key: string]: unknown;
+        };
+        Update: {
+          id?: string;
+          week_id?: string;
+          tier?: number;
+          user_id?: string;
+          reward_amount?: number;
+          boost_amount?: number;
+          created_at?: string;
+          [key: string]: unknown;
+        };
+      };
+      token_rewards: {
+        Row: {
+          id: string;
+          user_id: string;
+          amount: number;
+          status: string;
+          week_id: string;
+          tier: number;
+          idempotency_key: string;
+          created_at: string;
+          [key: string]: unknown;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          amount: number;
+          status?: string;
+          week_id: string;
+          tier: number;
+          idempotency_key: string;
+          created_at?: string;
+          [key: string]: unknown;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          amount?: number;
+          status?: string;
+          week_id?: string;
+          tier?: number;
+          idempotency_key?: string;
+          created_at?: string;
+          [key: string]: unknown;
+        };
+      };
       meme_ratings: {
         Row: {
           id: string;
@@ -184,6 +286,21 @@ export interface Database {
           allowed: boolean;
           remaining: number;
         } | null;
+      };
+      rpc_claim_weekly_quest: {
+        Args: {
+          p_week_id: string;
+          p_tier: number;
+          p_user_id: string;
+          p_reward_amount: number;
+          p_boost_amount: number;
+          p_idempotency_key: string;
+        };
+        Returns: {
+          success: boolean;
+          error?: string;
+          slots_remaining?: number;
+        };
       };
     };
   };
