@@ -43,7 +43,7 @@ Bewerte das Repo gegen diese verbindlichen Leitplanken:
   - Layout/Shell: `src/components/layout/PageShell.tsx` (setzt data-* Tokens auf `body`)
   - Layout/Globals: `src/components/layout/Navbar.tsx`, `src/components/layout/Footer.tsx`
   - Design Tokens/Styles: `tailwind.config.ts`, `src/index.css`, `src/App.css`
-  - Landing: `src/pages/Index.tsx`, `src/components/home/Hero.tsx`, `src/components/home/LiveTicker.tsx`
+  - Landing: `src/pages/IndexPage.tsx`, `src/components/home/Hero.tsx`, `src/components/home/LiveTicker.tsx`
   - Teaser/Locked: `src/components/ui/TeaserLayout.tsx`, `src/pages/ForgePage.tsx`, `src/pages/GamePage.tsx`, `src/pages/BadgesPage.tsx`
   - Assets: `public/` (client), `server/public/hero_socials_and_logo_icons/` (Hero Icons/Logo)
   - Server: `server/src` (routes/controllers/services), `server/public` (static)
@@ -86,7 +86,7 @@ Pruefe, ob die canonical routes existieren und korrekt sind:
 - `/badges` (Locked)
 
 Routing-Referenz (aktuelle Pfade in `src/App.tsx`):
-- `/` -> `src/pages/Index.tsx`
+- `/` -> `src/pages/IndexPage.tsx`
 - `/interact` -> `src/pages/Interact.tsx`
 - `/profile` -> `src/pages/Profile.tsx`
 - `/game` -> `src/pages/GamePage.tsx`

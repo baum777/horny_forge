@@ -30,3 +30,9 @@ Supabase kommt über `@supabase/supabase-js` zum Einsatz, die Verbindungskonfigu
 
 For a detailed and factual description of the current architecture, see:
 docs/architecture_current_state.md
+
+## AI / Agent Rules
+The following files in the repository root govern AI behavior and task workflows:
+- `.cursorrules`: Core instructions for the Cursor AI agent.
+- `TASK_CONTRACT.template.md`: Template for defining complex tasks.
+- `CURSOR_AGENT_PLAYBOOK.md`: Detailed playbook for agent operations and best practices.
