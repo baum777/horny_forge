@@ -11,6 +11,7 @@ export interface Database {
           author_avatar: string | null;
           image_url: string;
           tags: string[];
+          created_at: string | null;
           avg_rating: number | null;
           rating_count: number | null;
           report_count: number | null;
@@ -28,6 +29,7 @@ export interface Database {
           author_avatar?: string | null;
           image_url: string;
           tags: string[];
+          created_at?: string | null;
           avg_rating?: number | null;
           rating_count?: number | null;
           report_count?: number | null;
@@ -45,6 +47,7 @@ export interface Database {
           author_avatar?: string | null;
           image_url?: string;
           tags?: string[];
+          created_at?: string | null;
           avg_rating?: number | null;
           rating_count?: number | null;
           report_count?: number | null;
