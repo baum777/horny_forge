@@ -1,5 +1,4 @@
 import fs from 'node:fs/promises';
-import path from 'node:path';
 import { z } from 'zod';
 import { parse as parseYaml } from 'yaml';
 
@@ -46,7 +45,7 @@ const QuestConfigSchema = z.object({
       bonus_pool_weekly: z.number(),
       user_boost_cap_weekly: z.number(),
       eligibility: z.object({
-        min_unique_verified_voters: z.number(),
+          min_unique_raters: z.number(),
         min_avg_rating: z.number(),
         window_days: z.number(),
         require_published: z.boolean(),
@@ -103,6 +102,15 @@ const QuestConfigSchema = z.object({
     hidden_meme_nullifies_boost: z.boolean(),
     freeze_blocks_claim: z.boolean(),
   }),
+  thresholds: z
+    .object({
+      ace_mvp: z.object({
+        avg_rating: z.number(),
+        rating_count: z.number(),
+        report_count_max: z.number(),
+      }),
+    })
+    .optional(),
   notes: z.array(z.string()).optional(),
 });
 

@@ -55,7 +55,7 @@ export class VotingBoostService {
       return { eligible: false, score: 0 };
     }
 
-    const { uniqueVoters, avgRating, score } = await this.computeUserVotingStats({
+    const { uniqueRaters, avgRating, score } = await this.computeUserVotingStats({
       userId,
       weekStart,
       weekEnd,
@@ -64,7 +64,7 @@ export class VotingBoostService {
     });
 
     const eligible =
-      uniqueVoters >= votingConfig.eligibility.min_unique_verified_voters &&
+      uniqueRaters >= votingConfig.eligibility.min_unique_raters &&
       avgRating >= votingConfig.eligibility.min_avg_rating;
 
     return {
@@ -110,14 +110,14 @@ export class VotingBoostService {
     }
 
     const artifactIds = filteredArtifacts.map((artifact) => artifact.id);
-    const voterSetsByAuthor = await this.fetchUniqueVotersByAuthor(artifactIds, filteredArtifacts, weekStart, weekEnd);
+    const voterSetsByAuthor = await this.fetchUniqueRatersByAuthor(artifactIds, filteredArtifacts, weekStart, weekEnd);
 
     let totalScore = 0;
     for (const [authorId, stats] of statsByAuthor.entries()) {
       const avgRating = stats.ratingCount > 0 ? stats.ratingSum / stats.ratingCount : 0;
-      const uniqueVoters = voterSetsByAuthor.get(authorId)?.size ?? 0;
+      const uniqueRaters = voterSetsByAuthor.get(authorId)?.size ?? 0;
       const eligible =
-        uniqueVoters >= votingConfig.eligibility.min_unique_verified_voters &&
+        uniqueRaters >= votingConfig.eligibility.min_unique_raters &&
         avgRating >= votingConfig.eligibility.min_avg_rating &&
         (!votingConfig.eligibility.require_published || stats.ratingCount > 0);
 
@@ -152,8 +152,8 @@ export class VotingBoostService {
   }) {
     const { userId, weekStart, weekEnd, votingConfig, artifacts } = params;
     const artifactIds = artifacts.map((artifact) => artifact.id);
-    const voterSetsByAuthor = await this.fetchUniqueVotersByAuthor(artifactIds, artifacts, weekStart, weekEnd);
-    const uniqueVoters = voterSetsByAuthor.get(userId)?.size ?? 0;
+    const voterSetsByAuthor = await this.fetchUniqueRatersByAuthor(artifactIds, artifacts, weekStart, weekEnd);
+    const uniqueRaters = voterSetsByAuthor.get(userId)?.size ?? 0;
 
     let ratingSum = 0;
     let ratingCount = 0;
@@ -170,7 +170,7 @@ export class VotingBoostService {
     const avgRating = ratingCount > 0 ? ratingSum / ratingCount : 0;
 
     return {
-      uniqueVoters,
+      uniqueRaters,
       avgRating,
       score,
     };
@@ -208,7 +208,7 @@ export class VotingBoostService {
     return config.above_15;
   }
 
-  private async fetchUniqueVotersByAuthor(
+  private async fetchUniqueRatersByAuthor(
     artifactIds: string[],
     artifacts: Array<{ id: string; author_id?: string | null }>,
     weekStart: Date,

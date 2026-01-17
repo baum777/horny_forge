@@ -5,7 +5,7 @@ timezone: "Europe/Berlin"
 claim:
   first_come_first_served: true
   requires_verified: true
-  freeze_blocks_claim: true
+  freeze_blocks_claim: false        # NOOP in v1.1 because no freeze source exists
   user_weekly_cap: 200000          # hard cap per user per week (includes pending)
   user_weekly_boost_cap: 50000     # max boost tokens per user per week (voting+x combined)
 
@@ -189,8 +189,8 @@ boosts:
     description: "Soft boost derived from voting on the user's published memes during the quest week."
     bonus_pool_weekly: 150000
     user_boost_cap_weekly: 30000
-    eligibility:
-      min_unique_verified_voters: 10
+      eligibility:
+        min_unique_raters: 10
       min_avg_rating: 3.8
       window_days: 7
       require_published: true
@@ -209,7 +209,7 @@ boosts:
         above_15: 1.2
 
   x_engagement:
-    description: "Soft boost derived from verified X engagement on tracked share posts within 72h of posting."
+      description: "Soft boost derived from tracked X engagement on promo posts within 72h of posting."
     bonus_pool_weekly: 150000
     user_boost_cap_weekly: 20000
     eligibility:
@@ -235,7 +235,13 @@ boosts:
 moderation:
   report_autohide_n: "TUNING"     # resolved from tuning_thresholds, fallback to env/default
   hidden_meme_nullifies_boost: true
-  freeze_blocks_claim: true
+  freeze_blocks_claim: false
+
+thresholds:
+  ace_mvp:
+    avg_rating: 4.2
+    rating_count: 25
+    report_count_max: 3
 
 notes:
   - "Boosts never grant direct tokens; they only affect quest completion paths and bonus pool distribution."

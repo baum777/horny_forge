@@ -399,11 +399,20 @@ export class QuestService {
       }
     }
 
+    const thresholds = context.config.thresholds?.ace_mvp ?? {
+      avg_rating: 4.2,
+      rating_count: 25,
+      report_count_max: 3,
+    };
     const aceEligibleCount = (artifacts ?? []).filter((artifact) => {
       const avg = artifact.avg_rating ?? 0;
       const count = artifact.rating_count ?? 0;
       const reports = artifact.report_count ?? 0;
-      return avg >= 4.2 && count >= 25 && reports < 3;
+      return (
+        avg >= thresholds.avg_rating &&
+        count >= thresholds.rating_count &&
+        reports < thresholds.report_count_max
+      );
     }).length;
 
     const { count: ratingCount, error: ratingsError } = await this.supabase
