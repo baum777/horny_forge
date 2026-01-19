@@ -1,0 +1,60 @@
+import type { ThemeTokens } from './types';
+
+export const defaultThemeTokens: ThemeTokens = {
+  brand: {
+    primary: '#FFE600',
+    secondary: '#EAB308',
+    foreground: '#0B0B0B',
+  },
+  text: {
+    primary: '#EAEAEA',
+    secondary: '#9E9E9E',
+  },
+  surface: {
+    background: '#0B0B0B',
+    level1: '#0F0F10',
+    level2: '#141416',
+    level3: '#1B1B1E',
+  },
+  border: {
+    subtle: 'rgba(255,255,255,0.08)',
+    accent: 'rgba(255,230,0,0.22)',
+  },
+  effects: {
+    glowSoft: '0 0 16px rgba(255,230,0,0.35)',
+    glowStrong: '0 0 32px rgba(255,230,0,0.65)',
+  },
+  tailwind: {
+    background: '0 0% 4%', // #0B0B0B
+    foreground: '0 0% 92%', // #EAEAEA
+    card: '0 0% 6%', // #0F0F10
+    cardForeground: '0 0% 92%',
+    popover: '0 0% 6%',
+    popoverForeground: '0 0% 92%',
+    primary: '51 100% 50%', // #FFE600
+    primaryForeground: '0 0% 4%',
+    secondary: '0 0% 9%', // #141416
+    secondaryForeground: '0 0% 92%',
+    muted: '0 0% 11%', // #1B1B1E
+    mutedForeground: '0 0% 62%', // #9E9E9E
+    accent: '51 100% 50%',
+    accentForeground: '0 0% 4%',
+    destructive: '0 100% 27%',
+    destructiveForeground: '0 0% 100%',
+    border: '0 0% 20%',
+    input: '0 0% 15%',
+    ring: '51 100% 50%',
+    radius: '0.75rem',
+  },
+  sidebar: {
+    background: '0 0% 5%',
+    foreground: '0 0% 100%',
+    primary: '51 100% 50%',
+    primaryForeground: '0 0% 0%',
+    accent: '0 0% 15%',
+    accentForeground: '0 0% 100%',
+    border: '0 0% 20%',
+    ring: '51 100% 50%',
+  },
+};
+

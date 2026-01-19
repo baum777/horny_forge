@@ -1,7 +1,7 @@
-# Meme Generator Flow (UI → API → Service → Storage)
+# Content Generator Flow (UI → API → Service → Storage)
 
 ## Frontend Flow
-1. User opens Meta Forge (`Interact` page) and selects a base image from `/api/meme-pool`.
+1. User opens Meta Forge (`Interact` page) and selects a base image from `/api/content-pool`.
 2. User selects a preset and enters keywords + caption + tags.
 3. UI calls `forgeArtifact()` → `POST /api/forge`.
 4. UI shows a preview image + metadata (generation id, preset/base).

@@ -1,7 +1,7 @@
-# Meme Generator Gaps (v2 Targets)
+# Content Generator Gaps (v2 Targets)
 
 ## Missing / Partial
-- **Horny-Matrix guardrailing**: No structured intent/energy/flavor/pattern pipeline today.
+- **Brand-Matrix guardrailing**: No structured intent/energy/flavor/pattern pipeline today.
 - **Safety Rewrite**: Current PromptEngine removes blocked terms, but no rewrite mode (metaphorize/abstract/strict).
 - **Post-processing text**: No built-in top/bottom text overlay editor or metadata.
 - **Remix/Mutation**: No remix axis lock, no `remix_of` tracking.

@@ -1,4 +1,4 @@
-# Horny State Machine Spec v1
+# Brand State Machine Spec v1
 
 ## 0) Notation
 
@@ -32,7 +32,7 @@
 #### `freeze_applied(scope)`
 * From: `VERIFIED_ACTIVE`
 * To: `VERIFIED_FROZEN`
-* Guards: `scope in {claims, rewards, meme_context}`
+* Guards: `scope in {claims, rewards, content_context}`
 * Actions:
   * `set_user_freeze(scope, true)`
   * `emit_telemetry("freeze_applied")`
@@ -52,7 +52,7 @@
 
 ---
 
-## 2) Generator / Meme Forge Machine
+## 2) Generator / Content Forge Machine
 
 ### Per-day counters
 * `generations_used_today`
@@ -125,41 +125,41 @@
   * if `publishes_used_today >= 2`: `user_xp_balance >= publish_cost(publishes_used_today+1)`
 * Actions:
   * if cost: `deduct_xp(publish_cost, idem="xp:publish_cost:{day}:{n}")`
-  * `meme = create_published_meme(generated_image_id)`
+  * `content = create_published_item(generated_image_id)`
   * `increment_publishes_used_today()`
-  * `emit_xp_event(type="publish_meme", xp=10, idem="xp:publish:{meme.id}")`
+  * `emit_xp_event(type="publish_content", xp=10, idem="xp:publish:{content.id}")`
   * `emit_telemetry("publish_success")`
 * To: `PUBLISHED`
 
-#### `report_threshold_reached(meme_id)`
+#### `report_threshold_reached(content_id)`
 * From: `PUBLISHED`
 * Guards:
-  * `report_count(meme_id) >= reports_autohide_n`
+  * `report_count(content_id) >= reports_autohide_n`
 * Actions:
-  * `set_meme_hidden(meme_id, true)`
-  * `apply_freeze(user_id=owner, scope="meme_context", ref=meme_id)`
-  * `emit_telemetry("meme_auto_hidden")`
+  * `set_content_hidden(content_id, true)`
+  * `apply_freeze(user_id=owner, scope="content_context", ref=content_id)`
+  * `emit_telemetry("content_auto_hidden")`
 * To: `HIDDEN`
 
-#### `admin_remove(meme_id)`
+#### `admin_remove(content_id)`
 * From: `PUBLISHED` or `HIDDEN`
 * Actions:
   * `set_removed=true`
-  * `invalidate_rewards_linked_to_meme(meme_id)` (keep audit trail)
+  * `invalidate_rewards_linked_to_content(content_id)` (keep audit trail)
 * To: `REMOVED`
 
-#### `admin_unhide(meme_id)`
+#### `admin_unhide(content_id)`
 * From: `HIDDEN`
 * Guards:
   * `admin_approved == true`
 * Actions:
   * `set_hidden=false`
-  * `remove_freeze(scope="meme_context", ref=meme_id)` (if no other freezes)
+  * `remove_freeze(scope="content_context", ref=content_id)` (if no other freezes)
 * To: `PUBLISHED`
 
 ---
 
-## 4) Voting Machine (per published_meme per user)
+## 4) Voting Machine (per published_item per user)
 
 ### States
 * `NOT_RATED`
@@ -168,29 +168,29 @@
 
 ### Events
 
-#### `rate_request(meme_id, rating)`
+#### `rate_request(content_id, rating)`
 * From: `NOT_RATED`
 * Guards:
   * `user_verified == true`
-  * `meme.hidden == false && meme.removed == false`
+  * `content.hidden == false && content.removed == false`
   * `rating in 1..5`
 * Actions:
-  * `insert_rating(unique user+meme)`
-  * `update_meme_aggregates(avg, count, hot_score)`
-  * `emit_xp_event(type="rate_meme_first", xp=rating_xp(rating), idem="xp:rate:{meme}:{user}")`
+  * `insert_rating(unique user+content)`
+  * `update_content_aggregates(avg, count, hot_score)`
+  * `emit_xp_event(type="rate_content_first", xp=rating_xp(rating), idem="xp:rate:{content}:{user}")`
 * To: `RATED_EDITABLE`
 
-#### `rate_update_request(meme_id, rating)`
+#### `rate_update_request(content_id, rating)`
 * From: `RATED_EDITABLE`
 * Guards:
   * `now <= rating_created_at + 15min`
 * Actions:
   * `update_rating()`
-  * `update_meme_aggregates()`
+  * `update_content_aggregates()`
   * `emit_telemetry("rate_update")` (no XP)
 * To: `RATED_EDITABLE`
 
-#### `rating_edit_window_expired(meme_id)`
+#### `rating_edit_window_expired(content_id)`
 * From: `RATED_EDITABLE`
 * Guards: `now > created_at + 15min`
 * To: `RATED_LOCKED`
@@ -223,7 +223,7 @@
 #### `x_share_valid(generated_image_id, text_top, text_bottom, share_text)`
 * Guards:
   * `share_via_official_button == true`
-  * `"$HORNY" in share_text`
+  * `"$TOKEN" in share_text`
   * `(text_top or text_bottom) not empty`
   * `dedupe share per image` (optional)
 * Actions:
@@ -313,8 +313,8 @@
 * XP:
   * `xp:x_linked:{user}`
   * `xp:gen:{generated_image_id}`
-  * `xp:publish:{published_meme_id}`
-  * `xp:rate:{meme_id}:{user_id}`
+  * `xp:publish:{published_item_id}`
+  * `xp:rate:{content_id}:{user_id}`
   * `xp:badge:{badge_key}:{user_id}`
 * Claims:
   * `weekly:{week_id}:tier:{tier}:user:{user_id}`

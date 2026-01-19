@@ -19,9 +19,9 @@
 | Kategorie | Unicorn-Rolle | Typische Props | Beispiel-Szenen | Mood |
 |-----------|---------------|----------------|-----------------|------|
 | **X-Engagement** | Broadcaster/Spreader | 📡 Antenne, 📢 Megaphone, 💬 Speech Bubbles | Unicorn am Laptop, Signal-Wellen | Active, Connected |
-| **Meme-Creation** | Artist/Creator | 🎨 Pinsel, ✏️ Pencil, 🖼️ Canvas | Am Schreibtisch, Paint-Splashes | Creative, Focused |
+| **Content-Creation** | Artist/Creator | 🎨 Pinsel, ✏️ Pencil, 🖼️ Canvas | Am Schreibtisch, Paint-Splashes | Creative, Focused |
 | **Performance** | Star/Champion | 🏆 Trophy, 📊 Charts, 💎 Diamonds | Auf Podium, mit Trophy, Money-Rain | Successful, Flexing |
-| **Voting** | Curator/Judge | 🗳️ Ballot, ⭐ Stars, 👍 Thumbs | Zeigt auf andere Memes, sammelt Items | Engaged, Supportive |
+| **Voting** | Curator/Judge | 🗳️ Ballot, ⭐ Stars, 👍 Thumbs | Zeigt auf andere Content items, sammelt Items | Engaged, Supportive |
 | **Social-Reach** | Viral-Agent | 🔥 Fire, 🌊 Waves, 📈 Graphs | Explosions, Share-Icons, Networks | Explosive, Spreading |
 | **Consistency** | Ritual-Keeper | 🔔 Bell, 📅 Calendar, ⏰ Clock | Daily-Routine, Streak-Flames | Disciplined, Committed |
 | **Milestones** | Legend/Icon | 👑 Crown, 🎖️ Medal, ✨ Aura | Elevated, Glowing, Epic-Pose | Legendary, Transcendent |
@@ -85,7 +85,7 @@
 | Badge-Typ | Primary (Unicorn) | Accent 1 | Accent 2 | Accent 3 | Beispiel |
 |-----------|-------------------|----------|----------|----------|----------|
 | X-Engagement | 🟡 Gelb | ⚫ Grau (Tech) | 🔵 Blau (Digital) | - | Laptop = Grau |
-| Meme-Creation | 🟡 Gelb | 🎨 Multi (Paint) | - | - | Pinsel-Farben |
+| Content-Creation | 🟡 Gelb | 🎨 Multi (Paint) | - | - | Pinsel-Farben |
 | Performance | 🟡 Gelb | 💚 Grün (Money) | 💎 Weiß (Diamond) | - | Image 1: Grüne Bills |
 | Voting | 🟡 Gelb | ⭐ Gold (Stars) | 💙 Blau (Trust) | - | Sterne-Akzente |
 | Social-Reach | 🟡 Gelb | 🔴 Rot (Fire) | 🟠 Orange (Heat) | - | Flammen-Effekte |
@@ -103,7 +103,7 @@
 | **Excited** | ⚫ ⚫ (groß) | ⌣ (breit) | Arme hoch | Viral, Epic moments |
 | **Focused** | •  • | — (Linie) | Vorgebeugt | Creation, Work |
 | **Sleeping** | - - | ~ (Schnarch) | Liegend | Inaktiv (nicht verwendet) |
-| **Dead/Rekt** | X X | ︿ (sad) | Gekippt | Rugpull-Meme (nicht Badge) |
+| **Dead/Rekt** | X X | ︿ (sad) | Gekippt | Rugpull-Content (nicht Badge) |
 
 ---
 
@@ -150,7 +150,7 @@ Komplette Story in einem Frame
 | `first-forge` | Head + Brush | Creative | 🎨 Paintbrush | Common | Pattern A |
 | `vote-magnet` | Full + Trophy | Happy | 🏆 Trophy | Epic | Pattern B |
 | `moon-rider` | Riding Rocket | Excited | 🚀🌙🔥 | Legendary | Pattern C |
-| `meme-master` | Business Suit | Professional | 👔📊 | Epic | Pattern B |
+| `content-master` | Business Suit | Professional | 👔📊 | Epic | Pattern B |
 | `viral-machine` | Multi-Element | Euphoric | 🔥📈⭐ | Legendary | Pattern C |
 | `streak-keeper` | Simple + Flame | Neutral | 🔥 Single Flame | Rare | Pattern A |
 

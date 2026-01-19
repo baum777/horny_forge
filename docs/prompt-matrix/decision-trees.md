@@ -1,4 +1,4 @@
-# Horny Matrix Decision Trees
+# Brand Matrix Decision Trees
 
 ## SafetyRewrite
 - If explicit terms → `EXPLICIT_METAPHORIZE`

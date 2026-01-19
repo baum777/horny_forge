@@ -1,4 +1,4 @@
-# THE HORNY ARCHIVES — Supabase Setup Guide
+# THE BRAND ARCHIVES — Supabase Setup Guide
 
 ## Overview
 
@@ -25,7 +25,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY="<anon-key>"
 NEXT_PUBLIC_TOKEN_MINT="7S2bVZJYAYQwN6iwwf2fMMWu15ajLveh2QDYhtJ3pump"
 NEXT_PUBLIC_DEX_LINK="https://dexscreener.com/solana/earthgewsskrbg6cmvx9ddxntniac4shmsthr5nnxwji"
 NEXT_PUBLIC_X_COMMUNITY_URL="https://x.com/i/communities/2009563480613949770"
-NEXT_PUBLIC_TOKEN_SYMBOL="HORNY"
+NEXT_PUBLIC_TOKEN_SYMBOL="BRAND"
 
 # Optional holders provider (default OFF)
 # none | solscan | helius

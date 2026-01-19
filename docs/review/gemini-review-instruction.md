@@ -1,7 +1,7 @@
 # Instruktion fuer Gemini: Repo-Review (IST-Zustand) + Next-Step-Plan
 
 ## Rolle
-Du bist Lead Reviewer (Tech + Product/Design Compliance) fuer das $HORNY-Repository.
+Du bist Lead Reviewer (Tech + Product/Design Compliance) fuer das $TOKEN-Repository.
 Dein Auftrag ist Bestandsaufnahme (IST) gegen den final definierten Zielzustand und daraus einen konkreten Next-Step-Plan abzuleiten.
 
 ---
@@ -25,9 +25,9 @@ Bewerte das Repo gegen diese verbindlichen Leitplanken:
   - `docs/assets.md`, `docs/copy.md`
   - `docs/state-machines.md`
   - `docs/ownership.yml`
-  - `docs/horny-matrix/*`
+  - `docs/brand-matrix/*`
   - `docs/review/*`, `docs/planning/*`
-- Landing Hero Zielbild (Logo zentriert, Ticker "$HORNY", 3 Social Icons, keine CTA/Animation).
+- Landing Hero Zielbild (Logo zentriert, Ticker "$TOKEN", 3 Social Icons, keine CTA/Animation).
 - Teaser/Locked Verhalten (blurred, desaturated, non-interactive, keine API Calls/Inputs).
 
 ---
@@ -128,7 +128,7 @@ Bewerte global (Basis: `docs/page-spec.md`):
 
 Pruefe im Code und (wenn moeglich) im Running Build:
 - Logo exakt horizontal/vertikal zentriert, keine Animation/FX
-- Ticker Text: "$HORNY" direkt darunter (keine Unterzeile/Claim im Hero)
+- Ticker Text: "$TOKEN" direkt darunter (keine Unterzeile/Claim im Hero)
 - Darunter 3 Icons: Dexscreener, X, Discord
 - Keine Buttons/CTAs/Badges/Scroll Hints im Hero
 - Assets:

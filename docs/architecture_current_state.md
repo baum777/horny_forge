@@ -40,7 +40,7 @@ Managed via `.env` file (loaded by `dotenv`). Key variables:
 - `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`: Required for database connection.
 - `SITE_URL`: Base URL for sharing links.
 - `SHARE_TOKEN_SECRET`: Secret for signing share tokens.
-- `BASE_IMAGES_PATH`: Path to base images (default: `./server/public/horny_base`).
+- `BASE_IMAGES_PATH`: Path to base images (default: `./server/public/base_assets`).
 - `FORGE_RATE_LIMIT_*`: Rate limiting configurations.
 - `BRAND_SIMILARITY_THRESHOLD`: Threshold for similarity checks.
 
@@ -60,7 +60,7 @@ Managed via `.env` file (loaded by `dotenv`). Key variables:
 The frontend (Vite) proxies specific paths to the backend (`http://localhost:3001`):
 - `/api`: API endpoints.
 - `/health`: Health check endpoint.
-- `/horny_base`: Access to backend static base images.
+- `/base_assets`: Access to backend static base images.
 
 ### API Paths
 - Frontend makes requests to `/api/...`.
@@ -71,7 +71,7 @@ The frontend (Vite) proxies specific paths to the backend (`http://localhost:300
 ### Static Asset Path Resolution (CWD Dependency)
 - **Issue**: The backend calculates static asset paths relative to `process.cwd()`.
     - `server/src/app.ts`: `path.join(process.cwd(), 'server', 'public')`
-    - `server/src/config.ts`: Defaults `BASE_IMAGES_PATH` to `./server/public/horny_base`.
+    - `server/src/config.ts`: Defaults `BASE_IMAGES_PATH` to `./server/public/base_assets`.
 - **Consequence**:
     - If the backend is started from the **repo root** (e.g., `tsx server/src/index.ts`), paths resolve correctly to `[root]/server/public`.
     - If the backend is started from the **`server/` directory** (e.g., `npm run dev` inside `server/`), paths resolve to `[root]/server/server/public`, which does not exist.

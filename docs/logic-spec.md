@@ -1,4 +1,4 @@
-# Horny Logic Spec v1
+# Brand Logic Spec v1
 
 ## 0) Globale Begriffe
 
@@ -9,7 +9,7 @@
 
 **Content States**
 * `generated_image`: privates Asset
-* `published_meme`: public Kandidat für Voting Gallery
+* `published_item`: public Kandidat für Voting Gallery
 * `hidden`: durch Reports auto-hide (nicht public sichtbar)
 * `removed`: admin final entfernt
 
@@ -35,11 +35,11 @@
 ### Route Guards
 * `/dashboard`, `/forge/*`, `/my-gallery`, `/quests/*`: `VERIFIED` only
 * `/gallery/*`: öffentlich lesbar
-* `/gallery/:memeId/rate`, `/report`, `/quests/claim`: `VERIFIED` only
+* `/gallery/:contentId/rate`, `/report`, `/quests/claim`: `VERIFIED` only
 
 ---
 
-## 2) Meme Forge Logic Spec
+## 2) Content Forge Logic Spec
 
 ### 2.1 `/forge/create` (Generate)
 **Inputs**
@@ -81,22 +81,22 @@
   * ab 3/day: XP cost curve
 
 **Events**
-* `publish_meme` creates `published_meme`
+* `publish_content` creates `published_item`
 * XP event: +10 (optional multiplier nur wenn publish an matrix gebunden)
-* Wenn Meme später `hidden`: XP/Rewards freeze für meme-linked rewards
+* Wenn Content später `hidden`: XP/Rewards freeze für content-linked rewards
 
 ### 2.4 `/forge/remix` (Post-Limit Gameplay)
 **Access**
 * Remix immer möglich, aber **Rewards nur wenn Limit reached**
 **Features**
 * Top/Bottom text edit
-* Keyword assist: max 2 suggestions per meme
+* Keyword assist: max 2 suggestions per content
 * Share to X only via official button
 **Rewards**
 * **0 XP**
 * Badge progress möglich (X share badges)
 **Publishing**
-* Remix wird nie eigenes published_meme
+* Remix wird nie eigenes published_item
 * Remix bleibt Sub-Entity zu `generated_image`
 
 ---
@@ -105,8 +105,8 @@
 
 ### 3.1 Tabs
 * `drafts`: alle `generated_images` ohne publish
-* `published`: eigene published_memes
-* `hidden`: eigene hidden/flagged memes
+* `published`: eigene published_items
+* `hidden`: eigene hidden/flagged content items
 
 ### Ownership Rules
 * Nur owner sieht drafts/hidden
@@ -122,12 +122,12 @@
 **Public readable** (no auth required)
 
 **Eligibility**
-* Nur `published_meme.hidden = false` und `removed = false`
+* Nur `published_item.hidden = false` und `removed = false`
 
 **Sort**
 * `new`: created_at desc
 * `hot`: time-decay 72h
-  * show only memes with rating_count >= 3
+  * show only content items with rating_count >= 3
   * hard age cutoff <= 72h
 
 **Filters**
@@ -136,11 +136,11 @@
 
 ### 4.2 Rating Logic
 **Action**
-* `POST /api/gallery/:memeId/rate { rating 1..5 }`
+* `POST /api/gallery/:contentId/rate { rating 1..5 }`
 * `VERIFIED only`
 
 **Rules**
-* One rating per user per meme (unique)
+* One rating per user per content (unique)
 * Update window: 15 min
 * XP only on first rating (2/4/6/8)
 
@@ -154,15 +154,15 @@
 
 ### 4.4 Reports & Auto-hide
 **Action**
-* `POST /api/gallery/:memeId/report`
+* `POST /api/gallery/:contentId/report`
 * `VERIFIED only`
 
 **Rules**
-* unique reporter per meme
-* if report_count >= N → auto-hide meme
+* unique reporter per content
+* if report_count >= N → auto-hide content
 * auto-hide triggers:
-  * meme hidden=true
-  * rewards freeze for that meme context
+  * content hidden=true
+  * rewards freeze for that content context
 
 ---
 
@@ -179,7 +179,7 @@
 ### 5.2 Progress Computation
 Source data:
 * user aggregates (generations/publishes/votes/shares)
-* meme stats (best rating_count, avg_rating)
+* content stats (best rating_count, avg_rating)
 * matrix flags (novelty_high / coherence_high / rare_combo)
 
 Outputs:
@@ -224,7 +224,7 @@ Outputs:
 ## 7) XP Freeze Rules
 
 **Triggers**
-* Meme auto-hidden via reports
+* Content auto-hidden via reports
 * Abuse anomaly (fingerprint) on claims
 
 **Scope**
@@ -244,10 +244,10 @@ Outputs:
 ## 8) Key Event Types (Telemetry + XP)
 * `auth_x_connected`
 * `generate_image`
-* `publish_meme`
-* `rate_meme_first`
-* `rate_meme_update` (no XP)
-* `report_meme`
+* `publish_content`
+* `rate_content_first`
+* `rate_content_update` (no XP)
+* `report_content`
 * `remix_share_valid` (no XP)
 * `quest_claim_attempt`
 * `quest_claim_success`
@@ -272,8 +272,8 @@ Outputs:
 ```json
 {
   "base_id": "string (optional)",
-  "base_image": "string (optional, must match /horny_base/base-*.png pattern)",
-  "preset": "HORNY_CORE_SKETCH | HORNY_META_SCENE | HORNY_CHAOS_VARIATION",
+  "base_image": "string (optional, must match /base_assets/base-*.png pattern)",
+  "preset": "PRESET_CORE | PRESET_META | PRESET_CHAOS",
   "user_input": "string (1-240 chars)",
   "size": "1024x1024 (optional)",
   "seed": "string (optional)",
@@ -283,7 +283,7 @@ Outputs:
 **Validation**:
 * Either `base_id` or `base_image` required
 * `user_input` max 240 characters
-* `base_image` must match horny_base pattern
+* `base_image` must match base_assets pattern
 
 #### `POST /api/forge/release`
 **Auth**: Required
@@ -304,7 +304,7 @@ Outputs:
 **Body**:
 ```json
 {
-  "action": "vote | comment | share | follow | forge | artifact_release | meme_create | votes_received | time_spent | streak_tick | special",
+  "action": "vote | comment | share | follow | forge | artifact_release | content_create | votes_received | time_spent | streak_tick | special",
   "artifactId": "string (optional, required for vote/comment/share)",
   "idempotencyKey": "string (optional, can also be in header)",
   "receivedVotesDelta": "number (optional, for votes_received)",
@@ -350,7 +350,7 @@ Outputs:
 **Auth**: Optional (public readable)
 **Filters**: avg_rating >= 4.2, rating_count >= 25, report_count < 3, within 30 days
 
-#### `POST /api/gallery/:memeId/rate`
+#### `POST /api/gallery/:contentId/rate`
 **Auth**: Required
 **Body**:
 ```json
@@ -360,11 +360,11 @@ Outputs:
 }
 ```
 **Validation**:
-* One rating per user per meme (unique constraint)
+* One rating per user per content (unique constraint)
 * Edit window: 15 minutes
 * XP only on first rating (2/4/6/8 based on rating)
 
-#### `POST /api/gallery/:memeId/report`
+#### `POST /api/gallery/:contentId/report`
 **Auth**: Required
 **Body**:
 ```json
@@ -374,7 +374,7 @@ Outputs:
 }
 ```
 **Validation**:
-* Unique reporter per meme
+* Unique reporter per content
 * Auto-hide when report_count >= threshold
 
 ### 9.5 Quest Endpoints
@@ -404,8 +404,8 @@ Outputs:
 **Examples**:
 * `xp:x_linked:{user_id}`
 * `xp:gen:{generated_image_id}`
-* `xp:publish:{published_meme_id}`
-* `xp:rate:{meme_id}:{user_id}`
+* `xp:publish:{published_item_id}`
+* `xp:rate:{content_id}:{user_id}`
 * `xp:badge:{badge_key}:{user_id}`
 * `weekly:{week_id}:tier:{tier}:user:{user_id}`
 * `vote:art_123:550e8400-e29b-41d4-a716-446655440000`
@@ -419,8 +419,8 @@ Outputs:
 ## 11) Caps & Limits
 
 ### Global Caps
-* **Daily Horny Cap**: 150
-* **Weekly Horny Cap**: 600
+* **Daily Brand Cap**: 150
+* **Weekly Brand Cap**: 600
 
 ### Per-Action Caps (Daily)
 * `vote`: 20
@@ -429,7 +429,7 @@ Outputs:
 * `follow`: 20
 * `forge`: 30
 * `artifact_release`: 50
-* `meme_create`: 30
+* `content_create`: 30
 * `votes_received`: 100
 * `time_spent`: 20
 * `streak_tick`: 10
@@ -475,17 +475,17 @@ Outputs:
 ## 13) Gamification Actions & Rewards
 
 ### Action Types & Base Rewards
-* `vote`: +2 Horny
-* `comment`: +2 Horny
-* `share`: +5 Horny
-* `follow`: +1 Horny
-* `forge`: +5 Horny (unlocks: ["forge_preset_pack_1"])
-* `artifact_release`: +10 Horny
-* `meme_create`: +5 Horny
+* `vote`: +2 Brand
+* `comment`: +2 Brand
+* `share`: +5 Brand
+* `follow`: +1 Brand
+* `forge`: +5 Brand (unlocks: ["forge_preset_pack_1"])
+* `artifact_release`: +10 Brand
+* `content_create`: +5 Brand
 * `votes_received`: Computed (1 per vote received)
 * `time_spent`: Computed (1 per 60 seconds, max 3600s)
-* `streak_tick`: +3 Horny
-* `special`: +0 Horny (custom events)
+* `streak_tick`: +3 Brand
+* `special`: +0 Brand (custom events)
 
 ### Visibility Tiers
 * `private`: Internal only

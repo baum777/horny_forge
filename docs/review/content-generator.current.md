@@ -1,11 +1,11 @@
-# Meme Generator Current State
+# Content Generator Current State
 
 ## Summary
-The current meme generator is implemented as the “Meta Forge” feature in the React SPA and backed by an Express API. Users select a base image template, select a preset, enter keywords, and call `/api/forge` to generate a preview. A second call to `/api/forge/release` persists the final artifact, saves it to Supabase Storage, and publishes it into the `artifacts` table for the Archives feed.
+The current content generator is implemented as the “Meta Forge” feature in the React SPA and backed by an Express API. Users select a base image template, select a preset, enter keywords, and call `/api/forge` to generate a preview. A second call to `/api/forge/release` persists the final artifact, saves it to Supabase Storage, and publishes it into the `artifacts` table for the Archives feed.
 
 ## Frontend Overview
 - Meta Forge lives under `src/components/MetaForge/*` and is rendered on the Interact page. 
-- Base templates are fetched from `/api/meme-pool`. 
+- Base templates are fetched from `/api/content-pool`. 
 - Forge requests are sent via `src/lib/api/forge.ts`.
 - Voting and XP are handled via `useVote` and `postGamificationEvent`.
 

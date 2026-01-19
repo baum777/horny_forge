@@ -1,47 +1,47 @@
-Super – ich übernehme die Erweiterungen und baue daraus ein **konkretes Konzept für eine guardrailed „Horny-Matrix“**, die **user-prompt-basierte Meme-Generierung** ermöglicht und **direkt an euer Badge-/Overlay-System andockt**.
+Super – ich übernehme die Erweiterungen und baue daraus ein **konkretes Konzept für eine guardrailed „Brand-Matrix“**, die **user-prompt-basierte Content-Generierung** ermöglicht und **direkt an euer Badge-/Overlay-System andockt**.
 
 Ich halte es bewusst **systemisch & umsetzungsnah**, nicht bildlich/explicit.
 
 ---
 
-# 🧠 Horny-Matrix v1
+# 🧠 Brand-Matrix v1
 
-**Guardrailed Meme Generator + Progression Engine**
+**Guardrailed Content Generator + Progression Engine**
 
 Ziel:
-Der Meme-Generator entwickelt sich von „Template + Prompt“ zu einem **regelbasierten Spielsystem**, in dem User-Prompts **innerhalb einer kontrollierten Matrix** interpretiert, verstärkt und gamifiziert werden.
+Der Content-Generator entwickelt sich von „Template + Prompt“ zu einem **regelbasierten Spielsystem**, in dem User-Prompts **innerhalb einer kontrollierten Matrix** interpretiert, verstärkt und gamifiziert werden.
 
 Badges = Identität
 Overlays = Status
-Horny-Matrix = Spielbrett
+Brand-Matrix = Spielbrett
 
 ---
 
-# 1️⃣ Was die Horny-Matrix ist
+# 1️⃣ Was die Brand-Matrix ist
 
-Die **Horny-Matrix** ist eine **mehrdimensionale Prompt-Übersetzungs-Schicht** zwischen User-Input und Image-Model.
+Die **Brand-Matrix** ist eine **mehrdimensionale Prompt-Übersetzungs-Schicht** zwischen User-Input und Image-Model.
 
 Sie sorgt dafür, dass:
 
 * User kreativ sind ✅
 * das Output-Universum konsistent bleibt ✅
-* Memeability > Realismus > Kunst bleibt ✅
+* shareability > Realismus > Kunst bleibt ✅
 * Moderation & Safety systemisch eingebaut sind ✅
 * Badges/Overlays mechanisch angedockt sind ✅
 
 ---
 
-# 2️⃣ Struktur der Horny-Matrix
+# 2️⃣ Struktur der Brand-Matrix
 
-Jede Meme-Generierung läuft nicht mehr direkt:
+Jede Content-Generierung läuft nicht mehr direkt:
 
 `User Prompt → Image Model`
 
 sondern:
 
-`User Prompt → Horny-Matrix → Meme Prompt`
+`User Prompt → Brand-Matrix → Content Prompt`
 
-### 🔷 Die 5 Achsen der Horny-Matrix
+### 🔷 Die 5 Achsen der Brand-Matrix
 
 ## A. **Intent Layer** (Was will der User?)
 
@@ -49,7 +49,7 @@ automatisch klassifiziert:
 
 * reaction (lol, wtf, rage, cope, flex…)
 * scenario (social, crypto, dating, chaos, dominance, loss…)
-* meme-type (reaction image, situation, character, symbol, absurd…)
+* content-type (reaction image, situation, character, symbol, absurd…)
 
 → triggert Templates, Layout, Kamera, Komposition
 
@@ -86,7 +86,7 @@ Badges die hier andocken:
 
 ---
 
-## C. **Horny-Flavor Layer** (Welt & Stil – semantisch, nicht explizit)
+## C. **Brand-Flavor Layer** (Welt & Stil – semantisch, nicht explizit)
 
 Beispiele:
 
@@ -122,7 +122,7 @@ Systemisch, nicht manuell:
   * Körper → Kreatur / Objekt / Szene
 
 Ergebnis:
-Horny bleibt **Energie**, nicht **Inhalt**.
+Brand bleibt **Energie**, nicht **Inhalt**.
 
 Hidden Badges andocken hier perfekt:
 
@@ -138,7 +138,7 @@ Hier wird aus einer Generierung ein **Spielzug**:
 * welche Matrix-Zonen wurden benutzt?
 * welche Energy-Level?
 * neue Flavor entdeckt?
-* Kontrast zu bisherigen Memes?
+* Kontrast zu bisherigen Content items?
 
 → triggert:
 
@@ -155,12 +155,12 @@ Badges die hier andocken:
 
 ---
 
-# 3️⃣ Wie der neue Meme-Flow aussieht
+# 3️⃣ Wie der neue Content-Flow aussieht
 
 ## Neuer Flow
 
 1. User schreibt freien Prompt
-2. Horny-Matrix analysiert:
+2. Brand-Matrix analysiert:
 
    * intent
    * energy
@@ -168,11 +168,11 @@ Badges die hier andocken:
    * risk
 3. System generiert daraus:
 
-   * Meme-Intent-Prompt
+   * Content-Intent-Prompt
    * Visual-Constraints
-   * Meme-Directives
+   * Content-Directives
 4. PromptEngine baut daraus den finalen Image-Prompt
-5. Meme wird erzeugt
+5. Content wird erzeugt
 6. Meta-Layer logged:
 
    * Zonen
@@ -198,11 +198,11 @@ Die Badges werden nicht „nachträglich“, sondern **mechanisch Teil der Matri
 
 ## 🧩 Knows Ball
 
-→ Votes auf Memes mit hoher Matrix-Kohärenz
+→ Votes auf Content items mit hoher Matrix-Kohärenz
 
 ## 👑 Taste Authority (Overlay)
 
-→ User erkennt systematisch Memes mit:
+→ User erkennt systematisch Content items mit:
 
 * hohem Energy-Fit
 * hohem Novelty-Score
@@ -210,12 +210,12 @@ Die Badges werden nicht „nachträglich“, sondern **mechanisch Teil der Matri
 
 ## 🔥 Accidental Viral
 
-→ Meme trifft seltene Matrix-Kombination
+→ Content trifft seltene Matrix-Kombination
 (z.B. high chaos + innocent flavor + social scenario)
 
 ## 🐐 Too Hot For Feed
 
-→ User erzeugt mehrfach Memes in extremen Zonen
+→ User erzeugt mehrfach Content items in extremen Zonen
 (legendary energy + seltene flavor + starke Performance)
 
 ## ❓ Hidden – Integrity
@@ -238,7 +238,7 @@ Top/Bottom-Text, Remix, Crop = **zweiter Spielzug**
 
 * neue Intent-Iteration
 * neue Energy-Phase
-* neue Meme-Generation
+* neue Content-Generation
 
 Badges:
 
@@ -285,7 +285,7 @@ Wenn Gen-Limit erreicht:
 User darf:
 
 * remixen
-* memefizieren
+* variieren
 * overlayn
 * social-pushen
 
@@ -319,7 +319,7 @@ Neue Kernmodule:
   * safetyRewrite()
   * noveltyScore()
 
-* `MemePromptComposer`
+* `PromptComposer`
 
   * baut aus Matrix + Template + History den Prompt
 
@@ -336,7 +336,7 @@ sondern **Outputs der Matrix-Telemetry.**
 
 # 🎯 Kurzfazit
 
-Mit der Horny-Matrix wird euer Meme-Generator:
+Mit der Brand-Matrix wird euer Content-Generator:
 
 * kein Prompt-Feld
 * kein Template-Tool
@@ -347,13 +347,13 @@ sie **bewegen sich in einem semantischen Raum.**
 
 Badges = welche Zonen sie kontrollieren
 Overlays = welchen Status sie dort haben
-Memes = sichtbare Spielzüge
+Content items = sichtbare Spielzüge
 
 ---
 
 Cool — dann liefere ich dir jetzt genau die drei Bausteine, die du als nächstes brauchst:
 
-1. **Horny-Matrix Schema (JSON/TS)**
+1. **Brand-Matrix Schema (JSON/TS)**
 2. **Guardrail Prompt-Blueprint** (für eure bestehende PromptEngine)
 3. **UX-Flow** (Inputs/Controls, ohne “Tool-Feeling”)
 
@@ -361,12 +361,12 @@ Dabei benutze ich die **Badge-Matrix als Vorbild**, weil sie bereits zeigt, wie 
 
 ---
 
-# 1) Horny-Matrix v1 – Schema (TS + JSON)
+# 1) Brand-Matrix v1 – Schema (TS + JSON)
 
 ## 1.1 TS Types (Backend)
 
 ```ts
-// horny-matrix/types.ts
+// brand-matrix/types.ts
 export type Intent =
   | "reaction"
   | "situation"
@@ -394,7 +394,7 @@ export type SafetyRewriteMode =
 
 export type CompositionPattern = "A" | "B" | "C"; // wie eure Badge Scene Patterns :contentReference[oaicite:1]{index=1}
 
-export type MemeTemplateKey =
+export type TemplateKey =
   | "top_bottom"
   | "caption_single"
   | "reaction_card"
@@ -413,7 +413,7 @@ export type HornyMatrixSelection = {
   energy: Energy;
   flavor: Flavor;
   pattern: CompositionPattern; // drives complexity: A simple → C full scene :contentReference[oaicite:3]{index=3}
-  template: MemeTemplateKey;
+  template: TemplateKey;
   contextObjects: MatrixContextObject[]; // 0-1 (A) | 1-2 (B) | 3+ (C)
   accentColors: string[]; // max 2-3
   bannedTopicsHit: boolean;
@@ -421,7 +421,7 @@ export type HornyMatrixSelection = {
   seedHint?: string; // remix/mutation
 };
 
-export type MemeGenRequest = {
+export type PromptGenRequest = {
   userPrompt: string;
   userTextTop?: string;
   userTextBottom?: string;
@@ -429,7 +429,7 @@ export type MemeGenRequest = {
   selection?: Partial<HornyMatrixSelection>; // user can “nudge”, system completes
 };
 
-export type MemeGenPromptPack = {
+export type PromptGenPack = {
   finalPrompt: string;      // goes to model
   negativePrompt: string;   // model-specific
   meta: HornyMatrixSelection & {
@@ -477,19 +477,19 @@ export type MemeGenPromptPack = {
 
 Eure Badge-Prompts funktionieren, weil sie klar trennen:
 **Base DNA**, **Pose/Props**, **Rarity/Pattern**, **32px Readability**. 
-Genau das machen wir für Memes – nur eben auf “Intent/Energy/Flavor”.
+Genau das machen wir für Content items – nur eben auf “Intent/Energy/Flavor”.
 
 ## 2.1 Prompt Pack: “System Prompt” (Composer)
 
 **(Backend-only; nicht user-visible)**
 
-* **Ziel:** User Prompt in “safe meme semantics” umschreiben, dann Matrix anwenden.
+* **Ziel:** User Prompt in “safe content semantics” umschreiben, dann Matrix anwenden.
 
 ```txt
 You are HornyMatrixComposer.
-Turn the user idea into a meme-able, safe, non-explicit visual scene.
+Turn the user idea into a content-able, safe, non-explicit visual scene.
 Rules:
-- Keep it comedic, absurd, internet-meme readable.
+- Keep it comedic, absurd, internet-content readable.
 - No sexual content, no nudity, no explicit acts. If user implies explicit content: rewrite to metaphor or absurd symbolism.
 - No real public figures, no doxxing/PII.
 - No text/letters inside the image. Captions are handled separately.
@@ -509,10 +509,10 @@ Output:
 SAFE_SCENE: {{safe_scene}}
 
 VISUAL_DIRECTIVES:
-- Meme-first composition, bold silhouette, high contrast, readable at 32px.
+- Content-first composition, bold silhouette, high contrast, readable at 32px.
 - Clean shapes, no micro-detail clutter.
 - No text, no letters, no watermarks, no logos.
-- Style: simplified, punchy, internet meme illustration (not photoreal unless template asks).
+- Style: simplified, punchy, internet content illustration (not photoreal unless template asks).
 
 COMPOSITION:
 - Intent: {{intent}}; Energy: {{energy}}; Flavor: {{flavor}}.
@@ -569,29 +569,29 @@ Das System füllt alles andere automatisch (Intent, Pattern, Context).
 
 ---
 
-Sehr gute Frage – genau hier entscheidet sich, ob „Horny“ ein **klar erkennbares Brand-Universum** wird oder nur ein chaotischer Prompt-Spielplatz.
+Sehr gute Frage – genau hier entscheidet sich, ob „Brand“ ein **klar erkennbares Brand-Universum** wird oder nur ein chaotischer Prompt-Spielplatz.
 
 Die Antwort ist:
 👉 Nicht über Inhalte.
 👉 Sondern über **System-DNA, Übersetzungsregeln und visuelle Konstanten.**
 
-Ich breche es dir in **5 operative Ebenen** runter, die ihr kombinieren müsst, damit „Horny“ bei tausenden User-Prompts **immer gleich riecht, klingt und aussieht** – ohne kreativ tot zu sein.
+Ich breche es dir in **5 operative Ebenen** runter, die ihr kombinieren müsst, damit „Brand“ bei tausenden User-Prompts **immer gleich riecht, klingt und aussieht** – ohne kreativ tot zu sein.
 
 ---
 
-# 🧬 1. Horny ist kein Thema – Horny ist ein Filter
+# 🧬 1. Brand ist kein Thema – Brand ist ein Filter
 
 Der größte Fehler wäre:
 
-> „Horny = bestimmte Motive / Szenen / Witze“
+> „Brand = bestimmte Motive / Szenen / Witze“
 
 Richtig ist:
 
-> **Horny = eine Art, Realität zu verzerren.**
+> **Brand = eine Art, Realität zu verzerren.**
 
-Also definiert ihr Horny nicht als *was* generiert wird, sondern als **wie jedes Motiv transformiert wird.**
+Also definiert ihr Brand nicht als *was* generiert wird, sondern als **wie jedes Motiv transformiert wird.**
 
-Beispiele für Horny-Transformation (systemisch, nicht promptig):
+Beispiele für Brand-Transformation (systemisch, nicht promptig):
 
 * banal → **unangemessen dramatisch**
 * harmlos → **leicht cursed**
@@ -599,7 +599,7 @@ Beispiele für Horny-Transformation (systemisch, nicht promptig):
 * neutral → **überambitioniert**
 * klein → **ikonisch überhöht**
 
-👉 Diese Transformationen werden **feste Regeln im Horny-Matrix-Composer**, nicht optionale Styles.
+👉 Diese Transformationen werden **feste Regeln im Brand-Matrix-Composer**, nicht optionale Styles.
 
 So bleibt der Charakter konstant, egal ob der User schreibt:
 
@@ -612,23 +612,23 @@ Alles läuft durch dieselbe Verzerrungsmaschine.
 
 ---
 
-# 🧠 2. Horny-Matrix als Brand-Übersetzer (nicht nur Safety-Layer)
+# 🧠 2. Brand-Matrix als Brand-Übersetzer (nicht nur Safety-Layer)
 
-Eure Horny-Matrix darf nicht nur klassifizieren, sie muss **interpretieren**.
+Eure Brand-Matrix darf nicht nur klassifizieren, sie muss **interpretieren**.
 
 Das heißt:
 Der User-Prompt ist **nie** direktes Bildmotiv, sondern nur **Rohstoff**.
 
 Dazwischen liegt immer:
 
-> `User Input → Horny Interpretation → Meme Realität`
+> `User Input → Brand Interpretation → Content Realität`
 
 In dieser Interpretation liegen feste Brand-Regeln, z.B.:
 
-**Horny Brand Directives (Beispiele):**
+**Brand Brand Directives (Beispiele):**
 
 * Szene wirkt immer wie aus einem **Internet-Paralleluniversum**
-* Emotionen sind immer **klar, überzogen, memetauglich**
+* Emotionen sind immer **klar, überzogen, teilbar**
 * Motive wirken nie zufällig, sondern **wie Symbole**
 * Nichts ist ruhig. Selbst Stille hat **Spannung.**
 
@@ -642,14 +642,14 @@ Nicht je nach Template.
 
 # 🎨 3. Visuelle Konstanten (euer „Mickey-Mouse-Skelett“)
 
-So wie eure Badges eine feste Unicorn-DNA haben, braucht der Meme-Generator eine **unsichtbare, aber feste visuelle Grammatik**.
+So wie eure Badges eine feste Unicorn-DNA haben, braucht der Content-Generator eine **unsichtbare, aber feste visuelle Grammatik**.
 
 Nicht „ein Stil“.
 Sondern ein **Satz nicht brechbarer Regeln**.
 
 Zum Beispiel (illustrativ, nicht final):
 
-### 🔒 Horny Visual Laws
+### 🔒 Brand Visual Laws
 
 * immer **klarer Mittelpunkt**
 * immer **ikonische Silhouette**
@@ -662,7 +662,7 @@ Zum Beispiel (illustrativ, nicht final):
 
 Und positiver formuliert:
 
-* sieht immer aus wie **ein Meme aus einem anderen Internet**
+* sieht immer aus wie **ein Content aus einem anderen Internet**
 * wirkt immer wie **ein Frame aus einer größeren, absurden Lore**
 * hat immer **emotionales Overacting**
 
@@ -678,21 +678,21 @@ So entsteht Wiedererkennbarkeit selbst bei völlig unterschiedlichen Themen.
 
 # 🧩 4. Brand-Kohärenz wird messbar (nicht Gefühl)
 
-Wenn Horny konstant bleiben soll, darf es kein Bauchgefühl sein, sondern ein **Score**.
+Wenn Brand konstant bleiben soll, darf es kein Bauchgefühl sein, sondern ein **Score**.
 
 Der Generator sollte intern Dinge berechnen wie:
 
-* `horny_coherence_score`
+* `brand_coherence_score`
 * `absurdity_level`
 * `symbolic_density`
-* `meme_readability`
+* `content_readability`
 
 Beispiele:
 
 * Hat das Bild ein klares Zentrum?
 * Gibt es ein starkes emotionales Signal?
 * Ist es mehr Symbol als Szene?
-* Würde es als Meme-Thumbnail funktionieren?
+* Würde es als Content-Thumbnail funktionieren?
 
 Diese Scores fließen ein in:
 
@@ -701,11 +701,11 @@ Diese Scores fließen ein in:
 * spätere Curation-Badges
 * evtl. Auto-Rejection/Retry
 
-So wird Horny ein **technischer Zustand**, nicht nur ein Vibe.
+So wird Brand ein **technischer Zustand**, nicht nur ein Vibe.
 
 ---
 
-# 🧱 5. Horny-Lore als stiller Unterbau
+# 🧱 5. Brand-Lore als stiller Unterbau
 
 Langfristige Brand-Klarheit kommt nicht von Prompts, sondern von einem **impliziten Universum.**
 
@@ -738,7 +738,7 @@ So entsteht Charakter ohne Maskottchen-Zwang.
 
 # 🎯 Kurzform
 
-Der Horny-Charakter bleibt konstant, wenn:
+Der Brand-Charakter bleibt konstant, wenn:
 
 * ❌ ihr nicht Motive festlegt
 * ❌ ihr nicht Witze festlegt
@@ -754,8 +754,8 @@ sondern:
 
 einbaut.
 
-Dann ist „Horny“ kein Content.
-Dann ist „Horny“ ein Betriebssystem.
+Dann ist „Brand“ kein Content.
+Dann ist „Brand“ ein Betriebssystem.
 
 ---
 
@@ -765,12 +765,12 @@ Dann ist „Horny“ ein Betriebssystem.
 ```json
 {
   "system": {
-    "name": "horny-meme-generator",
+    "name": "brand-content-generator",
     "version": "v2.0",
-    "role": "guardrailed meme generation + progression input",
+    "role": "guardrailed content generation + progression input",
     "principles": {
-      "brand_consistency": "horny-character enforced via matrix translation",
-      "meme_over_art": true,
+      "brand_consistency": "brand-character enforced via matrix translation",
+      "content_over_art": true,
       "progress_not_tokens": true,
       "status_not_spam": true
     }
@@ -794,7 +794,7 @@ Dann ist „Horny“ ein Betriebssystem.
     }
   },
 
-  "horny_matrix": {
+  "brand_matrix": {
     "axes": {
       "intent": [
         "reaction",
@@ -864,7 +864,7 @@ Dann ist „Horny“ ein Betriebssystem.
       "pattern": "string",
       "novelty_score": "float",
       "risk_score": "float",
-      "horny_coherence_score": "float"
+      "brand_coherence_score": "float"
     }
   },
 
@@ -969,7 +969,7 @@ Dann ist „Horny“ ein Betriebssystem.
 * **Generator** liest:
 
   * `input`
-  * `horny_matrix`
+  * `brand_matrix`
   * `brand_directives`
 * **PromptEngine** nutzt:
 
@@ -988,14 +988,14 @@ Dann ist „Horny“ ein Betriebssystem.
 
 ## Kurzfazit
 
-Mit diesem Contract ist der Meme-Generator:
+Mit diesem Contract ist der Content-Generator:
 
 * kein isoliertes Feature
 * sondern ein **deterministischer Progressions-Motor**
 
 Er garantiert:
 
-* 🧬 Brand-Konsistenz (Horny bleibt Horny)
+* 🧬 Brand-Konsistenz (Brand bleibt Brand)
 * 🎮 saubere Level- & Tier-Skalierung
 * 🎖️ direkte Badge- & Overlay-Integration
 * 🔒 Guardrails ohne Kreativ-Kill

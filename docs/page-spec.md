@@ -1,4 +1,4 @@
-# $HORNY — Page-by-Page Design & Style Specification
+# $TOKEN — Page-by-Page Design & Style Specification
 
 ## Token System
 
@@ -21,7 +21,7 @@ Before any content renders, `PageShell` _requires_ this spec object so no page c
 ### `/` — Landing
 * **Purpose:** Build trust, drive users to either Forge or Game.
 * **Tokens:** `page=home`, `state=active`, `flavor=default`, `energy=2`.
-* **Accent:** Horny Yellow (#FFE600) used only on CTAs and badges—no additional accents.
+* **Accent:** Brand Yellow (#FFE600) used only on CTAs and badges—no additional accents.
 * **Motion:** Only fade-on-load and CTA hover glow; KPI band loops calmly.
 * **Interactions:** Primary CTAs (`Start Forging`, `Play Cyber Runner`), social icon CTAs (Dex, Discord, X). KPI band uses on-chain numbers (price, MC, holders, liquidity, volume).
 * **Forbidden:** pulsing backgrounds, moving headlines, multi-accent palettes.
@@ -31,18 +31,18 @@ Before any content renders, `PageShell` _requires_ this spec object so no page c
 * **Tokens:** `page=game`, `state=teaser`, `flavor=subtle`, `energy=1`.
 * **Accent:** Subtle yellow highlights; main canvas and placeholders remain black/white.
 * **Motion:** Minimal; only static blur gradients. No auto-animations beyond fade-in.
-* **Interactions:** None (no inputs, buttons, or API calls). The overlay copy is `$Horny Runner` / `$Horny Runner unlocking soon`.
+* **Interactions:** None (no inputs, buttons, or API calls). The overlay copy is `$Brand Runner` / `$Brand Runner unlocking soon`.
 * **Forbidden:** input handling, start buttons, live APIs, additional motion.
 
 ### `/forge`
-* **Purpose:** Meme generation focus space (currently a teaser placeholder).
+* **Purpose:** Content generation focus space (currently a teaser placeholder).
 * **Tokens:** `page=forge`, `state=teaser`, `flavor=default`, `energy=2`.
-* **Accent:** Horny Yellow limited to badges/CTA; rest of canvas is calm, dark tone.
+* **Accent:** Brand Yellow limited to badges/CTA; rest of canvas is calm, dark tone.
 * **Motion:** Hover feedback only; no auto animation.
 * **Allowed interactions:** Generate CTA, Remix CTA, prompt helpers (once live).
 
 ### `/feed` (Discovery)
-* **Purpose:** Showcase memes, inspire remix entry.
+* **Purpose:** Showcase content items, inspire remix entry.
 * **Tokens:** `page=feed`, `state=active`, `flavor=mixed`, `energy=2`.
 * **Accent:** Page-level accent stays neutral; individual cards are allowed their own accents.
 * **Motion:** Subtle hover reveals on cards; no page-wide accent swaps.
@@ -60,7 +60,7 @@ Before any content renders, `PageShell` _requires_ this spec object so no page c
 * **Tokens:** `page=badges`, `state=locked`, `flavor=desaturated`, `energy=1`.
 * **Accent:** Desaturated palette with blurred previews; no bright accents permitted.
 * **Motion:** Blur / opacity only; no tooltips or progress indicators.
-* **Copy:** `Coming Soon — stay $Horny`. No interactions.
+* **Copy:** `Coming Soon — stay $Brand`. No interactions.
 
 ### `/interact`
 * **Purpose:** Explore and remix content; optional experiments.

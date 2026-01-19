@@ -1,4 +1,4 @@
-# Horny Matrix v2 Contract (Short)
+# Brand Matrix v2 Contract (Short)
 
 ## Input
 - `user_prompt` (string)
@@ -35,7 +35,7 @@
 ## Persistence
 - `artifacts`: `matrix_meta`, `scores`, `remix_of`, `template_key`.
 - `forge_previews`: `matrix_meta`, `scores`, `template_key`.
-- `meme_events`: telemetry for generate/publish/vote/share/remix.
+- `content_events`: telemetry for generate/publish/vote/share/remix.
  - `matrix_events`: telemetry stream for matrix preview/release + guardrails.
 
 ## Telemetry
@@ -43,32 +43,32 @@
   - performance-adaptive prompting
   - novelty unlocks
   - taste authority overlays
-# HornyMatrix v2 Contract
+# PromptMatrix v2 Contract
 
 ## Overview
 
-This document defines the contract for HornyMatrix v2, including backward compatibility guarantees and fallback mechanisms.
+This document defines the contract for PromptMatrix v2, including backward compatibility guarantees and fallback mechanisms.
 
 ## Schema Version
 
 All records with `matrix_meta` MUST include a `schema_version` field:
-- `"v2"` - Current version with full HornyMatrix metadata
-- `"legacy"` - Records created before HornyMatrix v2
+- `"v2"` - Current version with full PromptMatrix metadata
+- `"legacy"` - Records created before PromptMatrix v2
 
 ## Legacy Records Handling
 
 ### Problem
 
-Records created before HornyMatrix v2 implementation do not have `matrix_meta` fields. The system must handle these gracefully without breaking API contracts.
+Records created before PromptMatrix v2 implementation do not have `matrix_meta` fields. The system must handle these gracefully without breaking API contracts.
 
 ### Solution
 
 **Server-Side Read-Fallback (API Layer)**
 
-When reading a Meme/Artifact record:
+When reading a Content/Artifact record:
 
 ```typescript
-import { normalizeMatrixMeta } from '@/services/hornyMatrix/LegacyRecordsHandler';
+import { normalizeMatrixMeta } from '@/services/promptMatrix/LegacyRecordsHandler';
 
 const matrixMeta = normalizeMatrixMeta(record.matrix_meta);
 ```
@@ -107,14 +107,14 @@ This function:
 
 ### Problem
 
-`MemePromptComposer.compose()` must never fail without producing a prompt with Brand Directives.
+`PromptComposer.compose()` must never fail without producing a prompt with Brand Directives.
 
 ### Solution
 
 **Orchestrator-Level Guard**
 
 ```typescript
-import { compose, composeFallback } from '@/services/hornyMatrix/MemePromptComposer';
+import { compose, composeFallback } from '@/services/promptMatrix/PromptComposer';
 
 let composed;
 let composerFallbackUsed = false;
@@ -177,11 +177,11 @@ Preview retries (UI, network issues, user spam) cause event storms with `matrix_
 **Request-Scoped De-Dup**
 
 ```typescript
-import { emitTelemetryEvent } from '@/services/hornyMatrix/TelemetryService';
+import { emitTelemetryEvent } from '@/services/promptMatrix/TelemetryService';
 
 // Only first event per request_id is emitted
 emitTelemetryEvent('matrix_preview_created', {
-  meme_preview_id: previewResult.generationId,
+  content_preview_id: previewResult.generationId,
   preview_request_id,
   schema_version,
   axes,
