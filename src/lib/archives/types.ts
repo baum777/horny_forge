@@ -1,4 +1,4 @@
-// Types for THE HORNY ARCHIVES
+// Types for the Archives feature
 
 export interface Artifact {
   id: string;

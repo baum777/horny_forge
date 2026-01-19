@@ -10,8 +10,10 @@ import RewardsCard from "@/components/dashboard/RewardsCard";
 import SystemNotices from "@/components/dashboard/SystemNotices";
 import type { DashboardDTO } from "@/components/dashboard/types";
 import { Button } from "@/components/ui/button";
+import { useCopy } from "@/lib/theme/copy";
 
 const Dashboard = () => {
+  const t = useCopy();
   const [data, setData] = useState<DashboardDTO | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -77,17 +79,17 @@ const Dashboard = () => {
       <DashboardShell>
         {loading && (
           <div className="glass-card p-6 rounded-2xl text-center">
-            <p className="text-sm text-muted-foreground">Loading dashboard…</p>
+            <p className="text-sm text-muted-foreground">{t('dashboard.loadingBody')}</p>
           </div>
         )}
 
         {!loading && !hasContent && (
           <div className="glass-card p-8 rounded-2xl text-center space-y-4">
-            <h1 className="text-2xl font-bold">No data yet</h1>
+            <h1 className="text-2xl font-bold">{t('dashboard.emptyTitle')}</h1>
             <p className="text-sm text-muted-foreground">
-              Once your account syncs, your quests, badges, and rewards will appear here.
+              {t('dashboard.emptyBody')}
             </p>
-            <Button variant="gradient">Verify with X</Button>
+            <Button variant="gradient">{t('dashboard.verifyCta')}</Button>
             {error && <p className="text-xs text-muted-foreground">{error}</p>}
           </div>
         )}

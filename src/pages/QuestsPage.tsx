@@ -1,7 +1,9 @@
 import { PageShell } from "@/components/layout/PageShell";
 import { TeaserLayout } from "@/components/ui/TeaserLayout";
+import { useCopy } from "@/lib/theme/copy";
 
 export default function QuestsPage() {
+  const t = useCopy();
   return (
     <PageShell
       spec={{
@@ -12,8 +14,8 @@ export default function QuestsPage() {
       }}
     >
       <TeaserLayout
-        title="Weekly Quests starting soon."
-        subtitle="First come, first served. Real rewards."
+        title={t('questsPage.title')}
+        subtitle={t('questsPage.subtitle')}
       />
     </PageShell>
   );

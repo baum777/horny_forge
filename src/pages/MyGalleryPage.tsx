@@ -1,7 +1,9 @@
 import { PageShell } from "@/components/layout/PageShell";
 import { TeaserLayout } from "@/components/ui/TeaserLayout";
+import { useCopy } from "@/lib/theme/copy";
 
 export default function MyGalleryPage() {
+  const t = useCopy();
   return (
     <PageShell
       spec={{
@@ -12,8 +14,8 @@ export default function MyGalleryPage() {
       }}
     >
       <TeaserLayout
-        title="Your collection is loading..."
-        subtitle="Drafts. Published. Hidden."
+        title={t('myGallery.title')}
+        subtitle={t('myGallery.subtitle')}
       />
     </PageShell>
   );

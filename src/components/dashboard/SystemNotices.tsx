@@ -1,4 +1,5 @@
 import type { DashboardDTO } from "./types";
+import { useCopy } from "@/lib/theme/copy";
 
 const severityStyles = {
   info: "border-blue-500/30 text-blue-300",
@@ -7,19 +8,20 @@ const severityStyles = {
 };
 
 const SystemNotices = ({ system }: { system: DashboardDTO["system"] }) => {
+  const t = useCopy();
   const notices = system?.notices ?? [];
 
   return (
     <div className="glass-card p-6 rounded-2xl">
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold">System Messages</h2>
+          <h2 className="text-xl font-bold">{t("dashboard.system.title")}</h2>
           {system?.lastSyncAt && (
-            <span className="text-xs text-muted-foreground">Last verified: {system.lastSyncAt}</span>
+            <span className="text-xs text-muted-foreground">{t("dashboard.system.lastSync", { date: system.lastSyncAt })}</span>
           )}
         </div>
         {notices.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No system notices right now.</p>
+          <p className="text-sm text-muted-foreground">{t("dashboard.system.empty")}</p>
         ) : (
           <div className="space-y-3">
             {notices.map((notice) => (

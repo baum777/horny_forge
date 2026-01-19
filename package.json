@@ -12,7 +12,8 @@
     "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.app.json --noEmit",
     "preview": "vite preview",
     "badges:dry": "node scripts/organize-badges.mjs --src public --dest public/badges --version v1 --dry --manifest",
-    "badges:apply": "node scripts/organize-badges.mjs --src public --dest public/badges --version v1 --apply --manifest"
+    "badges:apply": "node scripts/organize-badges.mjs --src public --dest public/badges --version v1 --apply --manifest",
+    "theme:guard": "node scripts/theme-guard.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

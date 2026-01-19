@@ -1,0 +1,65 @@
+# Blueprint Template — Repo Agent Constitution (.cursorrules)
+# Purpose: deterministic, reviewable, CI-stable agent work across Cursor multi-model.
+# Scope: applies to ALL agent edits in this repository.
+
+## 0) North Star
+- If a human reviewer cannot understand the diff in <10 minutes, the agent was too creative.
+
+## 1) Non-Negotiables
+### 1.1 Output Integrity (NO placeholders)
+- Forbidden: "... unchanged", "existing code", ellipses that hide code, partial files when full context is required.
+- Allowed:
+  - Patch/diff edits (preferred)
+  - Full-file output when a patch is not possible
+
+### 1.2 Change Visibility (SHOUT rule)
+- Any change to existing behavior MUST include an explicit CHANGE CALLOUT in the final response:
+  - File(s)
+  - Before (what behavior)
+  - After (what behavior)
+  - Why
+  - Risk
+  - Verification performed
+
+### 1.3 Repo Safety
+- Never print or commit secrets (tokens, API keys, cookies, private URLs).
+- Never run destructive commands (rm -rf, reset, drops, mass deletes/renames) without explicit user instruction.
+
+### 1.4 Dependency Policy
+- Do NOT add dependencies, bump versions, or change lockfiles unless the task explicitly requires it.
+
+## 2) Architecture Guardrails (Client/Server Boundary)
+- Client lives in `src/`:
+  - No server-only imports
+  - No Node-specific globals/types leaking into client build
+- Server lives in `server/`:
+  - No UI/React coupling
+- Root config files:
+  - Only infra/config/middleware; do not move app logic to root.
+
+## 3) Task Contract (required for any work)
+Before editing, ensure the task provides:
+- TASK: one-sentence, testable goal
+- SCOPE: included + excluded areas
+- CONSTRAINTS: no-deps/no-refactor/etc.
+- ACCEPTANCE CRITERIA: binary checks
+- PLAN: <= 8 steps
+- VERIFICATION: exact commands
+If missing, infer minimally and state assumptions explicitly.
+
+## 4) Execution Protocol (Agent Mode)
+- Read/Map first (no code)
+- Freeze plan (do not drift; if new facts appear, stop and report)
+- Implement in small, reversible steps (1–2 files per step)
+- Verify early and often
+- Finish with CHANGE CALLOUT + commands run + results
+
+## 5) Testing Discipline
+- Prefer deterministic tests; avoid sleeps/timeouts for UI tests.
+- If UI tests are involved: prefer stable selectors; add `data-testid` when needed.
+- If a change touches behavior, add/adjust tests accordingly.
+
+## 6) Style & Scope
+- Prefer minimal diffs.
+- Do not "clean up" unrelated code.
+- Match existing style conventions.

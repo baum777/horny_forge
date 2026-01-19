@@ -6,27 +6,28 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useCopy } from '@/lib/theme/copy';
 
 export const PRESETS = [
   {
     id: 'HORNY_CORE_SKETCH',
-    label: 'CORE',
-    description: 'tight brand lock',
-    fullDescription: 'tightest, safest brand sketches',
+    labelKey: 'generator.presets.core.label',
+    descriptionKey: 'generator.presets.core.description',
+    fullDescriptionKey: 'generator.presets.core.fullDescription',
     unlockLevel: 1,
   },
   {
     id: 'HORNY_META_SCENE',
-    label: 'META',
-    description: 'epic scenes',
-    fullDescription: 'epic scenes, lore expansions',
+    labelKey: 'generator.presets.meta.label',
+    descriptionKey: 'generator.presets.meta.description',
+    fullDescriptionKey: 'generator.presets.meta.fullDescription',
     unlockLevel: 2,
   },
   {
     id: 'HORNY_CHAOS_VARIATION',
-    label: 'CHAOS',
-    description: 'cursed energy, still doodle',
-    fullDescription: 'wild, but still branded chaos',
+    labelKey: 'generator.presets.chaos.label',
+    descriptionKey: 'generator.presets.chaos.description',
+    fullDescriptionKey: 'generator.presets.chaos.fullDescription',
     unlockLevel: 4,
   },
 ] as const;
@@ -40,22 +41,25 @@ interface PresetPickerProps {
 }
 
 export const PresetPicker: React.FC<PresetPickerProps> = ({ selectedPreset, onSelect, userLevel }) => {
+  const t = useCopy();
+
+  const selectedPresetCopy = PRESETS.find((preset) => preset.id === selectedPreset);
   return (
     <div className="space-y-3">
-      <label className="text-sm font-semibold block">Preset Guardrails</label>
+      <label className="text-sm font-semibold block">{t('generator.presets.label')}</label>
       <Select value={selectedPreset} onValueChange={(value) => onSelect(value as PresetId)}>
         <SelectTrigger className="w-full bg-muted border-none">
-          <SelectValue placeholder="Select a preset" />
+          <SelectValue placeholder={t('generator.presets.placeholder')} />
         </SelectTrigger>
         <SelectContent>
           {PRESETS.map((preset) => {
             const isLocked = userLevel < preset.unlockLevel;
             return (
               <SelectItem key={preset.id} value={preset.id} disabled={isLocked}>
-                <span className="font-bold">{preset.label}</span> — {preset.description}
+                <span className="font-bold">{t(preset.labelKey)}</span> — {t(preset.descriptionKey)}
                 {isLocked && (
                   <span className="ml-2 text-[10px] text-muted-foreground">
-                    Unlock at Level {preset.unlockLevel}
+                    {t('generator.presets.unlockAt', { level: preset.unlockLevel })}
                   </span>
                 )}
               </SelectItem>
@@ -64,7 +68,7 @@ export const PresetPicker: React.FC<PresetPickerProps> = ({ selectedPreset, onSe
         </SelectContent>
       </Select>
       <p className="text-[10px] text-muted-foreground italic">
-        {PRESETS.find((p) => p.id === selectedPreset)?.fullDescription}
+        {selectedPresetCopy ? t(selectedPresetCopy.fullDescriptionKey) : ''}
       </p>
     </div>
   );

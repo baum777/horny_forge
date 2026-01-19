@@ -4,6 +4,7 @@ import { Search, Clock, TrendingUp, Trophy, ChevronDown, X } from 'lucide-react'
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { PREDEFINED_TAGS, type SortOption } from '@/lib/archives/types';
+import { useCopy } from '@/lib/theme/copy';
 
 interface FiltersBarProps {
   sort: SortOption;
@@ -14,10 +15,10 @@ interface FiltersBarProps {
   onTagChange: (tag: string | null) => void;
 }
 
-const sortOptions: { value: SortOption; label: string; icon: React.ReactNode }[] = [
-  { value: 'newest', label: 'Live', icon: <Clock className="w-4 h-4" /> },
-  { value: 'top24h', label: 'Top 24h', icon: <TrendingUp className="w-4 h-4" /> },
-  { value: 'topAll', label: 'Top All Time', icon: <Trophy className="w-4 h-4" /> },
+const sortOptions: { value: SortOption; labelKey: string; icon: React.ReactNode }[] = [
+  { value: 'newest', labelKey: 'gallery.sort.live', icon: <Clock className="w-4 h-4" /> },
+  { value: 'top24h', labelKey: 'gallery.sort.top24h', icon: <TrendingUp className="w-4 h-4" /> },
+  { value: 'topAll', labelKey: 'gallery.sort.topAll', icon: <Trophy className="w-4 h-4" /> },
 ];
 
 export function FiltersBar({
@@ -28,6 +29,7 @@ export function FiltersBar({
   selectedTag,
   onTagChange,
 }: FiltersBarProps) {
+  const t = useCopy();
   const [showTagPicker, setShowTagPicker] = useState(false);
 
   return (
@@ -45,7 +47,7 @@ export function FiltersBar({
               className="gap-1.5"
             >
               {option.icon}
-              {option.label}
+              {t(option.labelKey)}
             </Button>
           ))}
         </div>
@@ -56,7 +58,7 @@ export function FiltersBar({
           <Input
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
-            placeholder="Search captions & handles..."
+            placeholder={t('gallery.search.placeholder')}
             className="pl-9 bg-background/50"
           />
           {search && (
@@ -78,7 +80,7 @@ export function FiltersBar({
           size="sm"
           className="gap-2"
         >
-          {selectedTag || 'Filter by tag'}
+          {selectedTag || t('gallery.filter.tag')}
           <ChevronDown className={`w-4 h-4 transition-transform ${showTagPicker ? 'rotate-180' : ''}`} />
         </Button>
 
@@ -90,7 +92,7 @@ export function FiltersBar({
             className="ml-2 text-muted-foreground"
           >
             <X className="w-4 h-4 mr-1" />
-            Clear
+            {t('common.clear')}
           </Button>
         )}
 

@@ -1,7 +1,9 @@
 import { PageShell } from "@/components/layout/PageShell";
 import { TeaserLayout } from "@/components/ui/TeaserLayout";
+import { useCopy } from "@/lib/theme/copy";
 
 export default function BadgesPage() {
+  const t = useCopy();
   return (
     <PageShell
       spec={{
@@ -12,8 +14,8 @@ export default function BadgesPage() {
       }}
     >
       <TeaserLayout
-        title="Coming Soon — stay $Horny"
-        subtitle="Badges show who you are — not what you earned."
+        title={t('badgesPage.title')}
+        subtitle={t('badgesPage.subtitle')}
       >
         <div className="mt-8 grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 opacity-30 blur-sm pointer-events-none select-none">
           {/* Visual Placeholder for blurred badges */}

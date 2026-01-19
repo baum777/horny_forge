@@ -51,7 +51,7 @@ POST /api/auth/logout (optional, später)
 ✅ Step 2 – FINAL DEFINIERT: Data Provider (Moralis)
 🎯 Scope (MVP, fix)
 
-Token: ausschließlich $HORNY (1 Solana Mint)
+Token: ausschließlich $TOKEN (1 Solana Mint)
 
 Provider: Moralis only
 
@@ -86,7 +86,7 @@ Timestamp („Last updated …“)
 
 Aktionen (unter Tooltip, horizontal):
 
-$HORNY (no background) → Copy Mint Address
+$TOKEN (no background) → Copy Mint Address
 
 Dexscreener (no background) → External Link
 
@@ -126,7 +126,7 @@ Cache Layer (fix)
 
 Cache TTL: 3 Minuten
 
-Cache-Key: token:$HORNY:market_snapshot
+Cache-Key: token:$TOKEN:market_snapshot
 
 Cache Location:
 
@@ -148,7 +148,7 @@ GET /api/token/market
 Response:
 
 {
-  "mint": "HORNY_MINT_ADDRESS",
+  "mint": "TOKEN_MINT_ADDRESS",
   "holderCount": 12345,
   "holderGrowthPct": 4.2,
   "marketCapUsd": 12300000,
@@ -183,10 +183,10 @@ Structured list (label → value)
 
 Footer:
 
-$HORNY    Dexscreener
+$TOKEN    Dexscreener
 
 
-$HORNY:
+$TOKEN:
 
 onClick → copy mint
 
@@ -206,7 +206,7 @@ No cache → hide hero metrics, keep layout
 
 5️⃣ ENV / Config (fix)
 MORALIS_API_KEY=...
-HORNY_MINT_ADDRESS=...
+TOKEN_MINT_ADDRESS=...
 DEXSCREENER_URL=https://dexscreener.com/solana/...
 
 
@@ -261,7 +261,7 @@ Zu viele Badges =:
 | Typ                   | Anzahl | Zweck                |
 | --------------------- | ------ | -------------------- |
 | **Core Badges**       | 15–20  | dauerhaft erreichbar |
-| **Hidden / Surprise** | 5–8    | Neugier, Memeability |
+| **Hidden / Surprise** | 5–8    | Neugier, shareability |
 | **Seasonal / Event**  | 5–10   | FOMO, Reaktivierung  |
 
 ➡️ **Zum Launch**: **12–15 Badges**, nicht mehr.
@@ -279,8 +279,8 @@ Menschen reagieren stärker auf **benannte Scores**.
 
 | Score            | Thema                             | Sichtbar wo |
 | ---------------- | --------------------------------- | ----------- |
-| 🔥 **Heat**      | Meme-Performance (Votes erhalten) | Meme Cards  |
-| 🛠 **Forge**     | Meme-Creation                     | Profil      |
+| 🔥 **Heat**      | Content-Performance (Votes erhalten) | Content Cards  |
+| 🛠 **Forge**     | Content-Creation                     | Profil      |
 | 👀 **Taste**     | Voting-Qualität & Aktivität       | Profil      |
 | 📣 **Signal**    | X / Sharing Impact                | Profil      |
 | 🧠 **Curiosity** | Templates, Vielfalt, Exploration  | Profil      |
@@ -328,7 +328,7 @@ Badges existieren in **3 Formen**:
 * „100 Votes Received“
 * „Active Voter“
 
-### ✅ Gute Badges (Memeable, neugierig)
+### ✅ Gute Badges (shareable, neugierig)
 
 Badges sollten:
 
@@ -338,7 +338,7 @@ Badges sollten:
 
 #### Beispiele nach Kategorie
 
-**Meme-Creation**
+**Content-Creation**
 
 * 🛠 *“Still Cooking”*
 * 🧪 *“Unstable Build”*
@@ -558,7 +558,7 @@ Das hält Power-User engaged, ohne Spam zu erlauben.
 
 * Voting Gallery bleibt clean
 * XP wird sinnvoller Sink
-* Gute Memes > viele Memes
+* Gute Content items > viele Content items
 
 ---
 
@@ -571,11 +571,11 @@ Limit erreicht = **kein Frust**, sondern **neuer Spielmodus**.
 
 User **kann weiterhin:**
 
-* bereits generierte Memes:
+* bereits generierte Content items:
 
-  * mit **Top / Bottom Text** memefizieren
+  * mit **Top / Bottom Text** variieren
 * **manuell** Text eingeben
-* **oder keyword-based Meme-Text generieren**
+* **oder keyword-based Content-Text generieren**
 
 ### Sharing-Flow
 
@@ -626,7 +626,7 @@ generated_images {
 ```
 
 * Remixing **verbraucht keine Generation**
-* Remixing zählt **nicht** als neues Meme
+* Remixing zählt **nicht** als neues Content
 * Remixing zählt für:
 
   * X Badges
@@ -657,7 +657,7 @@ Super – damit können wir Step 5 **sehr sauber** abschließen. Ich nehme deine
 ### Konsequenz (UX)
 
 * **My Gallery (private):** alle eigenen generierten Images (inkl. unlisted)
-* **Voting Gallery (public):** nur `published_memes` (clean by design)
+* **Voting Gallery (public):** nur `published_items` (clean by design)
 * Owner sieht auch “hidden/flagged” Inhalte weiterhin (Shadow-Hide möglich; siehe Moderation)
 
 ---
@@ -698,7 +698,7 @@ Super – damit können wir Step 5 **sehr sauber** abschließen. Ich nehme deine
 
 ## 3) Galleries: Published + Filter + Toggle “Ace/MVP” (FINAL)
 
-**Entscheidung:** published Memes, Filter `Hot/New` + Toggle zu “Ace/MVP Gallery”
+**Entscheidung:** published Content items, Filter `Hot/New` + Toggle zu “Ace/MVP Gallery”
 
 ### Gallery Views
 
@@ -712,7 +712,7 @@ Super – damit können wir Step 5 **sehr sauber** abschließen. Ich nehme deine
 ### Definition “Ace/MVP” (damit es nicht schwammig wird)
 
 **Empfehlung (objektiv & automatisch):**
-Ein Meme ist **Ace/MVP**, wenn **eine** Bedingung erfüllt ist:
+Ein Content ist **Ace/MVP**, wenn **eine** Bedingung erfüllt ist:
 
 * average rating ≥ **4.2 unicorns** und mindestens **N Ratings** (z. B. 25)
 * oder “Hot score” in Top X% der letzten 72h
@@ -729,7 +729,7 @@ Ein Meme ist **Ace/MVP**, wenn **eine** Bedingung erfüllt ist:
 ### Datenmodell
 
 * Vote ist eine **Rating-Zahl** 1..5 (integer)
-* Ein User kann pro Meme **1 active rating** haben (update allowed)
+* Ein User kann pro Content **1 active rating** haben (update allowed)
 
 ### Ranking-Logik
 
@@ -753,7 +753,7 @@ Ihr bekommt zwei Scores:
 
 **Empfehlung v1:**
 
-* **Rater XP:** pro Meme **max 1x XP** (beim ersten Rating), nicht bei Updates
+* **Rater XP:** pro Content **max 1x XP** (beim ersten Rating), nicht bei Updates
 
   * 1–2 unicorns: **+2 XP** (trotzdem zählt “participation”)
   * 3 unicorns: **+4 XP**
@@ -779,9 +779,9 @@ Ihr bekommt zwei Scores:
 * Backend zählt Reports (unique reporters)
 * Wenn Reports ≥ **N**:
 
-  * Meme wird `hidden=true` (nicht in public feeds)
-  * Creator erhält: `xp_status = frozen_for_meme`
-  * XP/Token-Rewards, die an dieses Meme gebunden sind: **gesperrt**
+  * Content wird `hidden=true` (nicht in public feeds)
+  * Creator erhält: `xp_status = frozen_for_content`
+  * XP/Token-Rewards, die an dieses Content gebunden sind: **gesperrt**
 
 ### Admin Unfreeze
 
@@ -792,8 +792,8 @@ Ihr bekommt zwei Scores:
 
 **Wichtig (Konsequenz-Regel):**
 
-* **XP freeze betrifft nur meme-related XP**, nicht das gesamte Konto (sonst zu hart).
-* Wenn Meme final removed: meme-XP bleibt entzogen, Badge/Token aus diesem Meme werden nicht vergeben.
+* **XP freeze betrifft nur content-related XP**, nicht das gesamte Konto (sonst zu hart).
+* Wenn Content final removed: content-XP bleibt entzogen, Badge/Token aus diesem Content werden nicht vergeben.
 
 ---
 
@@ -807,9 +807,9 @@ Ihr bekommt zwei Scores:
 * `thumb_path`
 * `created_at`
 * `is_published` (bool)
-* `published_meme_id` (nullable)
+* `published_item_id` (nullable)
 
-### `published_memes`
+### `published_items`
 
 * `id`
 * `generated_image_id`
@@ -825,29 +825,29 @@ Ihr bekommt zwei Scores:
   * `hot_score`
   * `report_count`
 
-### `meme_ratings`
+### `content_ratings`
 
 * `id`
-* `published_meme_id`
+* `published_item_id`
 * `user_id`
 * `rating` (1..5)
 * `created_at`
-* unique(user_id, published_meme_id)
+* unique(user_id, published_item_id)
 
-### `meme_reports`
+### `content_reports`
 
 * `id`
-* `published_meme_id`
+* `published_item_id`
 * `user_id`
 * `reason` (optional)
 * `created_at`
-* unique(user_id, published_meme_id)
+* unique(user_id, published_item_id)
 
 ### `xp_events`
 
 * `id`
 * `user_id`
-* `type` (vote_cast, meme_hit_threshold, etc.)
+* `type` (vote_cast, content_hit_threshold, etc.)
 * `points`
 * `meta_json`
 * `created_at`
@@ -855,7 +855,7 @@ Ihr bekommt zwei Scores:
 ### `xp_freezes` (optional, oder Flag in users)
 
 * `user_id`
-* `scope` (meme_id)
+* `scope` (content_id)
 * `status` (frozen/unfrozen)
 * `created_at`
 
@@ -896,7 +896,7 @@ Top – das ergibt ein **sehr sauberes Voting-System** (verified-only, aber trot
 
 ### Backend
 
-* `meme_ratings` row per `(user_id, meme_id)` unique
+* `content_ratings` row per `(user_id, content_id)` unique
 * `updated_at` + `locked_at` (optional) oder computed via `created_at`
 
 ---
@@ -939,7 +939,7 @@ Wir kombinieren Qualität + Menge + Zeit:
 
 **Filter:**
 
-* Hot Feed zeigt nur Memes:
+* Hot Feed zeigt nur Content items:
 
   * `age_hours ≤ 72` (hart)
   * `rating_count ≥ 3` (min signal)
@@ -982,12 +982,12 @@ Damit ist Hot nicht voller “0 votes” Müll.
 
 ### Protections (v1)
 
-1. **One rating per meme per user** (DB unique)
+1. **One rating per content per user** (DB unique)
 2. **Edit window** (15 min)
 3. **Vote rate limit**
 
    * per user: `max 20 ratings / 10 min`
-   * per meme: `max 1 rating action / minute` (prevents spam updates)
+   * per content: `max 1 rating action / minute` (prevents spam updates)
 4. **Fingerprint guard (soft)**
 
    * Wenn >3 verified accounts vom selben fingerprint in kurzer Zeit voten:
@@ -1019,19 +1019,19 @@ Damit ist Hot nicht voller “0 votes” Müll.
 
 * `GET /api/gallery/voting?sort=hot|new`
 * `GET /api/gallery/ace`
-* `POST /api/gallery/:memeId/rate` body `{ rating: 1..5, fingerprintHash }`
-* `POST /api/gallery/:memeId/report` body `{ reason?, fingerprintHash? }`
+* `POST /api/gallery/:contentId/rate` body `{ rating: 1..5, fingerprintHash }`
+* `POST /api/gallery/:contentId/report` body `{ reason?, fingerprintHash? }`
 
 ---
 
 ## Data model additions (minimal)
 
-`meme_ratings`:
+`content_ratings`:
 
 * `created_at`, `updated_at`
 * (optional) `edit_deadline_at` = created_at + 15m
 
-`published_memes`:
+`published_items`:
 
 * `avg_rating`, `rating_count`, `hot_score`, `report_count` (denormalized; recompute on write)
 
@@ -1082,7 +1082,7 @@ Ich mache **Step 7 jetzt FINAL (Commit-würdig)** und lege **klare Regeln + Stat
 * **Manuell:** immer
 * **Keyword-Textgen:**
 
-  * max. **2 Vorschläge pro Meme**
+  * max. **2 Vorschläge pro Content**
   * **kein Retry-Spam**
   * optional: „Regenerate“ **nicht** erlaubt
 
@@ -1103,7 +1103,7 @@ Ich mache **Step 7 jetzt FINAL (Commit-würdig)** und lege **klare Regeln + Stat
 ### Share zählt **nur**, wenn:
 
 * über **offiziellen Share-Button**
-* **$HORNY Hashtag** vorhanden
+* **$TOKEN Hashtag** vorhanden
 * Bild **tatsächlich verändert** (Top/Bottom-Text ≠ leer)
 
 ### Dedupe (implizit empfohlen)
@@ -1143,7 +1143,7 @@ Ich mache **Step 7 jetzt FINAL (Commit-würdig)** und lege **klare Regeln + Stat
 
 * Remix:
 
-  * **erscheint nicht** als eigenes Meme in der Voting Gallery
+  * **erscheint nicht** als eigenes Content in der Voting Gallery
   * ist **immer dem Original zugeordnet**
   * sichtbar:
 
@@ -1193,7 +1193,7 @@ Generated Image
 
   * `can_remix === true`
   * Generator-Limit **erreicht**
-  * `$HORNY` im Share-Text
+  * `$TOKEN` im Share-Text
 
 ---
 
@@ -1230,7 +1230,7 @@ Ich halte das **systemisch**, nicht textlastig.
 * **Trigger werden erweitert** um:
 
   * `novelty_score`
-  * `horny_coherence_score`
+  * `brand_coherence_score`
   * **Pattern- & Intent-Kombinationen**
 
 ### Beispiel
@@ -1245,7 +1245,7 @@ Ich halte das **systemisch**, nicht textlastig.
   * jetzt: Votes ≥ X **UND** `novelty_score ≥ threshold`
 
 ➡️ Effekt:
-**Höherer Anspruch**, weniger Farmbarkeit, bessere Meme-Qualität.
+**Höherer Anspruch**, weniger Farmbarkeit, bessere Content-Qualität.
 
 ---
 
@@ -1261,7 +1261,7 @@ Ich halte das **systemisch**, nicht textlastig.
 ```text
 Base XP: +5
 + novelty_high → ×1.2
-+ horny_coherence_high → ×1.1
++ brand_coherence_high → ×1.1
 + rare_pattern_combo → ×1.3
 ```
 
@@ -1299,7 +1299,7 @@ Kuratiertes Browsing ohne neue Komplexität.
 
 * Performance-XP & Badges berücksichtigen:
 
-  * `avg_rating × horny_coherence_score`
+  * `avg_rating × brand_coherence_score`
 
 ➡️ Effekt:
 Nicht nur „beliebt“, sondern **on-brand** wird belohnt.
@@ -1369,7 +1369,7 @@ XP = action_base
 ### Zugelassene Modifier
 
 * `novelty_score`
-* `horny_coherence_score`
+* `brand_coherence_score`
 * `risk_score` (gedeckelt, kein Exploit)
 
 **Nicht erlaubt zu skalieren:**
@@ -1475,7 +1475,7 @@ Grundlage Contract/Matrix:
 
   * `reaction_card`
   * `comic_2panel`
-  * `chart_meme`
+  * `chart_content`
 * Templates, die frei rendern können (weil Text immer UI-overlay ist), können **ohne Base** laufen:
 
   * `top_bottom`
@@ -1483,7 +1483,7 @@ Grundlage Contract/Matrix:
 
 **Warum das optimal ist**
 
-* Memeability + Wiedererkennbarkeit durch feste Layouts
+* shareability + Wiedererkennbarkeit durch feste Layouts
 * Weniger Prompt-Brittleness
 * Weniger “random composition” Failures
 
@@ -1497,7 +1497,7 @@ Grundlage Contract/Matrix:
 2. `caption_single`
 3. `reaction_card`
 4. `comic_2panel`
-5. `chart_meme`
+5. `chart_content`
 
 UI: Template Picker zeigt nur diese 5.
 
@@ -1512,7 +1512,7 @@ Deine Antwort “B + C” übersetze ich als:
 * **User wählt Template (B)**
 * Matrix nutzt Intent **nur**, um Prompt/Komposition zu modulieren (C-ähnlich), aber **ohne automatisches Umschalten**.
 
-➡️ Vorteil: Users fühlen Kontrolle (“Format”), während Matrix den “Horny-Character” erzwingt.
+➡️ Vorteil: Users fühlen Kontrolle (“Format”), während Matrix den “Brand-Character” erzwingt.
 
 ---
 
@@ -1570,7 +1570,7 @@ Contract-konform: “no text in image” bleibt unverletzt.
 
 * `reaction_card`: mehrere base layouts (z. B. 6–12)
 * `comic_2panel`: mehrere panel layouts (z. B. 6–12)
-* `chart_meme`: mehrere chart frames (z. B. 4–8)
+* `chart_content`: mehrere chart frames (z. B. 4–8)
 * `top_bottom` / `caption_single`: keine bases nötig (optional später)
 
 ---
@@ -1634,7 +1634,7 @@ Beispiel-Skeletons (Kurzform):
 
 * `top_bottom`:
 
-  * “single strong subject, bold silhouette, meme readable thumbnail, clean background”
+  * “single strong subject, bold silhouette, content readable thumbnail, clean background”
 * `caption_single`:
 
   * “single subject + minimal scene hint, center focus, high contrast”
@@ -1644,7 +1644,7 @@ Beispiel-Skeletons (Kurzform):
 * `comic_2panel`:
 
   * “two sequential beats, clear contrast between panel 1 and 2”
-* `chart_meme`:
+* `chart_content`:
 
   * “chart context scene with comedic visual metaphor, keep chart area clean”
 

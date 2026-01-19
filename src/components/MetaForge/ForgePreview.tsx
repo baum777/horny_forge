@@ -2,8 +2,9 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GlassCard } from '@/components/ui/glass-card';
 import { Button } from '@/components/ui/button';
-import { Download, Share2, RefreshCw, Rocket, Eye, Clock, Layers, Zap } from 'lucide-react';
+import { Share2, RefreshCw, Rocket, Eye, Clock, Layers, Zap } from 'lucide-react';
 import { ForgeResponse, type ReleaseError } from '@/lib/api/forge';
+import { useCopy } from '@/lib/theme/copy';
 
 interface ForgePreviewProps {
   image: string | null;
@@ -25,16 +26,24 @@ export const ForgePreview: React.FC<ForgePreviewProps> = ({
     onRegenerate,
     onRelease,
     onShare,
-    loadingCopy = 'Desire is forming...',
+    loadingCopy,
     isReleasing = false,
     releasedId = null,
     releaseError = null,
 }) => {
+    const t = useCopy();
     const showOffBrand = releaseError?.code === 'OFF_BRAND' || releaseError?.error === 'off_brand';
+    const loadingText = loadingCopy ?? t('generator.preview.loading');
+    const presetLabels: Record<string, string> = {
+      HORNY_CORE_SKETCH: t('generator.presets.core.label'),
+      HORNY_META_SCENE: t('generator.presets.meta.label'),
+      HORNY_CHAOS_VARIATION: t('generator.presets.chaos.label'),
+    };
+    const presetLabel = metadata?.preset ? presetLabels[metadata.preset] ?? t('generator.presets.unknown') : t('generator.presets.unknown');
 
     return (
         <div className="space-y-6 sticky top-8">
-            <label className="text-sm font-semibold block">Artifact Preview</label>
+            <label className="text-sm font-semibold block">{t('generator.preview.label')}</label>
             <GlassCard
                 variant="neon"
                 className="aspect-square flex items-center justify-center overflow-hidden relative"
@@ -52,8 +61,8 @@ export const ForgePreview: React.FC<ForgePreviewProps> = ({
                                 <div className="w-16 h-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
                                 <Zap className="w-6 h-6 text-primary absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-pulse" />
                             </div>
-                            <p className="text-primary font-medium animate-pulse">{loadingCopy}</p>
-                            <p className="text-[10px] text-muted-foreground">Stabilizing the artifact...</p>
+                            <p className="text-primary font-medium animate-pulse">{loadingText}</p>
+                            <p className="text-[10px] text-muted-foreground">{t('generator.preview.stabilizing')}</p>
                         </motion.div>
                     ) : image ? (
                         <motion.div
@@ -64,12 +73,12 @@ export const ForgePreview: React.FC<ForgePreviewProps> = ({
                         >
                             <img
                                 src={image}
-                                alt="Forged Artifact"
+                                alt={t('generator.preview.alt')}
                                 className="w-full h-full object-cover"
                             />
                             <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                 <Button variant="outline" size="sm" onClick={() => window.open(image, '_blank')}>
-                                    <Eye className="w-4 h-4 mr-2" /> View Full
+                                    <Eye className="w-4 h-4 mr-2" /> {t('generator.preview.viewFull')}
                                 </Button>
                             </div>
                         </motion.div>
@@ -81,7 +90,7 @@ export const ForgePreview: React.FC<ForgePreviewProps> = ({
                             className="text-center text-muted-foreground p-8"
                         >
                             <Layers className="w-12 h-12 mx-auto mb-4 opacity-20" />
-                            <p>Your artifact will appear here</p>
+                            <p>{t('generator.preview.empty')}</p>
                         </motion.div>
                     )}
                 </AnimatePresence>
@@ -97,26 +106,26 @@ export const ForgePreview: React.FC<ForgePreviewProps> = ({
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1">
                             <p className="text-[10px] text-muted-foreground uppercase flex items-center">
-                                <Zap className="w-3 h-3 mr-1" /> Preset
+                                <Zap className="w-3 h-3 mr-1" /> {t('generator.preview.meta.preset')}
                             </p>
-                            <p className="text-xs font-mono">{metadata.preset}</p>
+                            <p className="text-xs font-mono">{presetLabel}</p>
                         </div>
                         <div className="space-y-1">
                             <p className="text-[10px] text-muted-foreground uppercase flex items-center">
-                                <Layers className="w-3 h-3 mr-1" /> Base
+                                <Layers className="w-3 h-3 mr-1" /> {t('generator.preview.meta.base')}
                             </p>
                             <p className="text-xs font-mono">{metadata.base_id}</p>
                         </div>
                         <div className="space-y-1">
                             <p className="text-[10px] text-muted-foreground uppercase flex items-center">
-                                <Clock className="w-3 h-3 mr-1" /> Generated
+                                <Clock className="w-3 h-3 mr-1" /> {t('generator.preview.meta.generated')}
                             </p>
                             <p className="text-xs font-mono">
                                 {new Date(metadata.created_at).toLocaleTimeString()}
                             </p>
                         </div>
                         <div className="space-y-1">
-                            <p className="text-[10px] text-muted-foreground uppercase">Gen ID</p>
+                            <p className="text-[10px] text-muted-foreground uppercase">{t('generator.preview.meta.generationId')}</p>
                             <p className="text-xs font-mono truncate">{metadata.generation_id}</p>
                         </div>
                     </div>
@@ -124,7 +133,7 @@ export const ForgePreview: React.FC<ForgePreviewProps> = ({
                     {metadata.debug?.final_prompt && (
                         <details className="cursor-pointer group">
                             <summary className="text-[10px] text-muted-foreground hover:text-foreground transition-colors list-none">
-                                + Show Prompt Details
+                                {t('generator.preview.meta.showPrompt')}
                             </summary>
                             <div className="mt-2 p-2 bg-black/40 rounded border border-white/5">
                                 <p className="text-[10px] font-mono leading-relaxed text-muted-foreground">
@@ -145,20 +154,20 @@ export const ForgePreview: React.FC<ForgePreviewProps> = ({
                 >
                     {showOffBrand && (
                         <div className="rounded-xl border border-white/10 bg-black/40 p-4 text-xs text-muted-foreground space-y-3">
-                            <p className="text-foreground font-semibold">Release blocked: off-brand output.</p>
+                            <p className="text-foreground font-semibold">{t('generator.preview.release.blocked')}</p>
                             <p>
-                                Use base{' '}
+                                {t('generator.preview.release.useBase')}{' '}
                                 <span className="text-foreground font-mono">
                                     {releaseError?.base_match_id ?? metadata?.base_id ?? 'base-01'}
                                 </span>{' '}
-                                / preset{' '}
+                                {t('generator.preview.release.usePreset')}{' '}
                                 <span className="text-foreground font-mono">
-                                    {metadata?.preset ?? 'HORNY_CORE_SKETCH'}
+                                    {presetLabel}
                                 </span>{' '}
-                                and try again.
+                                {t('generator.preview.release.tryAgain')}
                             </p>
                             <Button variant="outline" size="sm" onClick={onRegenerate}>
-                                Try again
+                                {t('generator.preview.release.action')}
                             </Button>
                         </div>
                     )}
@@ -170,7 +179,7 @@ export const ForgePreview: React.FC<ForgePreviewProps> = ({
                             disabled={isReleasing}
                         >
                             <RefreshCw className="w-4 h-4 mr-2" />
-                            Regenerate
+                            {t('generator.preview.actions.regenerate')}
                         </Button>
                         {!releasedId ? (
                             <Button
@@ -180,7 +189,7 @@ export const ForgePreview: React.FC<ForgePreviewProps> = ({
                                 disabled={isReleasing}
                             >
                                 <Rocket className="w-4 h-4 mr-2" />
-                                {isReleasing ? 'Releasing...' : 'Release Artifact'}
+                                {isReleasing ? t('generator.preview.actions.releasing') : t('generator.preview.actions.release')}
                             </Button>
                         ) : (
                             <Button
@@ -189,7 +198,7 @@ export const ForgePreview: React.FC<ForgePreviewProps> = ({
                                 onClick={onShare}
                             >
                                 <Share2 className="w-4 h-4 mr-2" />
-                                Share to X
+                                {t('generator.preview.actions.share')}
                             </Button>
                         )}
                     </div>

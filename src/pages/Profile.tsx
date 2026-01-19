@@ -12,8 +12,10 @@ import { useGamification } from '@/hooks/useGamification';
 import { LevelBar } from '@/components/profile/LevelBar';
 import { BadgeGrid } from '@/components/profile/BadgeGrid';
 import { PageShell } from '@/components/layout/PageShell';
+import { useCopy } from '@/lib/theme/copy';
 
 export default function Profile() {
+  const t = useCopy();
   const navigate = useNavigate();
   const { archivesUser, isAuthenticated, loading: authLoading } = useAuth();
   const { stats, badges } = useGamification(archivesUser?.id);
@@ -92,7 +94,7 @@ export default function Profile() {
             {/* Info */}
             <div className="flex-1">
               <h1 className="text-2xl font-bold text-gradient">{archivesUser.handle}</h1>
-              <p className="text-muted-foreground text-sm mt-1">Keeper of Artifacts</p>
+              <p className="text-muted-foreground text-sm mt-1">{t('profile.tagline')}</p>
             </div>
 
             {/* Stats */}
@@ -102,14 +104,14 @@ export default function Profile() {
                   <Image className="w-6 h-6 text-primary" />
                   {artifacts.length}
                 </div>
-                <p className="text-xs text-muted-foreground uppercase tracking-wider mt-1">Artifacts</p>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider mt-1">{t('profile.stats.artifacts')}</p>
               </div>
               <div className="text-center">
                 <div className="flex items-center justify-center gap-2 text-3xl font-bold">
                   <Heart className="w-6 h-6 text-primary fill-primary" />
                   {totalVotes}
                 </div>
-                <p className="text-xs text-muted-foreground uppercase tracking-wider mt-1">Desire</p>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider mt-1">{t('profile.stats.votes')}</p>
               </div>
             </div>
           </div>
@@ -119,14 +121,14 @@ export default function Profile() {
           <LevelBar xpTotal={xpTotal} level={level} />
           <div className="glass-card p-5 rounded-2xl flex flex-col justify-between">
             <div>
-              <p className="text-xs uppercase tracking-widest text-muted-foreground">Streak</p>
-              <p className="text-3xl font-bold text-gradient mt-2">{streakDays} days</p>
+              <p className="text-xs uppercase tracking-widest text-muted-foreground">{t('profile.streak.title')}</p>
+              <p className="text-3xl font-bold text-gradient mt-2">{t('profile.streak.value', { days: streakDays })}</p>
               <p className="text-xs text-muted-foreground mt-2">
-                Return daily to keep the flame alive.
+                {t('profile.streak.subtitle')}
               </p>
             </div>
             <div className="text-xs text-muted-foreground mt-6">
-              Weekly streak bonus fuels your ascent.
+              {t('profile.streak.note')}
             </div>
           </div>
         </div>
@@ -137,7 +139,7 @@ export default function Profile() {
 
         {/* My Artifacts */}
         <section>
-          <h2 className="text-xl font-bold mb-6">My Artifacts</h2>
+          <h2 className="text-xl font-bold mb-6">{t('profile.artifacts.title')}</h2>
           
           {artifacts.length === 0 && !loading ? (
             <motion.div
@@ -146,14 +148,14 @@ export default function Profile() {
               className="glass-card p-12 rounded-2xl text-center"
             >
               <div className="text-6xl mb-4">🎨</div>
-              <h3 className="text-xl font-bold mb-2">The void awaits your mark</h3>
+              <h3 className="text-xl font-bold mb-2">{t('profile.artifacts.emptyTitle')}</h3>
               <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                You haven't infused any artifacts yet. Channel your creative energy and leave your imprint on THE HORNY ARCHIVES.
+                {t('profile.artifacts.emptyBody')}
               </p>
               <Link to="/archives">
                 <Button variant="gradient" className="gap-2">
                   <Upload className="w-4 h-4" />
-                  INFUSE YOUR FIRST ARTIFACT
+                  {t('profile.artifacts.cta')}
                 </Button>
               </Link>
             </motion.div>

@@ -6,15 +6,17 @@ import { Button } from '@/components/ui/button';
 import { getUser, type User as UserType } from '@/lib/storage';
 import LoginModal from '@/components/modals/LoginModal';
 import { NavLink } from '../NavLink'; // Ensure this component exists or use Link directly if simple
+import { useCopy } from '@/lib/theme/copy';
 
 const LINKS = [
-  { href: "/dashboard", label: "Dashboard" },
-  { href: "/forge", label: "Forge" },
-  { href: "/gallery", label: "Gallery" },
-  { href: "/quests", label: "Quests" },
+  { href: "/dashboard", labelKey: "nav.dashboard" },
+  { href: "/forge", labelKey: "nav.forge" },
+  { href: "/gallery", labelKey: "nav.gallery" },
+  { href: "/quests", labelKey: "nav.quests" },
 ];
 
 export default function Navbar() {
+  const t = useCopy();
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [user, setUser] = useState<UserType | null>(null);
@@ -52,7 +54,7 @@ export default function Navbar() {
             {/* Logo */}
             <Link to="/" className="flex-shrink-0 flex items-center gap-2 group">
               <span className="text-xl font-black tracking-tighter text-white group-hover:text-[#FFE600] transition-colors">
-                $HORNY
+                {t('brand.wordmark')}
               </span>
             </Link>
 
@@ -66,7 +68,7 @@ export default function Navbar() {
                     isActive(link.href) ? "text-[#FFE600]" : "text-muted-foreground hover:text-white"
                   }`}
                 >
-                  {link.label}
+                  {t(link.labelKey)}
                 </Link>
               ))}
             </div>
@@ -86,7 +88,7 @@ export default function Navbar() {
                 asChild 
                 className="text-muted-foreground hover:text-[#FFE600] hover:bg-white/5"
               >
-                <Link to="/profile">Profile</Link>
+                <Link to="/profile">{t('nav.profile')}</Link>
               </Button>
               
               {!user && (
@@ -95,7 +97,7 @@ export default function Navbar() {
                   onClick={() => setShowLogin(true)}
                   className="bg-white text-black hover:bg-[#FFE600] hover:text-black font-bold border-none"
                 >
-                  Connect X
+                  {t('auth.connect')}
                 </Button>
               )}
             </div>
@@ -134,7 +136,7 @@ export default function Navbar() {
                         : "text-muted-foreground hover:text-white hover:bg-white/5"
                     }`}
                   >
-                    {link.label}
+                    {t(link.labelKey)}
                   </Link>
                 ))}
                 
@@ -145,7 +147,7 @@ export default function Navbar() {
                   onClick={() => setIsOpen(false)}
                   className="block px-4 py-3 text-lg font-medium text-muted-foreground hover:text-white"
                 >
-                  Profile
+                  {t('nav.profile')}
                 </Link>
 
                 <div className="pt-4">
@@ -162,7 +164,7 @@ export default function Navbar() {
                         setShowLogin(true);
                       }}
                     >
-                      Connect X
+                      {t('auth.connect')}
                     </Button>
                   )}
                 </div>

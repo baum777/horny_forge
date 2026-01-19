@@ -74,7 +74,8 @@ function drawText(
 export async function generateBadgeCard(
   badgeName: string,
   rarity: string,
-  description: string
+  description: string,
+  footerLabel: string
 ): Promise<string> {
   const width = 500;
   const height = 350;
@@ -116,13 +117,13 @@ export async function generateBadgeCard(
   ctx.fillText(description, width / 2, 280, width - 60);
   
   // Footer
-  drawText(ctx, '$HORNY BADGE COLLECTION', width / 2, height - 30, 14, '#888888');
+  drawText(ctx, footerLabel, width / 2, height - 30, 14, '#888888');
   
   return canvas.toDataURL('image/png');
 }
 
-// Generate Meme Card
-export async function generateMemeCard(
+// Generate Content Card
+export async function generateContentCard(
   templateId: string,
   topText: string,
   bottomText: string,

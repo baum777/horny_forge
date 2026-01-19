@@ -3,6 +3,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { PREDEFINED_TAGS, type PredefinedTag } from '@/lib/archives/types';
 import { Check } from 'lucide-react';
+import { useCopy } from '@/lib/theme/copy';
 
 interface ForgeFormProps {
   userInput: string;
@@ -13,10 +14,10 @@ interface ForgeFormProps {
   setSelectedTags: (tags: PredefinedTag[]) => void;
 }
 
-const EXAMPLES = [
-  'croisHorney bakery in space, chart brain meltdown',
-  'eichHorney hoarding candles, neon chaos',
-  'metaHorney recursion portal, absurd symbols',
+const EXAMPLE_KEYS = [
+  'generator.examples.1',
+  'generator.examples.2',
+  'generator.examples.3',
 ];
 
 export const ForgeForm: React.FC<ForgeFormProps> = ({
@@ -27,6 +28,8 @@ export const ForgeForm: React.FC<ForgeFormProps> = ({
   selectedTags,
   setSelectedTags,
 }) => {
+  const t = useCopy();
+  const examples = EXAMPLE_KEYS.map((key) => t(key));
   const toggleTag = (tag: PredefinedTag) => {
     if (selectedTags.includes(tag)) {
       setSelectedTags(selectedTags.filter((t) => t !== tag));
@@ -40,16 +43,16 @@ export const ForgeForm: React.FC<ForgeFormProps> = ({
       {/* User Input */}
       <div className="space-y-3">
         <div className="flex justify-between items-end">
-          <label className="text-sm font-semibold block">Keywords / Visual Idea</label>
+          <label className="text-sm font-semibold block">{t('generator.input.label')}</label>
           <div className="flex gap-1">
-            {EXAMPLES.map((ex, i) => (
+            {examples.map((ex, i) => (
               <button
                 key={i}
                 type="button"
                 onClick={() => setUserInput(ex)}
                 className="text-[10px] bg-muted hover:bg-muted-foreground/20 px-2 py-0.5 rounded transition-colors"
               >
-                Try ex {i + 1}
+                {t('generator.input.tryExample', { index: i + 1 })}
               </button>
             ))}
           </div>
@@ -57,23 +60,24 @@ export const ForgeForm: React.FC<ForgeFormProps> = ({
         <Textarea
           value={userInput}
           onChange={(e) => setUserInput(e.target.value)}
-          placeholder="e.g. croisHorney bakery in space, chart brain meltdown"
+          placeholder={t('generator.input.placeholder')}
           className="bg-muted min-h-[100px] resize-none border-none focus-visible:ring-1 focus-visible:ring-primary"
         />
         {userInput.length > 0 && userInput.length < 10 && (
-          <p className="text-[10px] text-yellow-500">Add 3–10 keywords for better results.</p>
+          <p className="text-[10px] text-yellow-500">{t('generator.input.hint')}</p>
         )}
       </div>
 
       {/* Caption */}
       <div className="space-y-2">
         <label className="text-sm font-semibold block">
-          Caption <span className="text-muted-foreground font-normal">(for gallery)</span>
+          {t('generator.caption.label')}{' '}
+          <span className="text-muted-foreground font-normal">({t('generator.caption.helper')})</span>
         </label>
         <Input
           value={caption}
           onChange={(e) => setCaption(e.target.value.slice(0, 140))}
-          placeholder="Describe your artifact..."
+          placeholder={t('generator.caption.placeholder')}
           className="bg-muted border-none focus-visible:ring-1 focus-visible:ring-primary"
           maxLength={140}
         />
@@ -83,7 +87,10 @@ export const ForgeForm: React.FC<ForgeFormProps> = ({
       {/* Tags */}
       <div className="space-y-2">
         <label className="text-sm font-semibold block">
-          Tags <span className="text-muted-foreground font-normal">({selectedTags.length}/3)</span>
+          {t('generator.tags.label')}{' '}
+          <span className="text-muted-foreground font-normal">
+            ({selectedTags.length}/3)
+          </span>
         </label>
         <div className="flex flex-wrap gap-2">
           {PREDEFINED_TAGS.map((tag) => {

@@ -6,20 +6,22 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { ArchivesLoginModal } from './ArchivesLoginModal';
 import { UploadArtifactModal } from './UploadArtifactModal';
+import { useCopy } from '@/lib/theme/copy';
 
 const X_COMMUNITY_URL =
   import.meta.env.NEXT_PUBLIC_X_COMMUNITY_URL ||
   import.meta.env.VITE_X_COMMUNITY_URL ||
   'https://x.com/i/communities/2009563480613949770';
 const TOKEN_SYMBOL =
-  import.meta.env.NEXT_PUBLIC_TOKEN_SYMBOL || import.meta.env.VITE_TOKEN_SYMBOL || 'HORNY';
+  import.meta.env.NEXT_PUBLIC_TOKEN_SYMBOL || import.meta.env.VITE_TOKEN_SYMBOL || 'TOKEN';
 
 const navLinks = [
-  { href: '/archives', label: 'Archives', external: false },
-  { href: X_COMMUNITY_URL, label: 'Community', external: true },
+  { href: '/archives', labelKey: 'archives.nav.archives', external: false },
+  { href: X_COMMUNITY_URL, labelKey: 'archives.nav.community', external: true },
 ];
 
 export function ArchivesNavbar() {
+  const t = useCopy();
   const location = useLocation();
   const navigate = useNavigate();
   const { archivesUser, isAuthenticated, signOut, loading } = useAuth();
@@ -71,7 +73,7 @@ export function ArchivesNavbar() {
             <Link to="/archives" className="flex items-center gap-2 group">
               <span className="text-xl font-bold text-gradient">${TOKEN_SYMBOL}</span>
               <span className="text-xs text-muted-foreground group-hover:text-foreground transition-colors hidden sm:inline">
-                ARCHIVES
+                {t('archives.nav.archives')}
               </span>
             </Link>
 
@@ -86,7 +88,7 @@ export function ArchivesNavbar() {
                     rel="noopener noreferrer"
                     className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
                   >
-                    {link.label}
+                    {t(link.labelKey)}
                     <ExternalLink className="w-3 h-3" />
                   </a>
                 ) : (
@@ -99,7 +101,7 @@ export function ArchivesNavbar() {
                         : 'text-muted-foreground hover:text-foreground'
                     }`}
                   >
-                    {link.label}
+                    {t(link.labelKey)}
                   </Link>
                 )
               ))}
@@ -114,7 +116,7 @@ export function ArchivesNavbar() {
                       : 'text-muted-foreground hover:text-foreground'
                   }`}
                 >
-                  Profile
+                  {t('archives.nav.profile')}
                 </Link>
               )}
             </div>
@@ -129,7 +131,7 @@ export function ArchivesNavbar() {
                 className="hidden sm:flex gap-2"
               >
                 <Upload className="w-4 h-4" />
-                INFUSE
+                {t('archives.nav.infuse')}
               </Button>
 
               {/* User State */}
@@ -157,7 +159,7 @@ export function ArchivesNavbar() {
                   <button
                     onClick={handleLogout}
                     className="p-2 text-muted-foreground hover:text-foreground transition-colors"
-                    title="Logout"
+                    title={t('archives.nav.logout')}
                   >
                     <LogOut className="w-4 h-4" />
                   </button>
@@ -172,7 +174,7 @@ export function ArchivesNavbar() {
                   <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
                   </svg>
-                  Login with X
+                  {t('archives.nav.login')}
                 </Button>
               )}
 
@@ -207,7 +209,7 @@ export function ArchivesNavbar() {
                       onClick={() => setIsOpen(false)}
                       className="flex items-center gap-2 py-2 text-muted-foreground"
                     >
-                      {link.label}
+                    {t(link.labelKey)}
                       <ExternalLink className="w-3 h-3" />
                     </a>
                   ) : (
@@ -221,7 +223,7 @@ export function ArchivesNavbar() {
                           : 'text-muted-foreground'
                       }`}
                     >
-                      {link.label}
+                      {t(link.labelKey)}
                     </Link>
                   )
                 ))}
@@ -233,7 +235,7 @@ export function ArchivesNavbar() {
                     className="flex items-center gap-2 py-2 text-muted-foreground"
                   >
                     <User className="w-4 h-4" />
-                    My Profile
+                    {t('archives.nav.profile')}
                   </Link>
                 )}
 
@@ -243,7 +245,7 @@ export function ArchivesNavbar() {
                   className="w-full gap-2"
                 >
                   <Upload className="w-4 h-4" />
-                  INFUSE THE ARCHIVES
+                  {t('archives.nav.infuseLong')}
                 </Button>
               </div>
             </motion.div>

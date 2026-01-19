@@ -4,18 +4,20 @@ import { motion } from 'framer-motion';
 import { Palette, Trophy } from 'lucide-react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
-import HornyMeter from '@/components/features/HornyMeter';
+import EnergyMeter from '@/components/features/EnergyMeter';
 import MetaForge from '@/components/MetaForge/MetaForge';
 import Badges from '@/components/features/Badges';
 import { addSectionVisited, unlockBadge, getVisitData } from '@/lib/storage';
 import { PageShell } from '@/components/layout/PageShell';
+import { useCopy } from '@/lib/theme/copy';
 
 const sections = [
-  { id: 'meta-forge', title: 'Meta Forge', icon: Palette, description: 'Create legendary memes with sacred bases — AI-infused.' },
-  { id: 'badges', title: 'Badge Collection', icon: Trophy, description: 'Earn and showcase your achievements' },
+  { id: 'meta-forge', titleKey: 'interact.sections.generator.title', icon: Palette, descriptionKey: 'interact.sections.generator.description' },
+  { id: 'badges', titleKey: 'interact.sections.badges.title', icon: Trophy, descriptionKey: 'interact.sections.badges.description' },
 ];
 
 export default function Interact() {
+  const t = useCopy();
   const location = useLocation();
 
   useEffect(() => {
@@ -78,10 +80,10 @@ export default function Interact() {
             className="text-center"
           >
             <h1 className="text-4xl md:text-6xl font-black mb-4">
-              <span className="text-gradient">INTERACTION HUB</span>
+              <span className="text-gradient">{t('interact.title')}</span>
             </h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Engage with the Horny Meta. Every action increases your power level.
+              {t('interact.subtitle')}
             </p>
           </motion.div>
 
@@ -99,7 +101,7 @@ export default function Interact() {
                 className="flex items-center gap-2 px-4 py-2 rounded-full bg-muted hover:bg-primary/20 transition-colors"
               >
                 <section.icon className="w-4 h-4 text-primary" />
-                <span className="text-sm font-medium">{section.title}</span>
+                <span className="text-sm font-medium">{t(section.titleKey)}</span>
               </a>
             ))}
           </motion.div>
@@ -119,8 +121,8 @@ export default function Interact() {
                   <Palette className="w-6 h-6 text-yellow-500" />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold">Meta Forge</h2>
-                  <p className="text-muted-foreground">Create legendary memes with sacred bases — AI-infused.</p>
+                  <h2 className="text-2xl font-bold">{t('interact.sections.generator.title')}</h2>
+                  <p className="text-muted-foreground">{t('interact.sections.generator.description')}</p>
                 </div>
               </div>
               <MetaForge />
@@ -139,8 +141,8 @@ export default function Interact() {
                   <Trophy className="w-6 h-6 text-purple-500" />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold">Badge Collection</h2>
-                  <p className="text-muted-foreground">Earn and showcase your achievements</p>
+                  <h2 className="text-2xl font-bold">{t('interact.sections.badges.title')}</h2>
+                  <p className="text-muted-foreground">{t('interact.sections.badges.description')}</p>
                 </div>
               </div>
               <Badges />
@@ -150,7 +152,7 @@ export default function Interact() {
       </main>
 
       <Footer />
-      <HornyMeter />
+      <EnergyMeter />
     </div>
   </PageShell>
   );

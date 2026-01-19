@@ -177,7 +177,7 @@ export function FloatingImages(props: {
       aria-hidden="true"
     >
       <style>{`
-        @keyframes horny-breathe {
+        @keyframes float-breathe {
           0%   { opacity: 0; transform: scale(var(--s0)); }
           12%  { opacity: var(--op); }
           55%  { opacity: var(--op); transform: scale(var(--s1)); }
@@ -203,7 +203,7 @@ export function FloatingImages(props: {
             opacity: 0,
             transform: `scale(${it.s0})`,
             transformOrigin: "center",
-            animation: `horny-breathe ${it.dur}ms cubic-bezier(.2,.8,.2,1) ${it.delay}ms 1 forwards`,
+            animation: `float-breathe ${it.dur}ms cubic-bezier(.2,.8,.2,1) ${it.delay}ms 1 forwards`,
           } as React.CSSProperties & Record<`--${string}`, string>}
         >
           <img

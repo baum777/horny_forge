@@ -3,6 +3,7 @@ import { Twitter, Link2, Copy, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { getShareRedirectUrl } from '@/lib/api/share';
+import { useCopy } from '@/lib/theme/copy';
 
 interface SharePanelProps {
   artifactId: string;
@@ -11,10 +12,11 @@ interface SharePanelProps {
 }
 
 export function SharePanel({ artifactId, caption, compact = false }: SharePanelProps) {
+  const t = useCopy();
   const [copied, setCopied] = useState<'link' | 'text' | null>(null);
   const artifactUrl = `${window.location.origin}/artifact/${artifactId}`;
-  const shareText = `My artifact just entered THE HORNY ARCHIVES: ${caption}`;
-  const hashtags = 'HORNY,HornyArchives';
+  const shareText = t('share.artifact', { caption });
+  const hashtags = t('share.hashtags');
 
   const resolveShareUrl = async () => {
     const redirectUrl = await getShareRedirectUrl(artifactId);
@@ -32,22 +34,26 @@ export function SharePanel({ artifactId, caption, compact = false }: SharePanelP
       const resolvedUrl = await resolveShareUrl();
       await navigator.clipboard.writeText(resolvedUrl);
       setCopied('link');
-      toast.success('Link copied!');
+      toast.success(t('share.copy.linkSuccess'));
       setTimeout(() => setCopied(null), 2000);
     } catch {
-      toast.error('Failed to copy');
+      toast.error(t('share.copy.failed'));
     }
   };
 
   const copyText = async () => {
     try {
       const resolvedUrl = await resolveShareUrl();
-      await navigator.clipboard.writeText(`${shareText} ${resolvedUrl} #HORNY #HornyArchives`);
+      const tagText = hashtags
+        .split(',')
+        .map((tag) => `#${tag.trim()}`)
+        .join(' ');
+      await navigator.clipboard.writeText(`${shareText} ${resolvedUrl} ${tagText}`.trim());
       setCopied('text');
-      toast.success('Share text copied!');
+      toast.success(t('share.copy.textSuccess'));
       setTimeout(() => setCopied(null), 2000);
     } catch {
-      toast.error('Failed to copy');
+      toast.error(t('share.copy.failed'));
     }
   };
 
@@ -75,7 +81,7 @@ export function SharePanel({ artifactId, caption, compact = false }: SharePanelP
   return (
     <div className="glass-card p-4 rounded-xl space-y-3">
       <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-        Share Artifact
+        {t('share.title')}
       </h4>
       
       <Button
@@ -83,7 +89,7 @@ export function SharePanel({ artifactId, caption, compact = false }: SharePanelP
         className="w-full bg-[#1DA1F2] hover:bg-[#1a8cd8]"
       >
         <Twitter className="w-4 h-4 mr-2" />
-        Share to X
+        {t('share.actions.shareToX')}
       </Button>
 
       <div className="flex gap-2">
@@ -93,7 +99,7 @@ export function SharePanel({ artifactId, caption, compact = false }: SharePanelP
           className="flex-1"
         >
           {copied === 'link' ? <Check className="w-4 h-4 mr-2" /> : <Link2 className="w-4 h-4 mr-2" />}
-          Copy Link
+          {t('share.actions.copyLink')}
         </Button>
         <Button
           onClick={copyText}
@@ -101,7 +107,7 @@ export function SharePanel({ artifactId, caption, compact = false }: SharePanelP
           className="flex-1"
         >
           {copied === 'text' ? <Check className="w-4 h-4 mr-2" /> : <Copy className="w-4 h-4 mr-2" />}
-          Copy Text
+          {t('share.actions.copyText')}
         </Button>
       </div>
     </div>

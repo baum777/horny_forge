@@ -2,69 +2,69 @@ export type BadgeRarity = 'Common' | 'Rare' | 'Epic';
 
 export interface BadgeDefinition {
   id: string;
-  name: string;
-  description: string;
+  nameKey: string;
+  descriptionKey: string;
   rarity: BadgeRarity;
   icon: string;
-  unlockCondition: string;
+  unlockConditionKey: string;
 }
 
 export const badgeDefinitions: BadgeDefinition[] = [
   {
     id: 'all-sections',
-    name: 'Deep Explorer',
-    description: 'Ventured through every section of the Horny Meta Universe.',
+    nameKey: 'badges.items.allSections.name',
+    descriptionKey: 'badges.items.allSections.description',
     rarity: 'Rare',
     icon: '🗺️',
-    unlockCondition: 'Visit all sections',
+    unlockConditionKey: 'badges.items.allSections.unlock',
   },
   {
-    id: 'meme-forged',
-    name: 'Meme Alchemist',
-    description: 'Forged your first meme in the legendary Meme Forge.',
+    id: 'first-generated',
+    nameKey: 'badges.items.firstGenerate.name',
+    descriptionKey: 'badges.items.firstGenerate.description',
     rarity: 'Common',
     icon: '🎨',
-    unlockCondition: 'Create a meme',
+    unlockConditionKey: 'badges.items.firstGenerate.unlock',
   },
   {
     id: 'time-spent',
-    name: 'Addicted',
-    description: 'Spent 90+ seconds in the Horny Meta. The desire is real.',
+    nameKey: 'badges.items.timeSpent.name',
+    descriptionKey: 'badges.items.timeSpent.description',
     rarity: 'Rare',
     icon: '⏰',
-    unlockCondition: 'Spend 90 seconds on site',
+    unlockConditionKey: 'badges.items.timeSpent.unlock',
   },
   {
     id: 'first-share',
-    name: 'Prophet',
-    description: 'Spread the word by sharing your first Horny content.',
+    nameKey: 'badges.items.firstShare.name',
+    descriptionKey: 'badges.items.firstShare.description',
     rarity: 'Common',
     icon: '📢',
-    unlockCondition: 'Share any content',
+    unlockConditionKey: 'badges.items.firstShare.unlock',
   },
   {
-    id: 'three-memes',
-    name: 'Meme Lord',
-    description: 'Created 3 memes in the Forge. Your creativity knows no bounds.',
+    id: 'three-generated',
+    nameKey: 'badges.items.threeGenerations.name',
+    descriptionKey: 'badges.items.threeGenerations.description',
     rarity: 'Rare',
     icon: '👑',
-    unlockCondition: 'Create 3 memes',
+    unlockConditionKey: 'badges.items.threeGenerations.unlock',
   },
   {
     id: 'fomo-armed',
-    name: 'Alert Sentinel',
-    description: 'Armed a FOMO Alert. Always watching. Always ready.',
+    nameKey: 'badges.items.alert.name',
+    descriptionKey: 'badges.items.alert.description',
     rarity: 'Common',
     icon: '🔔',
-    unlockCondition: 'Set a FOMO alert',
+    unlockConditionKey: 'badges.items.alert.unlock',
   },
   {
     id: 'full-meter',
-    name: 'Maximum Horny',
-    description: 'Reached 100% on the Horny Meter. Ultimate desire achieved.',
+    nameKey: 'badges.items.fullMeter.name',
+    descriptionKey: 'badges.items.fullMeter.description',
     rarity: 'Epic',
     icon: '🔥',
-    unlockCondition: 'Fill the Horny Meter',
+    unlockConditionKey: 'badges.items.fullMeter.unlock',
   },
 ];
 

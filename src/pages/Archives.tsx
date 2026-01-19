@@ -9,8 +9,10 @@ import { useArtifacts } from '@/hooks/useArtifacts';
 import Footer from '@/components/layout/Footer';
 import type { SortOption } from '@/lib/archives/types';
 import { PageShell } from '@/components/layout/PageShell';
+import { useCopy } from '@/lib/theme/copy';
 
 export default function Archives() {
+  const t = useCopy();
   const [sort, setSort] = useState<SortOption>('newest');
   const [search, setSearch] = useState('');
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
@@ -53,7 +55,7 @@ export default function Archives() {
               animate={{ opacity: 1, y: 0 }}
               className="text-4xl md:text-6xl font-bold mb-4"
             >
-              <span className="text-gradient">THE HORNY ARCHIVES</span>
+              <span className="text-gradient">{t('gallery.title')}</span>
             </motion.h1>
             <motion.p
               initial={{ opacity: 0, y: 20 }}
@@ -61,7 +63,7 @@ export default function Archives() {
               transition={{ delay: 0.1 }}
               className="text-lg text-muted-foreground max-w-lg mx-auto"
             >
-              A living record of collective desire. Infuse. Vote. Ascend.
+              {t('gallery.subtitle')}
             </motion.p>
           </div>
         </section>
@@ -90,7 +92,7 @@ export default function Archives() {
                 animate={{ opacity: 1 }}
                 className="text-center py-8"
               >
-                <p className="text-destructive">The Archives resist. Retry your query.</p>
+                <p className="text-destructive">{t('gallery.error')}</p>
               </motion.div>
             )}
 

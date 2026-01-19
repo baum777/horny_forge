@@ -12,8 +12,8 @@ export type BadgeId =
 
 export type BadgeDefinition = {
   badge_id: BadgeId;
-  name: string;
-  description: string;
+  nameKey: string;
+  descriptionKey: string;
   visual_type: string;
   rarity: 'common' | 'rare' | 'epic';
 };
@@ -21,71 +21,71 @@ export type BadgeDefinition = {
 export const BADGE_DEFINITIONS: BadgeDefinition[] = [
   {
     badge_id: 'SIGIL_FIRST_INFUSION',
-    name: 'First Infusion',
-    description: 'Forged your first artifact in the Meta Forge.',
+    nameKey: 'profile.badges.sigils.firstInfusion.name',
+    descriptionKey: 'profile.badges.sigils.firstInfusion.description',
     visual_type: 'sigil',
     rarity: 'common',
   },
   {
     badge_id: 'SIGIL_FIRST_RELEASE',
-    name: 'First Release',
-    description: 'Released your first artifact into the Archives.',
+    nameKey: 'profile.badges.sigils.firstRelease.name',
+    descriptionKey: 'profile.badges.sigils.firstRelease.description',
     visual_type: 'sigil',
     rarity: 'common',
   },
   {
     badge_id: 'SIGIL_FIRST_VOTE',
-    name: 'First Vote',
-    description: 'Cast your first vote of desire.',
+    nameKey: 'profile.badges.sigils.firstVote.name',
+    descriptionKey: 'profile.badges.sigils.firstVote.description',
     visual_type: 'sigil',
     rarity: 'common',
   },
   {
     badge_id: 'STAMP_TREND_SPARK',
-    name: 'Trend Spark',
-    description: 'An artifact reached 10 votes.',
+    nameKey: 'profile.badges.stamps.trendSpark.name',
+    descriptionKey: 'profile.badges.stamps.trendSpark.description',
     visual_type: 'stamp',
     rarity: 'rare',
   },
   {
     badge_id: 'STAMP_FEED_DOMINATOR',
-    name: 'Feed Dominator',
-    description: 'An artifact reached 25 votes.',
+    nameKey: 'profile.badges.stamps.feedDominator.name',
+    descriptionKey: 'profile.badges.stamps.feedDominator.description',
     visual_type: 'stamp',
     rarity: 'epic',
   },
   {
     badge_id: 'FRAGMENT_RETURN_2D',
-    name: 'Return Fragment',
-    description: 'Returned to the Archives two days in a row.',
+    nameKey: 'profile.badges.fragments.return2d.name',
+    descriptionKey: 'profile.badges.fragments.return2d.description',
     visual_type: 'fragment',
     rarity: 'common',
   },
   {
     badge_id: 'FRAGMENT_RETURN_7D',
-    name: 'Return Relic',
-    description: 'Maintained a seven-day return streak.',
+    nameKey: 'profile.badges.fragments.return7d.name',
+    descriptionKey: 'profile.badges.fragments.return7d.description',
     visual_type: 'fragment',
     rarity: 'rare',
   },
   {
     badge_id: 'OBJECT_CROISHORNEY',
-    name: 'CroisHorney Object',
-    description: 'Used #CroisHorney three times on releases.',
+    nameKey: 'profile.badges.objects.objectOne.name',
+    descriptionKey: 'profile.badges.objects.objectOne.description',
     visual_type: 'object',
     rarity: 'common',
   },
   {
     badge_id: 'OBJECT_EICHHORNEY',
-    name: 'EichHorney Object',
-    description: 'Used #EichHorney three times on releases.',
+    nameKey: 'profile.badges.objects.objectTwo.name',
+    descriptionKey: 'profile.badges.objects.objectTwo.description',
     visual_type: 'object',
     rarity: 'common',
   },
   {
     badge_id: 'OBJECT_BRAINHORNEY',
-    name: 'BrainHorney Object',
-    description: 'Used #BrainHorney three times on releases.',
+    nameKey: 'profile.badges.objects.objectThree.name',
+    descriptionKey: 'profile.badges.objects.objectThree.description',
     visual_type: 'object',
     rarity: 'common',
   },

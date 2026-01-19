@@ -306,7 +306,7 @@ export class QuestService {
       throw new Error('Failed to load user stats');
     }
 
-    return data?.level ?? 1;
+    return (data as { level: number } | null)?.level ?? 1;
   }
 
   private async getUserClaims(userId: string, weekId: string): Promise<Set<number>> {
@@ -333,7 +333,7 @@ export class QuestService {
       throw new Error('Failed to load quest tiers');
     }
 
-    return data ?? [];
+    return (data ?? []) as { tier: number; slots_remaining: number }[];
   }
 
   private async ensureWeekTiers(context: WeekContext): Promise<void> {
@@ -369,7 +369,7 @@ export class QuestService {
       throw new Error('Failed to load preview metrics');
     }
 
-    const generateCount = previewCount ?? 0;
+    const generateCount = (previewCount ?? 0) as number;
 
     const { data: artifacts, error: artifactsError } = await this.supabase
       .from('artifacts')
@@ -382,17 +382,20 @@ export class QuestService {
       throw new Error('Failed to load artifacts for quest metrics');
     }
 
-    const publishCount = artifacts?.length ?? 0;
-    const ratingCounts = (artifacts ?? []).map((row) => row.rating_count ?? 0);
-    const avgRatings = (artifacts ?? []).map((row) => row.avg_rating ?? 0);
-    const reportCounts = (artifacts ?? []).map((row) => row.report_count ?? 0);
-    const hiddenCount = (artifacts ?? []).filter((row) => row.hidden).length;
+    // Cast artifacts to any[] to avoid strict type checks on never[]
+    const safeArtifacts = (artifacts ?? []) as any[];
+
+    const publishCount = safeArtifacts.length ?? 0;
+    const ratingCounts = safeArtifacts.map((row) => row.rating_count ?? 0);
+    const avgRatings = safeArtifacts.map((row) => row.avg_rating ?? 0);
+    const reportCounts = safeArtifacts.map((row) => row.report_count ?? 0);
+    const hiddenCount = safeArtifacts.filter((row) => row.hidden).length;
     const bestRatingCount = ratingCounts.length ? Math.max(...ratingCounts) : 0;
     const bestAvgRating = avgRatings.length ? Math.max(...avgRatings) : 0;
     const maxReportCount = reportCounts.length ? Math.max(...reportCounts) : 0;
 
     const matrixFlags = new Set<string>();
-    for (const artifact of artifacts ?? []) {
+    for (const artifact of safeArtifacts) {
       const meta = artifact.matrix_meta as { flags?: string[] } | null;
       if (meta?.flags && Array.isArray(meta.flags)) {
         for (const flag of meta.flags) matrixFlags.add(flag);
@@ -404,7 +407,7 @@ export class QuestService {
       rating_count: 25,
       report_count_max: 3,
     };
-    const aceEligibleCount = (artifacts ?? []).filter((artifact) => {
+    const aceEligibleCount = safeArtifacts.filter((artifact) => {
       const avg = artifact.avg_rating ?? 0;
       const count = artifact.rating_count ?? 0;
       const reports = artifact.report_count ?? 0;
@@ -433,7 +436,7 @@ export class QuestService {
       weekStart,
       weekEnd,
       config,
-      artifacts: artifacts ?? [],
+      artifacts: safeArtifacts,
     });
 
     return {
@@ -464,8 +467,9 @@ export class QuestService {
       throw new Error('Failed to load weekly totals');
     }
 
-    const totalClaimed = (claims ?? []).reduce((sum, row) => sum + (row.reward_amount ?? 0), 0);
-    const totalBoosted = (claims ?? []).reduce((sum, row) => sum + (row.boost_amount ?? 0), 0);
+    const safeClaims = (claims ?? []) as { reward_amount: number; boost_amount: number }[];
+    const totalClaimed = safeClaims.reduce((sum, row) => sum + (row.reward_amount ?? 0), 0);
+    const totalBoosted = safeClaims.reduce((sum, row) => sum + (row.boost_amount ?? 0), 0);
     return { totalClaimed, totalBoosted };
   }
 

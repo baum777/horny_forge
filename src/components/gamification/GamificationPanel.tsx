@@ -6,6 +6,8 @@ import { LevelChip } from "./LevelChip";
 import { VisibilityChip } from "./VisibilityChip";
 import { BadgeGrid } from "./BadgeGrid";
 import { LEVEL_CURVE } from "../../gamification/incentives";
+import { ALL_BADGES } from "../../badges/unifiedBadges";
+import { useCopy } from "@/lib/theme/copy";
 
 function nextLevelTarget(level: number) {
   const idx = LEVEL_CURVE.findIndex((r) => r.level === level);
@@ -14,17 +16,22 @@ function nextLevelTarget(level: number) {
 }
 
 export function GamificationPanel() {
+  const t = useCopy();
   const { stats, lastResult, loading, error, run } = useGamificationAction();
+  const badgeNameById = (id: string) => {
+    const badge = ALL_BADGES.find((entry) => entry.id === id);
+    return badge ? t(badge.nameKey) : id;
+  };
 
   if (!stats) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Progress</CardTitle>
+          <CardTitle>{t("gamification.progress.title")}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-sm opacity-70">
-            No stats loaded yet. Ensure server is running on http://localhost:3001.
+            {t("gamification.progress.empty")}
           </div>
           {error && <div className="text-sm text-red-500 mt-2">{error}</div>}
           <Button
@@ -32,7 +39,7 @@ export function GamificationPanel() {
             disabled={loading}
             onClick={() => run("vote", { artifactId: "a1", clientNonce: crypto.randomUUID() })}
           >
-            Trigger Action (Vote)
+            {t("gamification.progress.trigger")}
           </Button>
         </CardContent>
       </Card>
@@ -46,7 +53,7 @@ export function GamificationPanel() {
     <div className="grid gap-4">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between gap-3">
-          <CardTitle>Progress</CardTitle>
+          <CardTitle>{t("gamification.progress.title")}</CardTitle>
           <div className="flex items-center gap-2">
             <LevelChip level={stats.level} />
             <VisibilityChip tier={lastResult?.tier ?? "private"} />
@@ -58,12 +65,16 @@ export function GamificationPanel() {
 
           <div className="grid gap-2">
             <div className="text-sm opacity-70">
-              Lifetime earned <span className="font-semibold">$HORNY</span>:{" "}
+              {t("gamification.progress.lifetimeLabel")}{" "}
               <span className="font-semibold">{stats.lifetimeHornyEarned}</span>
             </div>
             <Progress value={pct} />
             <div className="text-xs opacity-60">
-              Next level target: {target} (daily: {stats.dailyHornyEarned} / weekly: {stats.weeklyHornyEarned})
+              {t("gamification.progress.nextTarget", {
+                target,
+                daily: stats.dailyHornyEarned,
+                weekly: stats.weeklyHornyEarned,
+              })}
             </div>
           </div>
 
@@ -71,15 +82,15 @@ export function GamificationPanel() {
             <div className="rounded-xl border p-3 text-sm">
               <div className="flex flex-wrap gap-x-6 gap-y-2">
                 <div>
-                  <span className="opacity-70">Δ $HORNY:</span>{" "}
+                  <span className="opacity-70">{t("gamification.result.delta")} </span>
                   <span className="font-semibold">{lastResult.deltaHorny}</span>
                 </div>
                 <div>
-                  <span className="opacity-70">Feed weight:</span>{" "}
+                  <span className="opacity-70">{t("gamification.result.feedWeight")} </span>
                   <span className="font-semibold">{lastResult.visibilityBoost.feedWeight.toFixed(2)}</span>
                 </div>
                 <div>
-                  <span className="opacity-70">Features:</span>{" "}
+                  <span className="opacity-70">{t("gamification.result.features")} </span>
                   <span className="font-semibold">
                     {lastResult.visibilityBoost.features.length ? lastResult.visibilityBoost.features.join(", ") : "—"}
                   </span>
@@ -89,10 +100,14 @@ export function GamificationPanel() {
               {(lastResult.newlyUnlockedBadges.length > 0 || lastResult.newlyUnlockedFeatures.length > 0) && (
                 <div className="mt-3 text-xs opacity-70">
                   {lastResult.newlyUnlockedBadges.length > 0 && (
-                    <div>New badges: {lastResult.newlyUnlockedBadges.join(", ")}</div>
+                    <div>
+                      {t("gamification.result.newBadges", {
+                        list: lastResult.newlyUnlockedBadges.map(badgeNameById).join(", "),
+                      })}
+                    </div>
                   )}
                   {lastResult.newlyUnlockedFeatures.length > 0 && (
-                    <div>New unlocks: {lastResult.newlyUnlockedFeatures.join(", ")}</div>
+                    <div>{t("gamification.result.newUnlocks", { list: lastResult.newlyUnlockedFeatures.join(", ") })}</div>
                   )}
                 </div>
               )}
@@ -101,16 +116,16 @@ export function GamificationPanel() {
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
             <Button disabled={loading} onClick={() => run("vote", { artifactId: "a1", clientNonce: crypto.randomUUID() })}>
-              Vote
+              {t("gamification.actions.vote")}
             </Button>
             <Button disabled={loading} onClick={() => run("comment", { artifactId: "a1", clientNonce: crypto.randomUUID() })}>
-              Comment
+              {t("gamification.actions.comment")}
             </Button>
             <Button disabled={loading} onClick={() => run("forge", { clientNonce: crypto.randomUUID() })}>
-              Forge
+              {t("gamification.actions.generate")}
             </Button>
             <Button disabled={loading} onClick={() => run("artifact_release", { artifactId: "a1", clientNonce: crypto.randomUUID() })}>
-              Release
+              {t("gamification.actions.release")}
             </Button>
 
             <Button
@@ -118,14 +133,14 @@ export function GamificationPanel() {
               variant="secondary"
               onClick={() => run("votes_received", { artifactId: "a1", receivedVotesDelta: 12, clientNonce: crypto.randomUUID() })}
             >
-              +12 Votes Received
+              {t("gamification.actions.votesReceived", { count: 12 })}
             </Button>
             <Button
               disabled={loading}
               variant="secondary"
               onClick={() => run("time_spent", { timeDeltaSeconds: 180, clientNonce: crypto.randomUUID() })}
             >
-              +180s Time
+              {t("gamification.actions.time", { seconds: 180 })}
             </Button>
             <Button
               disabled={loading}
@@ -137,7 +152,7 @@ export function GamificationPanel() {
                 })
               }
             >
-              Share
+              {t("gamification.actions.share")}
             </Button>
           </div>
         </CardContent>
@@ -147,11 +162,11 @@ export function GamificationPanel() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Unlocked Features</CardTitle>
+          <CardTitle>{t("gamification.features.title")}</CardTitle>
         </CardHeader>
         <CardContent>
           {stats.unlockedFeatures.length === 0 ? (
-            <div className="text-sm opacity-70">No unlocks yet.</div>
+            <div className="text-sm opacity-70">{t("gamification.features.empty")}</div>
           ) : (
             <div className="flex flex-wrap gap-2">
               {stats.unlockedFeatures.map((u) => (

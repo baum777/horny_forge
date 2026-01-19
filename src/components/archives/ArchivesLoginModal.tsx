@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
+import { useCopy } from '@/lib/theme/copy';
 
 interface ArchivesLoginModalProps {
   isOpen: boolean;
@@ -11,6 +12,7 @@ interface ArchivesLoginModalProps {
 }
 
 export function ArchivesLoginModal({ isOpen, onClose, onSuccess }: ArchivesLoginModalProps) {
+  const t = useCopy();
   const { signInWithTwitter } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -21,13 +23,13 @@ export function ArchivesLoginModal({ isOpen, onClose, onSuccess }: ArchivesLogin
     try {
       const { error: authError } = await signInWithTwitter();
       if (authError) {
-        setError('Failed to connect with X. Please try again.');
+        setError(t('auth.errors.connectFailed'));
         console.error(authError);
       } else {
         onSuccess?.();
       }
     } catch (err) {
-      setError('Failed to connect with X. Please try again.');
+      setError(t('auth.errors.connectFailed'));
       console.error('X login error:', err);
     } finally {
       setLoading(false);
@@ -62,10 +64,10 @@ export function ArchivesLoginModal({ isOpen, onClose, onSuccess }: ArchivesLogin
               <div className="text-center mb-8">
                 <div className="text-5xl mb-4">🔥</div>
                 <h2 className="text-2xl font-bold text-gradient mb-2">
-                  ENTER THE ARCHIVES
+                  {t('auth.modal.title')}
                 </h2>
                 <p className="text-muted-foreground text-sm">
-                  Connect your X account to infuse artifacts and channel your desire.
+                  {t('auth.modal.subtitle')}
                 </p>
               </div>
 
@@ -87,15 +89,15 @@ export function ArchivesLoginModal({ isOpen, onClose, onSuccess }: ArchivesLogin
                     <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
                   </svg>
                 )}
-                {loading ? 'Connecting...' : 'Continue with X'}
+                {loading ? t('auth.modal.connecting') : t('auth.modal.cta')}
               </Button>
 
               <p className="text-xs text-muted-foreground text-center mt-6">
-                By continuing, you accept our{' '}
+                {t('auth.modal.termsPrefix')}{' '}
                 <a href="/legal" className="text-primary hover:underline">
-                  terms
+                  {t('auth.modal.termsLink')}
                 </a>{' '}
-                and acknowledge the void.
+                {t('auth.modal.termsSuffix')}
               </p>
             </div>
           </motion.div>

@@ -15,8 +15,10 @@ import { useGamification } from '@/hooks/useGamification';
 import { postGamificationEvent } from '@/lib/api/event';
 import { isBaseUnlocked, isPresetUnlocked } from 'lib/gamification/eventProcessor';
 import { clientGamificationEnabled } from '@/lib/gamificationFlags';
+import { useCopy } from '@/lib/theme/copy';
 
 export default function MetaForge() {
+  const t = useCopy();
   const { archivesUser, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const { stats } = useGamification(archivesUser?.id);
@@ -53,15 +55,15 @@ export default function MetaForge() {
 
   const handleInfuse = async () => {
     if (!selectedBase) {
-      toast.error('Select a base image first.');
+      toast.error(t('generator.errors.baseRequired'));
       return;
     }
     if (!userInput.trim()) {
-      toast.error('Add some keywords or a visual idea.');
+      toast.error(t('generator.errors.promptRequired'));
       return;
     }
     if (userInput.trim().length < 3) {
-      toast.error('Input too short. Add more keywords.');
+      toast.error(t('generator.errors.promptTooShort'));
       return;
     }
 
@@ -78,7 +80,7 @@ export default function MetaForge() {
         user_input: userInput,
       });
       setGeneratedResult(result);
-      toast.success('Artifact stabilized.');
+      toast.success(t('generator.success.generated'));
       if (isAuthenticated) {
         void postGamificationEvent({
           event_id: crypto.randomUUID(),
@@ -88,7 +90,8 @@ export default function MetaForge() {
     } catch (error: unknown) {
       console.error('Forge error:', error);
       const errorObj = error && typeof error === 'object' && 'code' in error ? error as { code?: string; error?: string } : null;
-      const errorMessage = errorObj?.error || (error instanceof Error ? error.message : 'Artifact unstable. Retry.');
+      const errorMessage =
+        errorObj?.error || (error instanceof Error ? error.message : t('generator.errors.generic'));
       toast.error(errorMessage);
     } finally {
       setIsGenerating(false);
@@ -98,11 +101,11 @@ export default function MetaForge() {
   const handleRelease = async () => {
     if (!generatedResult) return;
     if (!isAuthenticated || !archivesUser) {
-      toast.error('Login required to release artifacts.');
+      toast.error(t('generator.errors.loginRequired'));
       return;
     }
     if (selectedTags.length === 0) {
-      toast.error('Select at least 1 tag.');
+      toast.error(t('generator.errors.tagsRequired'));
       return;
     }
 
@@ -111,12 +114,12 @@ export default function MetaForge() {
     try {
       const releaseResponse = await releaseArtifact({
         generation_id: generatedResult.generation_id,
-        caption: caption.trim() || 'Untitled Artifact',
+        caption: caption.trim() || t('generator.release.defaultCaption'),
         tags: selectedTags,
       });
 
       setReleasedId(releaseResponse.artifact_id);
-      toast.success('Artifact released to THE ARCHIVES.');
+      toast.success(t('generator.success.released'));
       void postGamificationEvent({
         event_id: crypto.randomUUID(),
         type: 'artifact_release',
@@ -132,9 +135,9 @@ export default function MetaForge() {
       const errorObj = error && typeof error === 'object' && 'code' in error ? error as { code?: string; error?: string } : null;
       if (errorObj?.code === 'OFF_BRAND' || errorObj?.error === 'off_brand') {
         setReleaseError(error as ReleaseError);
-        toast.error('Off-brand artifact. Try again using the suggested base.');
+        toast.error(t('generator.errors.offBrand'));
       } else {
-        toast.error('Failed to release artifact. Try again.');
+        toast.error(t('generator.errors.releaseFailed'));
       }
     } finally {
       setIsReleasing(false);
@@ -146,7 +149,7 @@ export default function MetaForge() {
     const url =
       (await getShareRedirectUrl(releasedId)) ?? `${window.location.origin}/archives/${releasedId}`;
     openXShare({
-      text: `Just forged a legendary artifact in THE HORNY ARCHIVES! ${caption}`,
+      text: t('generator.share.text', { caption }),
       url: url,
     });
   };
@@ -155,10 +158,10 @@ export default function MetaForge() {
     <div className="max-w-6xl mx-auto px-4 py-8">
       <div className="text-center mb-10">
         <h1 className="text-4xl md:text-5xl font-black italic tracking-tighter text-gradient mb-3">
-          META FORGE
+          {t('generator.title')}
         </h1>
         <p className="text-muted-foreground max-w-lg mx-auto">
-          Create legendary memes with sacred bases — AI-infused.
+          {t('generator.subtitle')}
         </p>
       </div>
 
@@ -194,10 +197,10 @@ export default function MetaForge() {
               onClick={handleInfuse}
               disabled={isGenerating || isReleasing}
             >
-              {isGenerating ? 'INFUSING...' : 'INFUSE (AI FORGE)'}
+              {isGenerating ? t('generator.actions.infusing') : t('generator.actions.infuse')}
             </Button>
             <p className="text-[10px] text-center text-muted-foreground mt-3 uppercase tracking-widest">
-              Consumption of $HORNY might occur
+              {t('generator.notice')}
             </p>
           </div>
         </div>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { apiGet } from "@/lib/api";
 import { PageShell } from "@/components/layout/PageShell";
+import { useCopy } from "@/lib/theme/copy";
 
 type ActionsDTO = {
   user: { status: "anonymous" | "verified" | "cooldown" | "rate_limited" };
@@ -39,6 +40,7 @@ function Card({ title, children }: { title: string; children: React.ReactNode })
 }
 
 export default function ActionsPage() {
+  const t = useCopy();
   const [data, setData] = useState<ActionsDTO | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -97,21 +99,21 @@ export default function ActionsPage() {
     >
       <div style={{ minHeight: "100vh", padding: 24, maxWidth: 1100, margin: "0 auto" }}>
       <header style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 18 }}>
-        <h2 style={{ fontSize: 28, margin: 0 }}>Actions</h2>
-        <div style={{ fontSize: 13, opacity: 0.75 }}>Quest board · state-driven</div>
+        <h2 style={{ fontSize: 28, margin: 0 }}>{t('actions.page.title')}</h2>
+        <div style={{ fontSize: 13, opacity: 0.75 }}>{t('actions.page.subtitle')}</div>
       </header>
 
       {loading && (
-        <Card title="Loading">
-          <div style={{ opacity: 0.8 }}>Fetching actions…</div>
+        <Card title={t('common.loading')}>
+          <div style={{ opacity: 0.8 }}>{t('actions.loadingBody')}</div>
         </Card>
       )}
 
       {!loading && err && (
-        <Card title="Error">
+        <Card title={t('common.error')}>
           <div style={{ marginBottom: 10 }}>{err}</div>
           <button onClick={() => location.reload()} style={{ padding: "10px 12px", borderRadius: 12 }}>
-            Retry
+            {t('common.retry')}
           </button>
         </Card>
       )}
@@ -119,7 +121,7 @@ export default function ActionsPage() {
       {!loading && !err && data && (
         <div style={{ display: "grid", gap: 16 }}>
           {data.system.notices.length > 0 && (
-            <Card title="Notices">
+            <Card title={t('actions.notices')}>
               <div style={{ display: "grid", gap: 8 }}>
                 {data.system.notices.map((n) => (
                   <div key={n.id} style={{ padding: 10, borderRadius: 12, background: "rgba(255,255,255,0.06)" }}>
@@ -131,7 +133,7 @@ export default function ActionsPage() {
             </Card>
           )}
 
-          <Card title="Available Now">
+          <Card title={t('actions.available')}>
             <div style={{ display: "grid", gap: 10 }}>
               {data.actions
                 .filter((a) => a.state === "available")
@@ -139,12 +141,12 @@ export default function ActionsPage() {
                   <ActionRow key={a.id} a={a} onRun={runCta} />
                 ))}
               {data.actions.filter((a) => a.state === "available").length === 0 && (
-                <div style={{ opacity: 0.8 }}>Nothing available right now.</div>
+                <div style={{ opacity: 0.8 }}>{t('actions.availableEmpty')}</div>
               )}
             </div>
           </Card>
 
-          <Card title="Cooldown / Locked">
+          <Card title={t('actions.locked')}>
             <div style={{ display: "grid", gap: 10 }}>
               {data.actions
                 .filter((a) => a.state !== "available")
@@ -152,7 +154,7 @@ export default function ActionsPage() {
                   <ActionRow key={a.id} a={a} onRun={runCta} />
                 ))}
               {data.actions.filter((a) => a.state !== "available").length === 0 && (
-                <div style={{ opacity: 0.8 }}>All clear.</div>
+                <div style={{ opacity: 0.8 }}>{t('actions.lockedEmpty')}</div>
               )}
             </div>
           </Card>
@@ -170,13 +172,14 @@ function ActionRow({
   a: ActionsDTO["actions"][number];
   onRun: (cta: ActionsDTO["actions"][number]["cta"]) => Promise<void> | void;
 }) {
+  const t = useCopy();
   const disabled =
     a.cta.type === "disabled" || a.state === "locked" || a.state === "cooldown" || a.state === "completed";
 
   const meta =
     a.state === "cooldown" && a.cooldownEndsAt
-      ? `Cooldown until ${new Date(a.cooldownEndsAt).toLocaleString()}`
-      : a.state.toUpperCase();
+      ? t('actions.cooldownUntil', { date: new Date(a.cooldownEndsAt).toLocaleString() })
+      : t(`actions.state.${a.state}`);
 
   return (
     <div
@@ -192,7 +195,7 @@ function ActionRow({
           <div style={{ fontSize: 15 }}>{a.title}</div>
           <div style={{ fontSize: 13, opacity: 0.75 }}>{a.description}</div>
           <div style={{ fontSize: 12, opacity: 0.65, marginTop: 6 }}>
-            {a.rewardHint ? `Reward: ${a.rewardHint}` : "Reward: —"} · {meta}
+            {a.rewardHint ? t('actions.reward', { reward: a.rewardHint }) : t('actions.rewardEmpty')} · {meta}
             {a.progress ? ` · ${a.progress.current}/${a.progress.target}` : ""}
           </div>
         </div>

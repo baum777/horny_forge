@@ -4,6 +4,7 @@ import { X, Twitter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { setUser, type User } from '@/lib/storage';
+import { useCopy } from '@/lib/theme/copy';
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -12,6 +13,7 @@ interface LoginModalProps {
 }
 
 export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalProps) {
+  const t = useCopy();
   const [handle, setHandle] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -58,7 +60,7 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
               <button
                 onClick={onClose}
                 className="absolute right-4 top-4 p-1 rounded-full hover:bg-muted transition-colors"
-                aria-label="Close"
+                aria-label={t('common.close')}
               >
                 <X className="w-5 h-5" />
               </button>
@@ -68,25 +70,25 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
                 <div className="mx-auto w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center mb-4">
                   <Twitter className="w-8 h-8 text-primary" />
                 </div>
-                <h2 className="text-2xl font-bold">Login with X</h2>
+                <h2 className="text-2xl font-bold">{t('login.title')}</h2>
                 <p className="text-sm text-muted-foreground mt-2">
-                  Join the Horny Meta Universe
+                  {t('login.subtitle')}
                 </p>
               </div>
 
               {/* MVP Notice */}
               <div className="mb-6 p-3 rounded-lg bg-accent/10 border border-accent/30">
                 <p className="text-xs text-center text-accent">
-                  ⚠️ MVP Demo: Enter any handle to simulate login. Real X OAuth coming soon.
+                  {t('login.notice')}
                 </p>
               </div>
 
               {/* Form */}
               <div className="space-y-4">
                 <div>
-                  <label className="text-sm font-medium mb-2 block">Your X Handle</label>
+                  <label className="text-sm font-medium mb-2 block">{t('login.handleLabel')}</label>
                   <Input
-                    placeholder="@yourhandle"
+                    placeholder={t('login.handlePlaceholder')}
                     value={handle}
                     onChange={(e) => setHandle(e.target.value)}
                     className="bg-muted border-border"
@@ -99,18 +101,18 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
                   onClick={handleMockLogin}
                   disabled={!handle.trim() || isLoading}
                 >
-                  {isLoading ? 'Entering the Meta...' : 'ENTER THE HORNY META'}
+                  {isLoading ? t('login.loading') : t('login.cta')}
                 </Button>
 
                 <p className="text-xs text-center text-muted-foreground">
-                  By logging in, you accept that you're horny for gains and ready for the meta.
+                  {t('login.legal')}
                 </p>
               </div>
 
               {/* Future integration note */}
               <div className="mt-6 pt-4 border-t border-border">
                 <p className="text-xs text-muted-foreground text-center">
-                  🔌 Integration point: Replace with real X OAuth flow
+                  {t('login.integrationNote')}
                 </p>
               </div>
             </div>

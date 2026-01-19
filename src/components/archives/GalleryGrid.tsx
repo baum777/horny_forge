@@ -3,7 +3,7 @@ import { Loader2 } from 'lucide-react';
 import { ArtifactCard } from './ArtifactCard';
 import { Button } from '@/components/ui/button';
 import type { Artifact } from '@/lib/archives/types';
-import { copyContent } from '@/lib/content';
+import { useCopy } from '@/lib/theme/copy';
 
 interface GalleryGridProps {
   artifacts: Artifact[];
@@ -20,6 +20,7 @@ export function GalleryGrid({
   onLoadMore,
   onRequiresAuth,
 }: GalleryGridProps) {
+  const t = useCopy();
   if (!loading && artifacts.length === 0) {
     return (
       <motion.div
@@ -28,9 +29,9 @@ export function GalleryGrid({
         className="text-center py-20"
       >
         <div className="text-6xl mb-4">🔮</div>
-        <h3 className="text-xl font-bold mb-2">Voting Gallery is quiet.</h3>
-        <p className="text-muted-foreground mb-1">{copyContent.gallery.emptyStates.hot}</p>
-        <p className="text-muted-foreground">{copyContent.gallery.emptyStates.new}</p>
+        <h3 className="text-xl font-bold mb-2">{t('gallery.empty.title')}</h3>
+        <p className="text-muted-foreground mb-1">{t('gallery.empty.hot')}</p>
+        <p className="text-muted-foreground">{t('gallery.empty.new')}</p>
       </motion.div>
     );
   }
@@ -78,7 +79,7 @@ export function GalleryGrid({
             variant="outline"
             size="lg"
           >
-            Uncover More Artifacts
+            {t('gallery.loadMore')}
           </Button>
         </div>
       )}

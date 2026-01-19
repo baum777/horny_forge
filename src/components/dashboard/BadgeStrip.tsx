@@ -1,7 +1,9 @@
 import { Progress } from "@/components/ui/progress";
 import type { DashboardDTO } from "./types";
+import { useCopy } from "@/lib/theme/copy";
 
 const BadgeStrip = ({ badges }: { badges: DashboardDTO["badges"] }) => {
+  const t = useCopy();
   const earned = badges?.earned?.slice(0, 3) ?? [];
   const locked = badges?.locked?.slice(0, 3) ?? [];
 
@@ -9,15 +11,15 @@ const BadgeStrip = ({ badges }: { badges: DashboardDTO["badges"] }) => {
     <div className="glass-card p-6 rounded-2xl">
       <div className="flex flex-col gap-6">
         <div>
-          <h2 className="text-xl font-bold">Badges Preview</h2>
-          <p className="text-sm text-muted-foreground">Track your latest unlocks and what is next.</p>
+          <h2 className="text-xl font-bold">{t('dashboard.badges.title')}</h2>
+          <p className="text-sm text-muted-foreground">{t('dashboard.badges.subtitle')}</p>
         </div>
 
         <div className="grid gap-6 lg:grid-cols-2">
           <div>
-            <p className="text-xs uppercase tracking-widest text-muted-foreground mb-3">Latest earned</p>
+            <p className="text-xs uppercase tracking-widest text-muted-foreground mb-3">{t('dashboard.badges.latest')}</p>
             {earned.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No badges earned yet.</p>
+              <p className="text-sm text-muted-foreground">{t('dashboard.badges.emptyEarned')}</p>
             ) : (
               <div className="space-y-3">
                 {earned.map((badge) => (
@@ -27,7 +29,9 @@ const BadgeStrip = ({ badges }: { badges: DashboardDTO["badges"] }) => {
                     </div>
                     <div>
                       <p className="text-sm font-medium">{badge.name}</p>
-                      <p className="text-xs text-muted-foreground">Earned {badge.earnedAt}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {t('dashboard.badges.earnedAt', { date: badge.earnedAt })}
+                      </p>
                     </div>
                   </div>
                 ))}
@@ -36,9 +40,9 @@ const BadgeStrip = ({ badges }: { badges: DashboardDTO["badges"] }) => {
           </div>
 
           <div>
-            <p className="text-xs uppercase tracking-widest text-muted-foreground mb-3">Locked</p>
+            <p className="text-xs uppercase tracking-widest text-muted-foreground mb-3">{t('dashboard.badges.locked')}</p>
             {locked.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No locked badges right now.</p>
+              <p className="text-sm text-muted-foreground">{t('dashboard.badges.emptyLocked')}</p>
             ) : (
               <div className="space-y-3">
                 {locked.map((badge) => {
@@ -63,7 +67,7 @@ const BadgeStrip = ({ badges }: { badges: DashboardDTO["badges"] }) => {
                             <Progress value={progress} className="h-2" />
                           </div>
                         ) : (
-                          <p className="text-xs text-muted-foreground">Locked</p>
+                          <p className="text-xs text-muted-foreground">{t('dashboard.badges.lockedLabel')}</p>
                         )}
                       </div>
                     </div>

@@ -29,11 +29,31 @@ export const config = {
   baseImages: {
     path: process.env.BASE_IMAGES_PATH || './server/public/horny_base',
   },
+  themes: {
+    defaultThemeId: process.env.DEFAULT_THEME_ID || 'default',
+    baseUrl: process.env.THEME_BASE_URL || '/themes',
+    hostnameMap: parseHostnameMap(process.env.THEME_HOSTNAME_MAP),
+  },
 };
 
 type RequiredEnvOptions = {
   allowMissingOpenAi?: boolean;
 };
+
+function parseHostnameMap(value?: string): Record<string, string> {
+  if (!value) return {};
+  try {
+    const parsed = JSON.parse(value) as Record<string, unknown>;
+    return Object.entries(parsed).reduce<Record<string, string>>((acc, [key, val]) => {
+      if (typeof val === 'string') {
+        acc[key] = val;
+      }
+      return acc;
+    }, {});
+  } catch {
+    return {};
+  }
+}
 
 function resolveTokenIdentifier() {
   return (

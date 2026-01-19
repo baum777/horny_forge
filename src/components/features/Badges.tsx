@@ -6,13 +6,20 @@ import { GlassCard } from '@/components/ui/glass-card';
 import { badgeDefinitions, getRarityColor, getRarityBorderColor, type BadgeDefinition } from '@/content/badgeDefinitions';
 import { getBadges, unlockBadge } from '@/lib/storage';
 import { generateBadgeCard, downloadImage } from '@/lib/canvasCard';
-import { openXShare, copyToClipboard, getBadgeShareText, getShareUrl } from '@/lib/share';
+import { openXShare, copyToClipboard, getShareUrl } from '@/lib/share';
 import { toast } from 'sonner';
+import { useCopy } from '@/lib/theme/copy';
 
 export default function Badges() {
+  const t = useCopy();
   const [unlockedBadges, setUnlockedBadges] = useState<Record<string, { unlockedAt: string | null }>>({});
   const [selectedBadge, setSelectedBadge] = useState<BadgeDefinition | null>(null);
   const [copied, setCopied] = useState(false);
+
+  const legacyBadgeIds: Record<string, string> = {
+    'first-generated': 'meme-forged',
+    'three-generated': 'three-memes',
+  };
 
   useEffect(() => {
     setUnlockedBadges(getBadges());
@@ -26,7 +33,9 @@ export default function Badges() {
   }, []);
 
   const isUnlocked = (badgeId: string) => {
-    return !!unlockedBadges[badgeId]?.unlockedAt;
+    if (unlockedBadges[badgeId]?.unlockedAt) return true;
+    const legacyId = legacyBadgeIds[badgeId];
+    return Boolean(legacyId && unlockedBadges[legacyId]?.unlockedAt);
   };
 
   const unlockedCount = badgeDefinitions.filter(b => isUnlocked(b.id)).length;
@@ -37,28 +46,39 @@ export default function Badges() {
     
     unlockBadge('first-share');
     openXShare({
-      text: getBadgeShareText(badge.name, badge.rarity),
+      text: t('share.badge', {
+        badge: t(badge.nameKey),
+        rarity: t(`badges.rarity.${badge.rarity.toLowerCase()}`),
+      }),
       url: getShareUrl('/interact#badges'),
     });
   };
 
   const handleCopy = async (badge: BadgeDefinition) => {
-    const shareText = `${getBadgeShareText(badge.name, badge.rarity)}\n${getShareUrl('/interact#badges')}`;
+    const shareText = `${t('share.badge', {
+      badge: t(badge.nameKey),
+      rarity: t(`badges.rarity.${badge.rarity.toLowerCase()}`),
+    })}\n${getShareUrl('/interact#badges')}`;
     const success = await copyToClipboard(shareText);
     if (success) {
       setCopied(true);
-      toast.success('Copied!');
+      toast.success(t('badges.toast.copied'));
       setTimeout(() => setCopied(false), 2000);
     }
   };
 
   const handleDownload = async (badge: BadgeDefinition) => {
     try {
-      const imageData = await generateBadgeCard(badge.name, badge.rarity, badge.description);
+      const imageData = await generateBadgeCard(
+        t(badge.nameKey),
+        t(`badges.rarity.${badge.rarity.toLowerCase()}`),
+        t(badge.descriptionKey),
+        t('badges.card.footer')
+      );
       downloadImage(imageData, `badge-${badge.id}.png`);
-      toast.success('Badge card downloaded!');
+      toast.success(t('badges.toast.downloaded'));
     } catch {
-      toast.error('Failed to generate badge card');
+      toast.error(t('badges.toast.downloadFailed'));
     }
   };
 
@@ -68,9 +88,9 @@ export default function Badges() {
       <GlassCard className="p-6">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h3 className="text-lg font-bold">Badge Collection</h3>
+            <h3 className="text-lg font-bold">{t('badges.title')}</h3>
             <p className="text-sm text-muted-foreground">
-              {unlockedCount} of {badgeDefinitions.length} unlocked
+              {t('badges.progress', { unlocked: unlockedCount, total: badgeDefinitions.length })}
             </p>
           </div>
           <div className="text-3xl font-black text-gradient">
@@ -81,7 +101,7 @@ export default function Badges() {
           <motion.div
             initial={{ width: 0 }}
             animate={{ width: `${progress}%` }}
-            className="h-full bg-gradient-horny"
+            className="h-full bg-gradient-brand"
           />
         </div>
       </GlassCard>
@@ -121,9 +141,9 @@ export default function Badges() {
                   {/* Badge content */}
                   <div className="text-center">
                     <span className="text-4xl block mb-2">{badge.icon}</span>
-                    <h4 className="font-bold text-sm mb-1">{badge.name}</h4>
+                    <h4 className="font-bold text-sm mb-1">{t(badge.nameKey)}</h4>
                     <span className={`text-xs font-medium ${getRarityColor(badge.rarity)}`}>
-                      {badge.rarity}
+                      {t(`badges.rarity.${badge.rarity.toLowerCase()}`)}
                     </span>
                   </div>
                 </GlassCard>
@@ -151,28 +171,28 @@ export default function Badges() {
           >
             <GlassCard variant="neon" className="text-center">
               <span className="text-6xl block mb-4">{selectedBadge.icon}</span>
-              <h3 className="text-2xl font-bold mb-2">{selectedBadge.name}</h3>
+              <h3 className="text-2xl font-bold mb-2">{t(selectedBadge.nameKey)}</h3>
               <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${getRarityColor(selectedBadge.rarity)} bg-current/10 mb-4`}>
-                {selectedBadge.rarity}
+                {t(`badges.rarity.${selectedBadge.rarity.toLowerCase()}`)}
               </span>
-              <p className="text-muted-foreground mb-6">{selectedBadge.description}</p>
+              <p className="text-muted-foreground mb-6">{t(selectedBadge.descriptionKey)}</p>
 
               <div className="space-y-3">
                 <Button variant="gradient" className="w-full" onClick={() => handleShare(selectedBadge)}>
                   <Share2 className="w-4 h-4 mr-2" />
-                  Share Badge
+                  {t('badges.actions.share')}
                 </Button>
                 <div className="flex gap-2">
                   <Button variant="outline" className="flex-1" onClick={() => handleCopy(selectedBadge)}>
                     {copied ? <Check className="w-4 h-4 mr-2" /> : <Copy className="w-4 h-4 mr-2" />}
-                    Copy
+                    {t('badges.actions.copy')}
                   </Button>
                   <Button variant="outline" className="flex-1" onClick={() => handleDownload(selectedBadge)}>
-                    Download
+                    {t('badges.actions.download')}
                   </Button>
                 </div>
                 <Button variant="ghost" className="w-full" onClick={() => setSelectedBadge(null)}>
-                  Close
+                  {t('common.close')}
                 </Button>
               </div>
             </GlassCard>
@@ -182,7 +202,7 @@ export default function Badges() {
 
       {/* How to unlock */}
       <GlassCard className="p-6">
-        <h3 className="text-lg font-bold mb-4">How to Unlock</h3>
+        <h3 className="text-lg font-bold mb-4">{t('badges.unlockTitle')}</h3>
         <div className="grid sm:grid-cols-2 gap-4">
           {badgeDefinitions.map((badge) => (
             <div
@@ -193,8 +213,8 @@ export default function Badges() {
             >
               <span className="text-2xl">{badge.icon}</span>
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-sm truncate">{badge.name}</p>
-                <p className="text-xs text-muted-foreground">{badge.unlockCondition}</p>
+                <p className="font-medium text-sm truncate">{t(badge.nameKey)}</p>
+                <p className="text-xs text-muted-foreground">{t(badge.unlockConditionKey)}</p>
               </div>
               {isUnlocked(badge.id) && (
                 <Check className="w-5 h-5 text-primary flex-shrink-0" />

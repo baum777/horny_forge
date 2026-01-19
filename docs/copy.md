@@ -1,20 +1,20 @@
-# Horny Final Copy & Content (Page Content v1)
+# Brand Final Copy & Content (Page Content v1)
 
 ## 1. Landing Page
 
 ### Hero
 Headline:
-$Horny
+$Brand
 
 Subline:
-Create → remix → compete inside the $HORNY universe,
-the Playground to channel the $Horny Energie to Memes
+Create → remix → compete inside the $TOKEN universe,
+the Playground to channel the $Brand Energie to Content items
 
 Primary CTA:
 Start Forging
 
 Secondary CTA:
-proof how $horny u are - Horny Runner
+proof how $brand u are - Brand Runner
 
 Trust Microcopy:
 No wallet required · Free to play · Community driven
@@ -23,7 +23,7 @@ No wallet required · Free to play · Community driven
 
 ### How it works
 1. Create  
-Generate and remix memes using the Horny Forge.
+Generate and remix content items using the Brand Forge.
 
 2. Play  
 Compete in Cyber Runner to earn XP and status.
@@ -36,11 +36,11 @@ Climb leaderboards and unlock badges.
 ## 2. Game Page – Cyber Runner
 
 Title:
-$Horny RUNNER
+$Brand RUNNER
 
 Pre-Game State:
 Initialize Protocol  
-$Horny enough to enter ?
+$Brand enough to enter ?
 
 Instructions:
 Space / Tap to jump
@@ -99,16 +99,16 @@ Session expired. Please refresh the page.
 * **No draft selected**: “Open a draft from My Gallery to continue.”
 
 ### My Gallery
-* **Drafts empty**: “No drafts yet. Forge your first meme.”
+* **Drafts empty**: “No drafts yet. Forge your first content.”
 * **Published empty**: “Nothing published yet. Publish when it feels ready.”
-* **Hidden empty**: “No hidden memes. Keep it clean.”
+* **Hidden empty**: “No hidden content items. Keep it clean.”
 
 ### Voting Gallery
 * **Hot empty**: “Hot is warming up. Check New.”
-* **New empty**: “No new memes yet. Be the first to publish.”
+* **New empty**: “No new content items yet. Be the first to publish.”
 
-### Meme Detail
-* **Meme removed**: “This meme is no longer available.”
+### Content Detail
+* **Content removed**: “This content is no longer available.”
 
 ### Weekly Quests
 * **All tiers locked**: “Reach Level {X} to unlock Weekly Quests.”
@@ -134,16 +134,16 @@ Session expired. Please refresh the page.
 ### Publish
 * **Publish limit reached**: “You’ve used today’s free publishes. Publishing now costs XP.”
 * **Not enough XP**: “Not enough XP. Vote or forge to earn more.”
-* **Publish blocked**: “This meme can’t be published right now.”
+* **Publish blocked**: “This content can’t be published right now.”
 
 ### Voting
 * **Vote failed**: “Rating failed. Try again.”
 * **Edit window expired**: “Rating locked. You can’t edit this anymore.”
-* **Already rated**: “You already rated this meme.”
+* **Already rated**: “You already rated this content.”
 
 ### Reports / Moderation
 * **Report submitted**: “Report received. Thanks.”
-* **Auto-hidden** (owner): “This meme is hidden due to reports. Rewards linked to it are paused.”
+* **Auto-hidden** (owner): “This content is hidden due to reports. Rewards linked to it are paused.”
 * **Frozen**: “Rewards are paused during review.”
 
 ### Quests / Claims
@@ -158,35 +158,35 @@ Session expired. Please refresh the page.
 
 ## 6. X Share Auto-Texts (Generator / Remix / Wins)
 
-> Regeln: immer `$HORNY`, keine Wallet-Worte, kurz, variabel, memeable.
+> Regeln: immer `$TOKEN`, keine Wallet-Worte, kurz, variabel, shareable.
 
 ### A) Publish Share (optional)
-1. “Forged this in the Horny Forge 🦄 $HORNY”
-2. “New drop. Rate it if you dare. $HORNY”
-3. “Low effort? Never. $HORNY”
+1. “Forged this in the Brand Forge 🦄 $TOKEN”
+2. “New drop. Rate it if you dare. $TOKEN”
+3. “Low effort? Never. $TOKEN”
 
 ### B) Remix Mode Share (valid)
-1. “Limit reached → Remix mode. Still posting. $HORNY”
-2. “No new gens. Still cooking. $HORNY”
-3. “Remixed, not generated. Stay $HORNY”
+1. “Limit reached → Remix mode. Still posting. $TOKEN”
+2. “No new gens. Still cooking. $TOKEN”
+3. “Remixed, not generated. Stay $TOKEN”
 
 ### C) Quest Claim / Weekly Win
-1. “Claimed a weekly reward. First come, first served. $HORNY”
-2. “Won my tier this week. See you next round. $HORNY”
-3. “Speed + taste = rewards. $HORNY”
+1. “Claimed a weekly reward. First come, first served. $TOKEN”
+2. “Won my tier this week. See you next round. $TOKEN”
+3. “Speed + taste = rewards. $TOKEN”
 
 ### D) Badge Earn (Status-only)
-1. “Unlocked a new status badge. Keep it $HORNY”
-2. “New overlay, same energy. $HORNY”
-3. “Status updated. Meme harder. $HORNY”
+1. “Unlocked a new status badge. Keep it $TOKEN”
+2. “New overlay, same energy. $TOKEN”
+3. “Status updated. Content harder. $TOKEN”
 
 ---
 
 ## 7. Short Marketing Variant (Landing-only, minimal)
 
 ### Headline Options
-* “Forge memes. Compete weekly. $HORNY”
-* “A meme forge with real stakes.”
+* “Forge content items. Compete weekly. $TOKEN”
+* “A content forge with real stakes.”
 * “Quality wins. Spam loses.”
 
 ### Subline Options
@@ -207,10 +207,10 @@ Session expired. Please refresh the page.
 
 ### Game Page (Teaser State)
 **Title:**
-$Horny RUNNER
+$Brand RUNNER
 
 **Subtitle:**
-$Horny Runner unlocking soon
+$Brand Runner unlocking soon
 
 **System Message:**
 System Initializing
@@ -246,7 +246,7 @@ Drafts. Published. Hidden.
 
 ### Badges Page (Locked State)
 **Title:**
-Coming Soon — stay $Horny
+Coming Soon — stay $Brand
 
 **Subtitle:**
 Badges show who you are — not what you earned.
@@ -268,16 +268,16 @@ Badges show who you are — not what you earned.
 ### Footer
 
 **Brand:**
-$HORNY
+$TOKEN
 
 **Tagline:**
-The Horny Meta Universe. Where desire meets gains.
+The Brand Meta Universe. Where desire meets gains.
 
 **Microcopy:**
 No wallets required. Badges are status. Rewards are earned weekly.
 
 **Copyright:**
-© {year} $HORNY. Not financial advice. DYOR. NFA.
+© {year} $TOKEN. Not financial advice. DYOR. NFA.
 
 **Social Links:**
 * X (Twitter)

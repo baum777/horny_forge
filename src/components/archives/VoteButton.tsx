@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { Heart } from 'lucide-react';
 import { useVote } from '@/hooks/useVote';
 import { cn } from '@/lib/utils';
+import { useCopy } from '@/lib/theme/copy';
 
 interface VoteButtonProps {
   artifactId: string;
@@ -16,6 +17,7 @@ export function VoteButton({
   onRequiresAuth,
   size = 'md' 
 }: VoteButtonProps) {
+  const t = useCopy();
   const { hasVoted, votesCount, toggleVote, loading } = useVote({
     artifactId,
     initialVotesCount,
@@ -68,7 +70,7 @@ export function VoteButton({
         />
       </motion.div>
       <span className="font-bold">{votesCount}</span>
-      <span className="hidden sm:inline">HORNY</span>
+      <span className="hidden sm:inline">{t('votes.label')}</span>
     </motion.button>
   );
 }

@@ -11,17 +11,41 @@ export type UnlockCondition =
 
 export type UnifiedBadge = {
   id: string;
-  name: string;
-  description: string;
+  nameKey: string;
+  descriptionKey: string;
   emoji?: string;
   unlockCondition: UnlockCondition;
 };
 
 export const ALL_BADGES: UnifiedBadge[] = [
-  { id: "HORN_SPARK", name: "Horn Spark", description: "First vote.", emoji: "⚡", unlockCondition: { type: "action_count", action: "vote", count: 1 } },
-  { id: "FIRST_PUMP", name: "First Pump", description: "First release.", emoji: "📈", unlockCondition: { type: "action_count", action: "artifact_release", count: 1 } },
-  { id: "FIRST_COMMENT", name: "First Words", description: "First comment.", emoji: "💬", unlockCondition: { type: "action_count", action: "comment", count: 1 } },
-  { id: "SHARE_SPARK", name: "Share Spark", description: "First share.", emoji: "📢", unlockCondition: { type: "action_count", action: "share", count: 1 } },
+  {
+    id: "HORN_SPARK",
+    nameKey: "gamification.badges.spark.name",
+    descriptionKey: "gamification.badges.spark.description",
+    emoji: "⚡",
+    unlockCondition: { type: "action_count", action: "vote", count: 1 },
+  },
+  {
+    id: "FIRST_PUMP",
+    nameKey: "gamification.badges.firstRelease.name",
+    descriptionKey: "gamification.badges.firstRelease.description",
+    emoji: "📈",
+    unlockCondition: { type: "action_count", action: "artifact_release", count: 1 },
+  },
+  {
+    id: "FIRST_COMMENT",
+    nameKey: "gamification.badges.firstComment.name",
+    descriptionKey: "gamification.badges.firstComment.description",
+    emoji: "💬",
+    unlockCondition: { type: "action_count", action: "comment", count: 1 },
+  },
+  {
+    id: "SHARE_SPARK",
+    nameKey: "gamification.badges.firstShare.name",
+    descriptionKey: "gamification.badges.firstShare.description",
+    emoji: "📢",
+    unlockCondition: { type: "action_count", action: "share", count: 1 },
+  },
 ];
 
 export function checkUnlockCondition(condition: UnlockCondition, stats: UserStats): boolean {

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { apiGet } from "@/lib/api";
 import { PageShell } from "@/components/layout/PageShell";
+import { useCopy } from "@/lib/theme/copy";
 
 type StatusDTO = {
   overall: "ok" | "degraded" | "down";
@@ -47,6 +48,7 @@ function Dot({ status }: { status: "ok" | "degraded" | "down" }) {
 }
 
 export default function StatusPage() {
+  const t = useCopy();
   const [data, setData] = useState<StatusDTO | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -81,21 +83,23 @@ export default function StatusPage() {
     >
       <div style={{ minHeight: "100vh", padding: 24, maxWidth: 1100, margin: "0 auto" }}>
       <header style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 18 }}>
-        <h2 style={{ fontSize: 28, margin: 0 }}>Status</h2>
-        <div style={{ fontSize: 13, opacity: 0.75 }}>{data ? `checked ${new Date(data.checkedAt).toLocaleString()}` : ""}</div>
+        <h2 style={{ fontSize: 28, margin: 0 }}>{t('status.title')}</h2>
+        <div style={{ fontSize: 13, opacity: 0.75 }}>
+          {data ? t('status.checkedAt', { date: new Date(data.checkedAt).toLocaleString() }) : ""}
+        </div>
       </header>
 
       {loading && (
-        <Card title="Loading">
-          <div style={{ opacity: 0.8 }}>Checking system…</div>
+        <Card title={t('common.loading')}>
+          <div style={{ opacity: 0.8 }}>{t('status.loadingBody')}</div>
         </Card>
       )}
 
       {!loading && err && (
-        <Card title="Error">
+        <Card title={t('common.error')}>
           <div style={{ marginBottom: 10 }}>{err}</div>
           <button onClick={() => location.reload()} style={{ padding: "10px 12px", borderRadius: 12 }}>
-            Retry
+            {t('common.retry')}
           </button>
         </Card>
       )}
@@ -103,7 +107,7 @@ export default function StatusPage() {
       {!loading && !err && data && (
         <div style={{ display: "grid", gap: 16 }}>
           {data.system.notices.length > 0 && (
-            <Card title="Notices">
+            <Card title={t('status.notices')}>
               <div style={{ display: "grid", gap: 8 }}>
                 {data.system.notices.map((n) => (
                   <div key={n.id} style={{ padding: 10, borderRadius: 12, background: "rgba(255,255,255,0.06)" }}>
@@ -115,16 +119,16 @@ export default function StatusPage() {
             </Card>
           )}
 
-          <Card title="Overall">
+          <Card title={t('status.overall')}>
             <div style={{ display: "flex", alignItems: "center" }}>
               <Dot status={data.overall === "ok" ? "ok" : data.overall === "degraded" ? "degraded" : "down"} />
               <div style={{ fontSize: 18 }}>
-                <b>{data.overall.toUpperCase()}</b>
+                <b>{t(`status.state.${data.overall}`)}</b>
               </div>
             </div>
           </Card>
 
-          <Card title="Services">
+          <Card title={t('status.services')}>
             <div style={{ display: "grid", gap: 10 }}>
               {data.services.map((s) => (
                 <div
@@ -146,7 +150,7 @@ export default function StatusPage() {
                     </div>
                     <div style={{ fontSize: 12, opacity: 0.75, marginLeft: 18 }}>
                       {s.message ?? "—"}
-                      {s.lastOkAt ? ` · last ok ${new Date(s.lastOkAt).toLocaleString()}` : ""}
+                      {s.lastOkAt ? ` · ${t('status.lastOk', { date: new Date(s.lastOkAt).toLocaleString() })}` : ""}
                     </div>
                   </div>
                   <div style={{ fontSize: 12, opacity: 0.75, whiteSpace: "nowrap" }}>
@@ -157,16 +161,16 @@ export default function StatusPage() {
             </div>
           </Card>
 
-          <Card title="Config (safe subset)">
+          <Card title={t('status.config')}>
             <div style={{ display: "grid", gap: 10 }}>
-              <Row label="Env" value={data.config.env ?? "—"} />
-              <Row label="Token" value={data.config.tokenSymbol ?? "—"} />
-              <Row label="Frontend URL" value={data.config.frontendUrl ?? "—"} />
+              <Row label={t('status.env')} value={data.config.env ?? "—"} />
+              <Row label={t('status.token')} value={data.config.tokenSymbol ?? "—"} />
+              <Row label={t('status.frontendUrl')} value={data.config.frontendUrl ?? "—"} />
 
-              <div style={{ fontSize: 13, opacity: 0.8, marginTop: 6 }}>Feature flags</div>
+              <div style={{ fontSize: 13, opacity: 0.8, marginTop: 6 }}>{t('status.features')}</div>
               <div style={{ display: "grid", gap: 8 }}>
                 {Object.entries(data.config.features).map(([k, v]) => (
-                  <Row key={k} label={k} value={v ? "ON" : "OFF"} />
+                  <Row key={k} label={k} value={v ? t('status.on') : t('status.off')} />
                 ))}
               </div>
             </div>

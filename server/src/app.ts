@@ -5,6 +5,7 @@ import { config } from './config';
 import type { ForgeController } from './controllers/ForgeController';
 import { authMiddleware as defaultAuthMiddleware, requireAuth as defaultRequireAuth, type AuthenticatedRequest } from './middleware/auth';
 import { forgeRateLimit } from './middleware/rateLimit';
+import { themeResolver } from './middleware/theme';
 import createEventRouter from './routes/event';
 import createOgRouter from './routes/og';
 import { createShareRouters } from './routes/share';
@@ -16,10 +17,11 @@ import actionsRouter from './routes/actionsRouter';
 import badgesRouter from './routes/badgesRouter';
 import rewardsRouter from './routes/rewardsRouter';
 import statusRouter from './routes/statusRouter';
-import { memePoolRouter } from './routes/memePool';
-import createMemesRouter from './routes/memes';
+import { assetPoolRouter } from './routes/assetPool';
+import createContentItemsRouter from './routes/contentItems';
 import createGalleryRouter from './routes/galleryRouter';
 import createQuestsRouter from './routes/questsRouter';
+import themeRouter from './routes/theme';
 
 type AppDependencies = {
   forgeController?: ForgeController;
@@ -55,6 +57,7 @@ export async function createApp(deps: AppDependencies = {}) {
   app.set('trust proxy', true);
 
   // Auth middleware (optional, allows anonymous)
+  app.use(themeResolver);
   app.use(authMiddleware);
 
   // Health check
@@ -62,11 +65,14 @@ export async function createApp(deps: AppDependencies = {}) {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
   });
 
+  app.use('/themes', themeRouter);
+  app.use('/themes', express.static(path.join(process.cwd(), 'themes')));
+
   // API Routes
   app.post('/api/forge', requireAuth, forgeRateLimit, (req, res) => forgeController.forge(req as AuthenticatedRequest, res));
   app.post('/api/forge/preview', requireAuth, forgeRateLimit, (req, res) => forgeController.forge(req as AuthenticatedRequest, res));
   app.post('/api/forge/release', requireAuth, forgeRateLimit, (req, res) => forgeController.release(req as AuthenticatedRequest, res));
-  app.use('/api', memePoolRouter);
+  app.use('/api', assetPoolRouter);
   app.use('/api', eventRouter);
   app.use('/api', shareRouters.shareApiRouter);
   app.use('/api', tokenStatsRouter);
@@ -77,7 +83,7 @@ export async function createApp(deps: AppDependencies = {}) {
   app.use('/api', statusRouter);
   app.use('/api', galleryRouter);
   app.use('/api', questsRouter);
-  app.use('/api', createMemesRouter(deps.supabaseAdmin));
+  app.use('/api', createContentItemsRouter(deps.supabaseAdmin));
   app.use('/api/gamification', gamificationRouter);
   app.use('/api/admin', adminRouter);
   app.use('/', ogRouter);

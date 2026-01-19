@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { BASE_IMAGE_UNLOCKS, isBaseUnlocked } from 'lib/gamification/eventProcessor';
+import { useCopy } from '@/lib/theme/copy';
 
 export type BaseSelection = {
   id: string;
@@ -26,6 +27,7 @@ const labelFromPath = (value: string): string => {
 };
 
 export const BasePicker: React.FC<BasePickerProps> = ({ selectedBase, onSelect, userLevel }) => {
+  const t = useCopy();
   const [options, setOptions] = useState<BaseSelection[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -33,7 +35,7 @@ export const BasePicker: React.FC<BasePickerProps> = ({ selectedBase, onSelect, 
     let active = true;
     setLoading(true);
 
-    fetch('/api/meme-pool')
+    fetch('/api/asset-pool')
       .then((res) => res.json())
       .then((data) => {
         if (!active) return;
@@ -80,7 +82,7 @@ export const BasePicker: React.FC<BasePickerProps> = ({ selectedBase, onSelect, 
 
   return (
     <div className="space-y-3">
-      <label className="text-sm font-semibold block">Choose Base</label>
+      <label className="text-sm font-semibold block">{t('generator.basePicker.label')}</label>
       <select
         className="w-full rounded-lg border border-white/10 bg-muted/40 px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400/70"
         disabled={loading || options.length === 0}
@@ -92,12 +94,16 @@ export const BasePicker: React.FC<BasePickerProps> = ({ selectedBase, onSelect, 
           }
         }}
       >
-        {loading && <option>Loading...</option>}
-        {!loading && options.length === 0 && <option>No base images found</option>}
+        {loading && <option>{t('common.loading')}</option>}
+        {!loading && options.length === 0 && <option>{t('generator.basePicker.empty')}</option>}
         {options.map((option) => (
           <option key={option.image} value={option.image} disabled={option.locked}>
             {option.label}
-            {option.locked && option.unlockLevel ? ` (unlock at lvl ${option.unlockLevel})` : option.locked ? ' (locked)' : ''}
+            {option.locked && option.unlockLevel
+              ? ` (${t('generator.basePicker.unlockAt', { level: option.unlockLevel })})`
+              : option.locked
+                ? ` (${t('generator.basePicker.locked')})`
+                : ''}
           </option>
         ))}
       </select>

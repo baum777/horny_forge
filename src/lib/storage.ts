@@ -2,10 +2,18 @@
 import { clientGamificationEnabled } from '@/lib/gamificationFlags';
 
 const STORAGE_KEYS = {
+  USER: 'app_user',
+  BADGES: 'app_badges',
+  CONTENT_ITEMS: 'app_content_items',
+  ENERGY_METER: 'app_energy_meter',
+  VISIT_DATA: 'app_visit_data',
+} as const;
+
+const LEGACY_STORAGE_KEYS = {
   USER: 'horny_user',
   BADGES: 'horny_badges',
-  MEMES: 'horny_memes',
-  HORNY_METER: 'horny_meter',
+  CONTENT_ITEMS: 'horny_memes',
+  ENERGY_METER: 'horny_meter',
   VISIT_DATA: 'horny_visit_data',
 } as const;
 
@@ -20,7 +28,7 @@ export interface Badge {
   unlockedAt: string | null;
 }
 
-export interface Meme {
+export interface ContentItem {
   id: string;
   templateId: string;
   topText: string;
@@ -47,6 +55,17 @@ function getItem<T>(key: string): T | null {
   }
 }
 
+function getItemWithLegacy<T>(key: string, legacyKey?: string): T | null {
+  const current = getItem<T>(key);
+  if (current !== null) return current;
+  if (!legacyKey) return null;
+  const legacy = getItem<T>(legacyKey);
+  if (legacy !== null) {
+    setItem(key, legacy);
+  }
+  return legacy;
+}
+
 function setItem<T>(key: string, value: T): void {
   try {
     localStorage.setItem(key, JSON.stringify(value));
@@ -64,13 +83,15 @@ function removeItem(key: string): void {
 }
 
 // User
-export const getUser = () => getItem<User>(STORAGE_KEYS.USER);
+export const getUser = () => getItemWithLegacy<User>(STORAGE_KEYS.USER, LEGACY_STORAGE_KEYS.USER);
 export const setUser = (user: User) => setItem(STORAGE_KEYS.USER, user);
 export const clearUser = () => removeItem(STORAGE_KEYS.USER);
 
 // Badges
 export const getBadges = () =>
-  clientGamificationEnabled ? getItem<Record<string, Badge>>(STORAGE_KEYS.BADGES) || {} : {};
+  clientGamificationEnabled
+    ? getItemWithLegacy<Record<string, Badge>>(STORAGE_KEYS.BADGES, LEGACY_STORAGE_KEYS.BADGES) || {}
+    : {};
 export const setBadges = (badges: Record<string, Badge>) => {
   if (!clientGamificationEnabled) return;
   setItem(STORAGE_KEYS.BADGES, badges);
@@ -86,32 +107,35 @@ export const unlockBadge = (id: string) => {
   return false;
 };
 
-// Memes
-export const getMemes = () => getItem<Meme[]>(STORAGE_KEYS.MEMES) || [];
-export const addMeme = (meme: Meme) => {
-  const memes = getMemes();
-  memes.unshift(meme);
+// Content Items
+export const getContentItems = () =>
+  getItemWithLegacy<ContentItem[]>(STORAGE_KEYS.CONTENT_ITEMS, LEGACY_STORAGE_KEYS.CONTENT_ITEMS) || [];
+export const addContentItem = (item: ContentItem) => {
+  const items = getContentItems();
+  items.unshift(item);
   // Keep only last 12
-  setItem(STORAGE_KEYS.MEMES, memes.slice(0, 12));
+  setItem(STORAGE_KEYS.CONTENT_ITEMS, items.slice(0, 12));
 };
 
-// Horny Meter
-export const getHornyMeter = () =>
-  clientGamificationEnabled ? getItem<number>(STORAGE_KEYS.HORNY_METER) || 0 : 0;
-export const setHornyMeter = (value: number) => {
+// Energy Meter
+export const getEnergyMeter = () =>
+  clientGamificationEnabled
+    ? getItemWithLegacy<number>(STORAGE_KEYS.ENERGY_METER, LEGACY_STORAGE_KEYS.ENERGY_METER) || 0
+    : 0;
+export const setEnergyMeter = (value: number) => {
   if (!clientGamificationEnabled) return;
-  setItem(STORAGE_KEYS.HORNY_METER, Math.min(100, Math.max(0, value)));
+  setItem(STORAGE_KEYS.ENERGY_METER, Math.min(100, Math.max(0, value)));
 };
-export const addToHornyMeter = (amount: number) => {
+export const addToEnergyMeter = (amount: number) => {
   if (!clientGamificationEnabled) return 0;
-  const current = getHornyMeter();
-  setHornyMeter(current + amount);
+  const current = getEnergyMeter();
+  setEnergyMeter(current + amount);
   return Math.min(100, current + amount);
 };
 
 // Visit Data
 export const getVisitData = (): VisitData => {
-  const data = getItem<VisitData>(STORAGE_KEYS.VISIT_DATA);
+  const data = getItemWithLegacy<VisitData>(STORAGE_KEYS.VISIT_DATA, LEGACY_STORAGE_KEYS.VISIT_DATA);
   return data || {
     firstVisit: new Date().toISOString(),
     totalTime: 0,

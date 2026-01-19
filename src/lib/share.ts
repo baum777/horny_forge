@@ -1,7 +1,7 @@
 // X (Twitter) sharing utilities
 
-const HASHTAGS = ['HORNY', 'HornyMeta', 'Memecoin', 'Crypto'];
-const SITE_URL = 'https://hornymeta.io'; // Placeholder
+const HASHTAGS = ['Blueprint', 'Template'];
+const SITE_URL = 'https://example.com'; // Placeholder
 
 export interface ShareContent {
   text: string;
@@ -50,16 +50,6 @@ export async function copyToClipboard(text: string): Promise<boolean> {
       return false;
     }
   }
-}
-
-// Badge share text
-export function getBadgeShareText(badgeName: string, rarity: string): string {
-  return `🏆 I just unlocked the "${badgeName}" badge (${rarity}) in the Horny Meta Universe!\n\nClaim your badges:`;
-}
-
-// Meme share text
-export function getMemeShareText(): string {
-  return `🎨 I just forged this beauty in the Horny Meme Lab!\n\nCreate yours:`;
 }
 
 // Generic share URL builder

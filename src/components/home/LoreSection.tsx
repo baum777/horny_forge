@@ -1,31 +1,33 @@
 import { motion } from 'framer-motion';
 import { GlassCard, GlassCardHeader, GlassCardTitle, GlassCardContent } from '@/components/ui/glass-card';
+import { useCopy } from '@/lib/theme/copy';
 
 const loreChapters = [
   {
     id: 1,
-    title: 'The Awakening',
+    titleKey: 'home.lore.chapters.1.title',
     icon: '🌅',
-    description: 'In the void of endless charts, a signal emerged. Not of logic, but of pure, unfiltered desire. The first holders felt it—a pull toward something greater than mere profit.',
+    descriptionKey: 'home.lore.chapters.1.description',
     color: 'from-pink-500/20 to-transparent',
   },
   {
     id: 2,
-    title: 'The Infection',
+    titleKey: 'home.lore.chapters.2.title',
     icon: '🧬',
-    description: 'It spread through timelines and group chats. Every red candle only made the desire stronger. The weak sold. The true believers ascended. The meta was forming.',
+    descriptionKey: 'home.lore.chapters.2.description',
     color: 'from-red-500/20 to-transparent',
   },
   {
     id: 3,
-    title: 'The Parabolic',
+    titleKey: 'home.lore.chapters.3.title',
     icon: '🚀',
-    description: 'When the chart went vertical, time stopped. Those who understood knew: this was never about the money. It was about becoming one with the Horny Meta.',
+    descriptionKey: 'home.lore.chapters.3.description',
     color: 'from-yellow-500/20 to-transparent',
   },
 ];
 
 export default function LoreSection() {
+  const t = useCopy();
   return (
     <section id="lore" className="py-24 relative">
       <div className="max-w-6xl mx-auto px-4">
@@ -37,10 +39,10 @@ export default function LoreSection() {
           className="text-center mb-16"
         >
           <h2 className="text-3xl md:text-5xl font-black mb-4">
-            The <span className="text-gradient">Sacred Lore</span>
+            {t('home.lore.titlePrefix')} <span className="text-gradient">{t('home.lore.titleAccent')}</span>
           </h2>
           <p className="text-muted-foreground max-w-xl mx-auto">
-            Every memecoin has a story. Ours is written in candlesticks and conviction.
+            {t('home.lore.subtitle')}
           </p>
         </motion.div>
 
@@ -63,13 +65,15 @@ export default function LoreSection() {
                 
                 <GlassCardHeader className="relative">
                   <div className="text-4xl mb-4">{chapter.icon}</div>
-                  <p className="text-xs font-semibold text-primary mb-2">Chapter {chapter.id}</p>
-                  <GlassCardTitle className="text-xl">{chapter.title}</GlassCardTitle>
+                  <p className="text-xs font-semibold text-primary mb-2">
+                    {t('home.lore.chapterLabel', { index: chapter.id })}
+                  </p>
+                  <GlassCardTitle className="text-xl">{t(chapter.titleKey)}</GlassCardTitle>
                 </GlassCardHeader>
                 
                 <GlassCardContent className="relative">
                   <p className="text-muted-foreground text-sm leading-relaxed">
-                    {chapter.description}
+                    {t(chapter.descriptionKey)}
                   </p>
                 </GlassCardContent>
               </GlassCard>
@@ -84,7 +88,7 @@ export default function LoreSection() {
           viewport={{ once: true }}
           className="text-center mt-12 text-muted-foreground italic"
         >
-          Chapter 4 is being written... by you.
+        {t('home.lore.teaser')}
         </motion.p>
       </div>
     </section>

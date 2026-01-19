@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { ExternalLink, Activity, AlertTriangle } from 'lucide-react';
 import { useTokenStats } from 'lib/hooks/useTokenStats';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useCopy } from '@/lib/theme/copy';
 
 const DEX_LINK =
   import.meta.env.NEXT_PUBLIC_DEX_LINK ||
@@ -22,6 +23,7 @@ function formatCompactNumber(value: number | null) {
 }
 
 export function TokenPulseStrip() {
+  const t = useCopy();
   const { stats, holders, loading, error } = useTokenStats();
   const isLive = !stats.isStale && !error;
   const hasAnyValue =
@@ -51,7 +53,7 @@ export function TokenPulseStrip() {
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-center gap-2 py-2 text-muted-foreground">
             <AlertTriangle className="w-4 h-4 text-accent" />
-            <span className="text-sm">Token pulse unstable.</span>
+            <span className="text-sm">{t('gallery.pulse.error')}</span>
           </div>
         </div>
       </div>
@@ -70,7 +72,7 @@ export function TokenPulseStrip() {
           <div className="flex items-center gap-1.5 flex-shrink-0">
             <div className={`w-2 h-2 rounded-full ${isLive ? 'bg-green-500 animate-pulse' : 'bg-accent'}`} />
             <span className={`text-xs font-medium ${isLive ? 'text-green-500' : 'text-accent'}`}>
-              {isLive ? 'LIVE' : 'STALE'}
+              {isLive ? t('gallery.pulse.live') : t('gallery.pulse.stale')}
             </span>
           </div>
 
@@ -78,7 +80,7 @@ export function TokenPulseStrip() {
 
           {/* Price */}
           <div className="flex items-center gap-2 flex-shrink-0">
-            <span className="text-xs text-muted-foreground">Price</span>
+            <span className="text-xs text-muted-foreground">{t('gallery.pulse.price')}</span>
             <span className="text-sm font-bold text-foreground">{formatUsdShort(stats.priceUsd)}</span>
           </div>
 
@@ -86,7 +88,7 @@ export function TokenPulseStrip() {
 
           {/* FDV/MCAP */}
           <div className="flex items-center gap-2 flex-shrink-0">
-            <span className="text-xs text-muted-foreground">FDV</span>
+            <span className="text-xs text-muted-foreground">{t('gallery.pulse.fdv')}</span>
             <span className="text-sm font-semibold">{formatUsdShort(stats.fdvUsd)}</span>
           </div>
 
@@ -94,7 +96,7 @@ export function TokenPulseStrip() {
 
           {/* Liquidity */}
           <div className="hidden sm:flex items-center gap-2 flex-shrink-0">
-            <span className="text-xs text-muted-foreground">Liquidity</span>
+            <span className="text-xs text-muted-foreground">{t('gallery.pulse.liquidity')}</span>
             <span className="text-sm font-semibold">{formatUsdShort(stats.liquidityUsd)}</span>
           </div>
 
@@ -102,7 +104,7 @@ export function TokenPulseStrip() {
 
           {/* Volume */}
           <div className="hidden md:flex items-center gap-2 flex-shrink-0">
-            <span className="text-xs text-muted-foreground">24h Vol</span>
+            <span className="text-xs text-muted-foreground">{t('gallery.pulse.volume24h')}</span>
             <span className="text-sm font-semibold">{formatUsdShort(stats.volume24hUsd)}</span>
           </div>
 
@@ -110,7 +112,7 @@ export function TokenPulseStrip() {
 
           {/* Holders */}
           <div className="hidden lg:flex items-center gap-2 flex-shrink-0">
-            <span className="text-xs text-muted-foreground">Holders</span>
+            <span className="text-xs text-muted-foreground">{t('gallery.pulse.holders')}</span>
             <span className="text-sm font-semibold">{formatCompactNumber(holders)}</span>
           </div>
 
@@ -122,7 +124,7 @@ export function TokenPulseStrip() {
             className="ml-auto flex items-center gap-1 text-xs text-primary hover:text-primary/80 transition-colors flex-shrink-0"
           >
             <Activity className="w-3 h-3" />
-            <span className="hidden sm:inline">View on DEX</span>
+            <span className="hidden sm:inline">{t('gallery.pulse.viewDex')}</span>
             <ExternalLink className="w-3 h-3" />
           </a>
         </div>

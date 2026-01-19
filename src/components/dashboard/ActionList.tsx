@@ -1,15 +1,16 @@
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import type { DashboardDTO } from "./types";
+import { useCopy } from "@/lib/theme/copy";
 
-const formatCountdown = (value?: string) => {
+const formatCountdown = (value: string | undefined, t: (key: string, params?: Record<string, number>) => string) => {
   if (!value) return "";
   const diff = new Date(value).getTime() - Date.now();
-  if (Number.isNaN(diff) || diff <= 0) return "Ready";
+  if (Number.isNaN(diff) || diff <= 0) return t("actions.countdown.ready");
   const minutes = Math.ceil(diff / 60000);
-  if (minutes < 60) return `${minutes}m`;
+  if (minutes < 60) return t("actions.countdown.minutes", { minutes });
   const hours = Math.ceil(minutes / 60);
-  return `${hours}h`;
+  return t("actions.countdown.hours", { hours });
 };
 
 const ActionList = ({
@@ -19,13 +20,14 @@ const ActionList = ({
   actions: DashboardDTO["actions"];
   status: DashboardDTO["user"]["status"];
 }) => {
+  const t = useCopy();
   if (!actions || actions.length === 0) {
     return (
       <div className="glass-card p-6 rounded-2xl text-center">
-        <p className="text-lg font-semibold">No data yet</p>
-        <p className="text-sm text-muted-foreground mt-2">Complete your first action to see quests.</p>
+        <p className="text-lg font-semibold">{t("actions.emptyTitle")}</p>
+        <p className="text-sm text-muted-foreground mt-2">{t("actions.emptyBody")}</p>
         <Button variant="gradient" className="mt-4">
-          {status === "anonymous" ? "Verify with X" : "Start Action"}
+          {status === "anonymous" ? t("actions.emptyCtaVerify") : t("actions.emptyCtaStart")}
         </Button>
       </div>
     );
@@ -38,8 +40,8 @@ const ActionList = ({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold">Active Quests</h2>
-        <span className="text-xs uppercase tracking-widest text-muted-foreground">Top 3</span>
+        <h2 className="text-xl font-bold">{t("actions.list.title")}</h2>
+        <span className="text-xs uppercase tracking-widest text-muted-foreground">{t("actions.list.subtitle")}</span>
       </div>
       <div className="grid gap-4">
         {visible.map((action) => {
@@ -60,18 +62,18 @@ const ActionList = ({
                     <h3 className="text-lg font-semibold">{action.title}</h3>
                     {isNext && (
                       <span className="text-xs px-2 py-1 rounded-full bg-primary/20 text-primary">
-                        Next best action
+                        {t("actions.nextBest")}
                       </span>
                     )}
                   </div>
                   <p className="text-sm text-muted-foreground">{action.description}</p>
                   {action.rewardHint && (
-                    <p className="text-xs text-muted-foreground">Reward: {action.rewardHint}</p>
+                    <p className="text-xs text-muted-foreground">{t("actions.reward", { reward: action.rewardHint })}</p>
                   )}
                   {action.progress && (
                     <div className="space-y-1">
                       <div className="flex justify-between text-xs text-muted-foreground">
-                        <span>Progress</span>
+                        <span>{t("actions.progress")}</span>
                         <span>
                           {action.progress.current}/{action.progress.target}
                         </span>
@@ -84,7 +86,7 @@ const ActionList = ({
                 <div className="flex flex-col items-start gap-2">
                   {action.state === "cooldown" && action.cooldownEndsAt && (
                     <span className="text-xs text-muted-foreground">
-                      Cooldown {formatCountdown(action.cooldownEndsAt)}
+                      {t("actions.cooldown", { time: formatCountdown(action.cooldownEndsAt, t) })}
                     </span>
                   )}
                   <Button
@@ -93,10 +95,10 @@ const ActionList = ({
                       actionsDisabled || action.state === "locked" || action.state === "completed"
                     }
                   >
-                    {action.state === "available" && "Do it"}
-                    {action.state === "cooldown" && "Cooldown"}
-                    {action.state === "locked" && "Verify"}
-                    {action.state === "completed" && "Completed"}
+                    {action.state === "available" && t("actions.cta.do")}
+                    {action.state === "cooldown" && t("actions.cta.cooldown")}
+                    {action.state === "locked" && t("actions.cta.verify")}
+                    {action.state === "completed" && t("actions.cta.completed")}
                   </Button>
                 </div>
               </div>
@@ -105,7 +107,7 @@ const ActionList = ({
         })}
       </div>
       {actionsDisabled && (
-        <p className="text-xs text-orange-400">Rate limit active. Actions are temporarily disabled.</p>
+        <p className="text-xs text-orange-400">{t("actions.rateLimited")}</p>
       )}
     </div>
   );

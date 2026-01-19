@@ -6,6 +6,7 @@ import { SharePanel } from './SharePanel';
 import { TokenPulseTooltip } from './TokenPulseTooltip';
 import type { Artifact } from '@/lib/archives/types';
 import { BADGE_ICON_PATHS } from 'lib/gamification/badgeRules';
+import { useCopy } from '@/lib/theme/copy';
 
 interface ArtifactCardProps {
   artifact: Artifact;
@@ -13,6 +14,7 @@ interface ArtifactCardProps {
 }
 
 export function ArtifactCard({ artifact, onRequiresAuth }: ArtifactCardProps) {
+  const t = useCopy();
   const navigate = useNavigate();
   const badgeIcon = artifact.author_top_badge_id
     ? BADGE_ICON_PATHS[artifact.author_top_badge_id as keyof typeof BADGE_ICON_PATHS]
@@ -76,21 +78,21 @@ export function ArtifactCard({ artifact, onRequiresAuth }: ArtifactCardProps) {
           {artifact.author_avatar ? (
             <img
               src={artifact.author_avatar}
-              alt={artifact.author_handle || 'Author'}
+              alt={artifact.author_handle || t('gallery.author')}
               className="w-6 h-6 rounded-full object-cover ring-1 ring-border"
             />
           ) : (
             <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary to-destructive" />
           )}
           <span className="text-sm font-medium truncate flex-1">
-            {artifact.author_handle || 'Anonymous'}
+            {artifact.author_handle || t('gallery.anonymous')}
           </span>
           <div className="flex items-center gap-1 rounded-full bg-muted/60 px-2 py-0.5 text-[10px] text-muted-foreground">
-            <span>Lv {artifact.author_level ?? 1}</span>
+            <span>{t('gallery.level', { level: artifact.author_level ?? 1 })}</span>
             {badgeIcon && (
               <img
                 src={badgeIcon}
-                alt="Top badge"
+                alt={t('gallery.topBadge')}
                 className="w-3 h-3"
               />
             )}

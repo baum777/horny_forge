@@ -32,6 +32,7 @@ async function createForgeControllerWithMocks() {
     imageGen: { generate: ReturnType<typeof vi.fn> };
     storage: { storePreview: ReturnType<typeof vi.fn> };
     supabase: { from: (table: string) => { insert: ReturnType<typeof vi.fn> } };
+    telemetry: { record: ReturnType<typeof vi.fn> };
   };
 
   let generationCounter = 0;
@@ -56,6 +57,9 @@ async function createForgeControllerWithMocks() {
     from: (_table: string) => ({
       insert: vi.fn().mockResolvedValue({ error: null }),
     }),
+  };
+  controllerAny.telemetry = {
+    record: vi.fn().mockResolvedValue(undefined),
   };
 
   return controller;
@@ -101,7 +105,7 @@ describe('forge integration', () => {
 
   it('dedupes matrix_preview_created telemetry per preview_request_id', async () => {
     const { createApp } = await import('../app');
-    const { clearRequestTracking } = await import('../services/hornyMatrix/TelemetryService');
+    const { clearRequestTracking } = await import('../services/promptMatrix/TelemetryService');
     const forgeController = await createForgeControllerWithMocks();
     const recordSpy = vi.spyOn((forgeController as unknown as { telemetry: { record: () => Promise<void> } }).telemetry, 'record')
       .mockResolvedValue();

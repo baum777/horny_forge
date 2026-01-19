@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { PREDEFINED_TAGS, type PredefinedTag } from '@/lib/archives/types';
 import { uploadArtifactImage } from 'lib/supabase/queries';
+import { useCopy } from '@/lib/theme/copy';
 
 interface UploadArtifactModalProps {
   isOpen: boolean;
@@ -19,6 +20,7 @@ const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/webp'];
 
 export function UploadArtifactModal({ isOpen, onClose }: UploadArtifactModalProps) {
+  const t = useCopy();
   const { archivesUser, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -35,12 +37,12 @@ export function UploadArtifactModal({ isOpen, onClose }: UploadArtifactModalProp
     if (!selectedFile) return;
 
     if (!ALLOWED_TYPES.includes(selectedFile.type)) {
-      toast.error('Only PNG, JPG, and WebP allowed.');
+      toast.error(t('upload.errors.invalidType'));
       return;
     }
 
     if (selectedFile.size > MAX_FILE_SIZE) {
-      toast.error('Max file size: 5MB');
+      toast.error(t('upload.errors.maxSize'));
       return;
     }
 
@@ -56,18 +58,18 @@ export function UploadArtifactModal({ isOpen, onClose }: UploadArtifactModalProp
     } else if (selectedTags.length < 3) {
       setSelectedTags([...selectedTags, tag]);
     } else {
-      toast.error('Maximum 3 tags allowed.');
+      toast.error(t('upload.errors.maxTags'));
     }
   };
 
   const handleSubmit = async () => {
     if (!file || !caption.trim() || selectedTags.length === 0) {
-      toast.error('Image, caption, and at least 1 tag required.');
+      toast.error(t('upload.errors.required'));
       return;
     }
 
     if (!isAuthenticated || !archivesUser) {
-      toast.error('Login required.');
+      toast.error(t('upload.errors.loginRequired'));
       return;
     }
 
@@ -109,7 +111,7 @@ export function UploadArtifactModal({ isOpen, onClose }: UploadArtifactModalProp
       if (insertError) throw insertError;
 
       setUploadProgress(100);
-      toast.success('Artifact entered the Archives.');
+      toast.success(t('upload.success'));
       
       // Reset form
       setFile(null);
@@ -122,7 +124,7 @@ export function UploadArtifactModal({ isOpen, onClose }: UploadArtifactModalProp
       navigate(`/archives/${artifact.id}`);
     } catch (err) {
       console.error('Upload error:', err);
-      toast.error('Not horny enough. Retry.');
+      toast.error(t('upload.errors.failed'));
     } finally {
       setUploading(false);
       setUploadProgress(0);
@@ -164,10 +166,10 @@ export function UploadArtifactModal({ isOpen, onClose }: UploadArtifactModalProp
 
               <div className="text-center mb-6">
                 <h2 className="text-2xl font-bold text-gradient mb-2">
-                  INFUSE THE ARCHIVES
+                  {t('upload.title')}
                 </h2>
                 <p className="text-muted-foreground text-sm">
-                  Release your artifact into the collective consciousness.
+                  {t('upload.subtitle')}
                 </p>
               </div>
 
@@ -190,14 +192,14 @@ export function UploadArtifactModal({ isOpen, onClose }: UploadArtifactModalProp
                 {preview ? (
                   <img
                     src={preview}
-                    alt="Preview"
+                    alt={t('upload.previewAlt')}
                     className="max-h-48 mx-auto rounded-lg object-contain"
                   />
                 ) : (
                   <div className="text-center">
                     <ImageIcon className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
                     <p className="text-muted-foreground">
-                      Click to upload (PNG, JPG, WebP • Max 5MB)
+                      {t('upload.dropzone')}
                     </p>
                   </div>
                 )}
@@ -206,12 +208,12 @@ export function UploadArtifactModal({ isOpen, onClose }: UploadArtifactModalProp
               {/* Caption */}
               <div className="mb-6">
                 <label className="block text-sm font-medium mb-2">
-                  Caption ({caption.length}/140)
+                  {t('upload.caption', { count: caption.length })}
                 </label>
                 <Input
                   value={caption}
                   onChange={(e) => setCaption(e.target.value.slice(0, 140))}
-                  placeholder="Describe your artifact..."
+                  placeholder={t('upload.captionPlaceholder')}
                   className="bg-background/50"
                   maxLength={140}
                 />
@@ -220,7 +222,7 @@ export function UploadArtifactModal({ isOpen, onClose }: UploadArtifactModalProp
               {/* Tags */}
               <div className="mb-6">
                 <label className="block text-sm font-medium mb-2">
-                  Tags ({selectedTags.length}/3)
+                  {t('upload.tags', { count: selectedTags.length })}
                 </label>
                 <div className="flex flex-wrap gap-2">
                   {PREDEFINED_TAGS.map((tag) => (
@@ -253,7 +255,7 @@ export function UploadArtifactModal({ isOpen, onClose }: UploadArtifactModalProp
                     />
                   </div>
                   <p className="text-xs text-center text-muted-foreground mt-2">
-                    Infusing artifact... {uploadProgress}%
+                    {t('upload.progress', { value: uploadProgress })}
                   </p>
                 </div>
               )}
@@ -266,7 +268,7 @@ export function UploadArtifactModal({ isOpen, onClose }: UploadArtifactModalProp
                 className="w-full"
               >
                 <Upload className="w-4 h-4 mr-2" />
-                {uploading ? 'RELEASING...' : 'RELEASE ARTIFACT'}
+                {uploading ? t('upload.submitting') : t('upload.submit')}
               </Button>
             </div>
           </motion.div>

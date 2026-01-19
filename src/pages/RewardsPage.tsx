@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { apiGet } from "@/lib/api";
 import { PageShell } from "@/components/layout/PageShell";
+import { useCopy } from "@/lib/theme/copy";
 
 type RewardsDTO = {
   user: { status: "anonymous" | "verified" | "cooldown" | "rate_limited"; id?: string };
@@ -54,6 +55,7 @@ function Stat({ label, value }: { label: string; value: React.ReactNode }) {
 }
 
 export default function RewardsPage() {
+  const t = useCopy();
   const [data, setData] = useState<RewardsDTO | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -106,21 +108,21 @@ export default function RewardsPage() {
     >
       <div style={{ minHeight: "100vh", padding: 24, maxWidth: 1100, margin: "0 auto" }}>
       <header style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 18 }}>
-        <h2 style={{ fontSize: 28, margin: 0 }}>Rewards</h2>
-        <div style={{ fontSize: 13, opacity: 0.75 }}>Read-only · transparency-first</div>
+        <h2 style={{ fontSize: 28, margin: 0 }}>{t('rewards.title')}</h2>
+        <div style={{ fontSize: 13, opacity: 0.75 }}>{t('rewards.subtitle')}</div>
       </header>
 
       {loading && (
-        <Card title="Loading">
-          <div style={{ opacity: 0.8 }}>Fetching rewards…</div>
+        <Card title={t('common.loading')}>
+          <div style={{ opacity: 0.8 }}>{t('rewards.loadingBody')}</div>
         </Card>
       )}
 
       {!loading && err && (
-        <Card title="Error">
+        <Card title={t('common.error')}>
           <div style={{ marginBottom: 10 }}>{err}</div>
           <button onClick={() => location.reload()} style={{ padding: "10px 12px", borderRadius: 12 }}>
-            Retry
+            {t('common.retry')}
           </button>
         </Card>
       )}
@@ -128,7 +130,7 @@ export default function RewardsPage() {
       {!loading && !err && data && (
         <div style={{ display: "grid", gap: 16 }}>
           {data.system.notices.length > 0 && (
-            <Card title="Notices">
+            <Card title={t('rewards.notices')}>
               <div style={{ display: "grid", gap: 8 }}>
                 {data.system.notices.map((n) => (
                   <div key={n.id} style={{ padding: 10, borderRadius: 12, background: "rgba(255,255,255,0.06)" }}>
@@ -140,12 +142,12 @@ export default function RewardsPage() {
             </Card>
           )}
 
-          <Card title="Snapshot">
+          <Card title={t('rewards.snapshot')}>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 12 }}>
-              <Stat label="Pending queue" value={<b>{data.summary.pendingCount}</b>} />
-              <Stat label="Your position" value={<b>{data.summary.yourPendingPosition ?? "—"}</b>} />
-              <Stat label="Paid" value={<b>{data.summary.paidCount ?? "—"}</b>} />
-              <Stat label="Failed" value={<b>{data.summary.failedCount ?? "—"}</b>} />
+              <Stat label={t('rewards.stats.pending')} value={<b>{data.summary.pendingCount}</b>} />
+              <Stat label={t('rewards.stats.position')} value={<b>{data.summary.yourPendingPosition ?? "—"}</b>} />
+              <Stat label={t('rewards.stats.paid')} value={<b>{data.summary.paidCount ?? "—"}</b>} />
+              <Stat label={t('rewards.stats.failed')} value={<b>{data.summary.failedCount ?? "—"}</b>} />
             </div>
 
             <div style={{ marginTop: 12, display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
@@ -153,22 +155,22 @@ export default function RewardsPage() {
                 onClick={() => setFilter("all")}
                 style={{ padding: "8px 10px", borderRadius: 12, opacity: filter === "all" ? 1 : 0.6 }}
               >
-                All
+                {t('rewards.filters.all')}
               </button>
               <button
                 onClick={() => setFilter("mine")}
                 style={{ padding: "8px 10px", borderRadius: 12, opacity: filter === "mine" ? 1 : 0.6 }}
               >
-                Mine
+                {t('rewards.filters.mine')}
               </button>
 
               <div style={{ fontSize: 12, opacity: 0.75 }}>
-                No wallet connect yet. Rewards reflect server-side accounting.
+                {t('rewards.notice')}
               </div>
             </div>
           </Card>
 
-          <Card title="Pending payout queue">
+          <Card title={t('rewards.pending.title')}>
             <div style={{ display: "grid", gap: 10 }}>
               {pendingList.slice(0, 50).map((p, idx) => (
                 <div
@@ -183,19 +185,23 @@ export default function RewardsPage() {
                   <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
                     <div>
                       <div style={{ fontSize: 14 }}>
-                        #{idx + 1} · {p.amountText} {p.mine ? "· (you)" : ""}
+                        {t('rewards.pending.item', {
+                          index: idx + 1,
+                          amount: p.amountText,
+                          mine: p.mine ? t('rewards.pending.you') : '',
+                        })}
                       </div>
                       <div style={{ fontSize: 12, opacity: 0.75 }}>{new Date(p.createdAt).toLocaleString()}</div>
                     </div>
-                    <div style={{ fontSize: 12, opacity: 0.75 }}>PENDING</div>
+                    <div style={{ fontSize: 12, opacity: 0.75 }}>{t('rewards.status.pending')}</div>
                   </div>
                 </div>
               ))}
-              {pendingList.length === 0 && <div style={{ opacity: 0.8 }}>No pending payouts.</div>}
+              {pendingList.length === 0 && <div style={{ opacity: 0.8 }}>{t('rewards.pending.empty')}</div>}
             </div>
           </Card>
 
-          <Card title="Recent payouts">
+          <Card title={t('rewards.recent.title')}>
             <div style={{ display: "grid", gap: 10 }}>
               {recentList.slice(0, 50).map((r) => (
                 <div
@@ -211,23 +217,23 @@ export default function RewardsPage() {
                       <div style={{ fontSize: 14 }}>{r.amountText}</div>
                       <div style={{ fontSize: 12, opacity: 0.75 }}>{new Date(r.createdAt).toLocaleString()}</div>
                     </div>
-                    <div style={{ fontSize: 12, opacity: 0.75 }}>{r.status.toUpperCase()}</div>
+                    <div style={{ fontSize: 12, opacity: 0.75 }}>{t(`rewards.status.${r.status}`)}</div>
                   </div>
 
                   {r.txUrl && (
                     <div style={{ marginTop: 8, fontSize: 12 }}>
                       <a href={r.txUrl} target="_blank" rel="noreferrer" style={{ opacity: 0.85 }}>
-                        View transaction
+                        {t('rewards.recent.viewTx')}
                       </a>
                     </div>
                   )}
                 </div>
               ))}
-              {recentList.length === 0 && <div style={{ opacity: 0.8 }}>No payouts yet.</div>}
+              {recentList.length === 0 && <div style={{ opacity: 0.8 }}>{t('rewards.recent.empty')}</div>}
             </div>
           </Card>
 
-          <Card title="How rewards work (rules)">
+          <Card title={t('rewards.rules.title')}>
             <div style={{ display: "grid", gap: 10 }}>
               {data.rules.map((rule) => (
                 <div key={rule.id} style={{ padding: 12, borderRadius: 14, background: "rgba(255,255,255,0.06)" }}>

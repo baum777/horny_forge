@@ -4,68 +4,10 @@
 
 @layer base {
   :root {
-    /* HORNY Design System Tokens v1.0 */
-    --horny-yellow: #FFE600;
-    --horny-black: #0B0B0B;
-    --horny-white: #FFFFFF;
-
-    /* Text */
-    --text-primary: #EAEAEA;
-    --text-secondary: #9E9E9E;
-
-    /* Surfaces */
-    --surface-bg: #0B0B0B;
-    --surface-1: #0F0F10;
-    --surface-2: #141416;
-    --surface-3: #1B1B1E;
-
-    /* Borders */
-    --border-subtle: rgba(255,255,255,0.08);
-    --border-accent: rgba(255,230,0,0.22);
-
-    /* Glow */
-    --glow-soft: 0 0 16px rgba(255,230,0,0.35);
-    --glow-strong: 0 0 32px rgba(255,230,0,0.65);
-
-    /* Mappings to Tailwind defaults */
-    --background: 0 0% 4%; /* #0B0B0B approx hsl */
-    --foreground: 0 0% 92%; /* #EAEAEA */
-    
-    --card: 0 0% 6%; /* #0F0F10 */
-    --card-foreground: 0 0% 92%;
-    
-    --popover: 0 0% 6%;
-    --popover-foreground: 0 0% 92%;
-    
-    --primary: 51 100% 50%; /* #FFE600 */
-    --primary-foreground: 0 0% 4%;
-    
-    --secondary: 0 0% 9%; /* #141416 */
-    --secondary-foreground: 0 0% 92%;
-    
-    --muted: 0 0% 11%; /* #1B1B1E */
-    --muted-foreground: 0 0% 62%; /* #9E9E9E */
-    
-    --accent: 51 100% 50%;
-    --accent-foreground: 0 0% 4%;
-    
-    --destructive: 0 100% 27%;
-    --destructive-foreground: 0 0% 100%;
-    
-    --border: 0 0% 20%; /* fallback */
-    --input: 0 0% 15%;
-    --ring: 51 100% 50%;
-    
-    --radius: 0.75rem;
-
-    --sidebar-background: 0 0% 5%;
-    --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 51 100% 50%;
-    --sidebar-primary-foreground: 0 0% 0%;
-    --sidebar-accent: 0 0% 15%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 0 0% 20%;
-    --sidebar-ring: 51 100% 50%;
+    /* 
+      Theme variables are injected by ThemeProvider from src/lib/theme/default.ts
+      This allows for runtime theme switching and centralized management.
+    */
   }
 
   * {
@@ -80,8 +22,7 @@
 
 @layer utilities {
   .text-gradient {
-    /* Updated gradient to use yellow */
-    background: linear-gradient(90deg, #FFE600 0%, #EAB308 100%);
+    background: linear-gradient(90deg, var(--brand-primary) 0%, var(--brand-secondary) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -101,8 +42,8 @@
     box-shadow: var(--glow-soft);
   }
 
-  .bg-gradient-horny {
-    background: linear-gradient(90deg, #FFE600 0%, #EAB308 100%);
+  .bg-gradient-brand {
+    background: linear-gradient(90deg, var(--brand-primary) 0%, var(--brand-secondary) 100%);
   }
 
   .glass-card {

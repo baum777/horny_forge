@@ -1,8 +1,10 @@
 import { Link } from 'react-router-dom';
 import { SocialGroup } from '@/components/ui/SocialGroup';
 import { ContractAddress } from '@/components/ui/ContractAddress';
+import { useCopy } from '@/lib/theme/copy';
 
 export default function Footer() {
+  const t = useCopy();
   return (
     <footer className="border-t border-white/5 bg-[#0B0B0B] py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -10,9 +12,9 @@ export default function Footer() {
           
           {/* Brand */}
           <div>
-            <span className="text-2xl font-black text-white">$HORNY</span>
+            <span className="text-2xl font-black text-white">{t('brand.wordmark')}</span>
             <p className="mt-2 text-sm text-muted-foreground max-w-md mx-auto">
-              The Horny Meta Universe. Where desire meets gains.
+              {t('footer.tagline')}
             </p>
           </div>
 
@@ -25,8 +27,8 @@ export default function Footer() {
 
           {/* Microcopy */}
           <div className="text-xs text-muted-foreground space-y-1 opacity-60">
-            <p>No wallets required. Badges are status. Rewards are earned weekly.</p>
-            <p>© {new Date().getFullYear()} $HORNY. Not financial advice. DYOR. NFA.</p>
+            <p>{t('footer.microcopy')}</p>
+            <p>© {new Date().getFullYear()} {t('brand.wordmark')}. {t('footer.disclaimer')}</p>
           </div>
 
         </div>

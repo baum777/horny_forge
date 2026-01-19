@@ -3,13 +3,13 @@ import { randomUUID } from 'node:crypto';
 import { ImageGenAdapter } from '../services/ImageGenAdapter';
 import { StorageAdapter } from '../services/StorageAdapter';
 import { SimilarityService } from '../services/SimilarityService';
-import { HornyMatrixEngine } from '../services/hornyMatrix/HornyMatrixEngine';
-import { SafetyRewrite } from '../services/hornyMatrix/SafetyRewrite';
-import { MemePromptComposer } from '../services/hornyMatrix/MemePromptComposer';
-import { scoreMatrix } from '../services/hornyMatrix/scoring';
-import { emitTelemetryEvent } from '../services/hornyMatrix/TelemetryService';
+import { PromptMatrixEngine } from '../services/promptMatrix/PromptMatrixEngine';
+import { SafetyRewrite } from '../services/promptMatrix/SafetyRewrite';
+import { PromptComposer } from '../services/promptMatrix/PromptComposer';
+import { scoreMatrix } from '../services/promptMatrix/scoring';
+import { emitTelemetryEvent } from '../services/promptMatrix/TelemetryService';
 import { MatrixTelemetry } from '../services/telemetry/MatrixTelemetry';
-import type { MatrixFlavor } from '../services/hornyMatrix/types';
+import type { MatrixFlavor } from '../services/promptMatrix/types';
 import { config } from '../config';
 import { ALLOWED_TAGS, BASE_IMAGES } from '../constants';
 import type { ForgeResponse, ForgeError, ReleaseResponse } from '../types';
@@ -71,9 +71,9 @@ export class ForgeController {
   private storage: StorageAdapter;
   private supabase;
   private similarity: SimilarityService;
-  private matrixEngine: HornyMatrixEngine;
+  private matrixEngine: PromptMatrixEngine;
   private safetyRewrite: SafetyRewrite;
-  private promptComposer: MemePromptComposer;
+  private promptComposer: PromptComposer;
   private telemetry: MatrixTelemetry;
 
   constructor() {
@@ -81,9 +81,9 @@ export class ForgeController {
     this.storage = new StorageAdapter();
     this.supabase = createClient<Database>(config.supabase.url, config.supabase.serviceRoleKey);
     this.similarity = new SimilarityService();
-    this.matrixEngine = new HornyMatrixEngine();
+    this.matrixEngine = new PromptMatrixEngine();
     this.safetyRewrite = new SafetyRewrite();
-    this.promptComposer = new MemePromptComposer();
+    this.promptComposer = new PromptComposer();
     this.telemetry = new MatrixTelemetry();
   }
 
@@ -531,11 +531,13 @@ export class ForgeController {
         return;
       }
 
-      const { data: previewRecord, error: previewRecordError } = await this.supabase
+      const { data: previewRecordRaw, error: previewRecordError } = await this.supabase
         .from('forge_previews')
         .select('matrix_meta, scores, template_key, base_id')
         .eq('generation_id', generation_id)
         .maybeSingle();
+      
+      const previewRecord = previewRecordRaw as any;
 
       if (previewRecordError) {
         console.error('Preview lookup failed:', previewRecordError);
